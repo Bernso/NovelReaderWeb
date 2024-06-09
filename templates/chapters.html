@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='MAINICON-20240501.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='chaptersPageStyle.css') }}">
+    <title>Home</title>
+</head>
+<body>
+    <div class="chapter">
+        <div class="content">
+            <span class="speaker">Chapters - TBATE</span>
+            <button><a href="/">Home</a></button>
+            <p class="content">
+                <ul class="links">
+                    {% for chapter_number in chapter_numbers %}
+                        <li><a href="/chapters/{{ chapter_number }}">Chapter {{ chapter_number }}</a></li>
+                    {% endfor %}
+                </ul>
+            </p>
+        </div>
+    </div>
+</body>
+<script>
+    
+</script>
+</html>

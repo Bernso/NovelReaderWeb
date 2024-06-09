@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='MAINICON-20240501.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/x-icon" href="/./static/MAINICON-20240501.ico">
+    <link rel="stylesheet" href="/./static/style.css">
+    <title>404</title>
+    
+</head>
+<body>
+    <div class="chapter">
+        <div class="content">
+            <span class="speaker">
+                404 Page Not Found
+            </span>
+            <button id="homeButton">Home</button>
+        </div>
+    </div>
+</body>
+<script>
+    document.getElementById('homeButton').addEventListener('click', function() {
+        window.location.href = '/'; // Replace '/home' with your actual home page URL
+    });
+</script>
+</html>

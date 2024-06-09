@@ -1,0 +1,119 @@
+/* Basic reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body styles */
+body {
+    background-color: #121212; /* Dark background */
+    color: #E0E0E0; /* Light text */
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Chapter container */
+.chapter {
+    background-color: #1E1E1E; /* Slightly lighter background for contrast */
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 120vh; /* Increased width */
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); /* Subtle glow effect */
+    margin: 0 auto; /* Center the container */
+}
+
+/* Content paragraph */
+.content {
+    font-size: 1.2em;
+    line-height: 1.6; /* Improved readability */
+}
+
+/* Speaker names */
+.content .speaker {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #BB86FC; /* Highlight color for speaker names */
+    font-size: 24px;
+}
+
+/* Adding link styles */
+.links {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr); /* 4 columns */
+    grid-gap: 20px; /* Gap between links */
+    margin-top: 20px; /* Add some space between rows */
+    list-style-type: none; /* Remove bullet points */
+}
+
+.links a {
+    color: #03DAC5; /* Link color */
+    text-decoration: none;
+    transition: color 0.3s ease;
+    font-size: 18px;
+}
+
+.links a:hover {
+    color: #BB86FC; /* Link hover color */
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+    width: 10px; /* Width of the scrollbar */
+}
+
+/* Scrollbar Handle */
+::-webkit-scrollbar-thumb {
+    background: #bb86fc8e; /* Color of the scrollbar handle */
+    border-radius: 5px; /* Border radius of the scrollbar handle */
+}
+
+/* Scrollbar Track */
+::-webkit-scrollbar-track {
+    background: #000000; /* Background color of the scrollbar track */
+}
+
+/* Scrollbar Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #bb86fcab; /* Color of the scrollbar handle on hover */
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: #bb86fc; /* Color of the scrollbar handle on hover */
+}
+
+/* Button Styles */
+button {
+    background-color: #BB86FC; /* Initial background color */
+    color: #121212; /* Button text color */
+    border: none;
+    padding: 10px 20px; /* Padding for the button */
+    font-size: 1em; /* Font size */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Cursor on hover */
+    transition: background-color 0.3s, transform 0.3s; /* Smooth transition for background and scale */
+    margin-top: 20px; /* Space above the button */
+}
+
+/* Button Hover Effect */
+button:hover {
+    background-color: #BB86FC; /* Background color on hover */
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+/* Button Active State */
+button:active {
+    background-color: #6200EE; /* Background color on active */
+    transform: scale(0.95); /* Slightly shrink on click */
+}
+
+a {
+    color: #000000; /* Highlight color for links */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}

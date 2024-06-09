@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='MAINICON-20240501.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/x-icon" href="/./static/MAINICON-20240501.ico">
+    <link rel="stylesheet" href="/./static/style.css">
+    <title>Home</title>
+    
+</head>
+<body>
+    <div class="chapter">
+        <div class="content">
+            <span class="speaker">Home Page</span>
+            <button id="generateButton">Generate TBATE Chapters</button>
+            <p class="content">
+                <br>Generating TBATE chapters will take around 3-4 minutes, then you will get a pop-up on your screen saying that it has completed it. 
+                There is no initial warning to tell you that the script has started running.<br>
+                <br>Generating chapters will create a webpage with the content of the given chapter. And will be uploaded in the Chapters button bellow.
+                <br><button><a href="chapters" >Chapters</a></button><br>
+
+                <br>Join the <a href="https://www.discord.gg/k5HBFXqtCB">Discord Server</a> for support
+            </p>
+
+            <p>
+                <br>Made By <a href="https://www.github.com/Bernso">Bernso</a>
+            </p>
+        </div>
+    </div>
+</body>
+<script>
+    // Add an event listener to the button
+    document.getElementById('generateButton').addEventListener('click', function() {
+        // Send a POST request to the server to run the genfiles.py script
+        fetch('/run_script', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({}) // No data needed for this request
+        })
+        .then(response => {
+            if (response.ok) {
+                // If the request is successful, display a success message
+                alert('Chapters generated successfully!');
+            } else {
+                // If there's an error, display an error message
+                alert('Error generating chapters!');
+            }
+        })
+        .catch(error => {
+            // If there's a network error, display an error message
+            console.error('Error:', error);
+            alert('Network error. Please try again later.');
+        });
+    });
+</script>
+</html>
