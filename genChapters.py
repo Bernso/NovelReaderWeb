@@ -20,7 +20,6 @@ def get_latest_chapter_number(base_url):
             for letter in latest_text.get_text():
                 if letter.isdigit():
                     chapter_number += letter
-            input(chapter_number)
             return chapter_number
         else:
             print("Error: 'latest-text1row' not found on the page.")
