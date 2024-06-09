@@ -20,38 +20,29 @@
                 There is no initial warning to tell you that the script has started running.<br>
                 <br>Generating chapters will create a webpage with the content of the given chapter. And will be uploaded in the Chapters button bellow.
                 <br><button><a href="chapters" >Chapters</a></button><br>
-
-                <br>Join the <a href="https://www.discord.gg/k5HBFXqtCB">Discord Server</a> for support
-            </p>
-
-            <p>
+                <br>Join the <a href="https://www.discord.gg/k5HBFXqtCB">Discord Server</a> for support <br>
                 <br>Made By <a href="https://www.github.com/Bernso">Bernso</a>
             </p>
         </div>
     </div>
 </body>
 <script>
-    // Add an event listener to the button
     document.getElementById('generateButton').addEventListener('click', function() {
-        // Send a POST request to the server to run the genfiles.py script
         fetch('/run_script', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({}) // No data needed for this request
+            body: JSON.stringify({}) 
         })
         .then(response => {
             if (response.ok) {
-                // If the request is successful, display a success message
                 alert('Chapters generated successfully!');
             } else {
-                // If there's an error, display an error message
                 alert('Error generating chapters!');
             }
         })
         .catch(error => {
-            // If there's a network error, display an error message
             console.error('Error:', error);
             alert('Network error. Please try again later.');
         });
