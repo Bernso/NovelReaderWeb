@@ -59,7 +59,7 @@ def main(url, i):
             </span>
             <button> <a href=/chapters/{int(chapterNumber)-1}>Previous Chapter</a></button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button> <a href=/chapters/{int(chapterNumber)+1}>Next Chapter</a></button>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <button> <a href="/">Home</a></button>
+            <button> <a href="/">Home</a></button>&nbsp;&nbsp;<button> <a href="/chapters">Chapters</a></button>
             
             <p class="content">
                 <br>
@@ -69,7 +69,7 @@ def main(url, i):
         <br>
         <button> <a href=/chapters/{int(chapterNumber)-1}>Previous Chapter</a></button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button> <a href=/chapters/{int(chapterNumber)+1}>Next Chapter</a></button>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <button> <a href="/">Home</a></button>
+        <button> <a href="/">Home</a></button>&nbsp;&nbsp;<button> <a href="/chapters">Chapters</a></button>
     </div>
 </body>
 </html>"""
