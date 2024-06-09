@@ -1,11 +1,34 @@
 import requests
 from bs4 import BeautifulSoup
-import webbrowser
-import tkinter as tk
 import os
 
 
-# EXAMPLE URL 'https://lightnovelpub.vip/novel/the-beginning-after-the-end-548/chapter-482'
+def get_latest_chapter_number(base_url):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36'
+    }
+
+    try:
+        response = requests.get(base_url, headers=headers)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        latest_text = soup.find('p', class_='latest text1row')
+        if latest_text:
+            chapter_number = ''
+            for letter in latest_text.get_text():
+                if letter.isdigit():
+                    chapter_number += letter
+            input(chapter_number)
+            return chapter_number
+        else:
+            print("Error: 'latest-text1row' not found on the page.")
+            return None
+
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+        return None
 
 
 def main(url, i):
@@ -20,8 +43,6 @@ def main(url, i):
             response.raise_for_status()
             
             soup = BeautifulSoup(response.text, 'html.parser')
-            
-            
         
             chapter_title = soup.find(class_='chapter-title')
             if chapter_title:
@@ -37,8 +58,6 @@ def main(url, i):
             chapter_container = soup.find('div', id='chapter-container')
             if chapter_container:
                 chapter_text = chapter_container.get_text(separator='\n').strip()
-                
-            
                 
                 html_template = f"""<!DOCTYPE html>
 <html lang="en">
@@ -79,9 +98,7 @@ def main(url, i):
                 with open(os.path.join('templates/chapters', f'chapter-{chapterNumber}.html'), 'w', encoding='utf-8') as file:
                     file.write(html_template)
                     
-                print(f"HTML file created successfully. For chapter {i}")
-                #webbrowser.open(os.path.join('Chapters', f'chapter-{chapterNumber}.html'))
-                #os._exit(0)
+                print(f"HTML file created successfully for chapter {chapterNumber}")
             else:
                 print("Error: 'chapter-container' not found on the page.")
             
@@ -89,9 +106,21 @@ def main(url, i):
             
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
+
+
 def yes():
-    for i in range(1, 482 + 1):
+    base_url = "https://lightnovelpub.vip/novel/the-beginning-after-the-end-web-novel-11110049"
+    latest_chapter_number = get_latest_chapter_number(base_url)
+
+    if latest_chapter_number is None:
+        print("Failed to get the latest chapter number.")
+        return
+
+    print(f"Latest chapter number: {latest_chapter_number}")
+
+    for i in range(1, int(latest_chapter_number) + 1):
         main(url=f"https://lightnovelpub.vip/novel/the-beginning-after-the-end-548/chapter-{i}", i=i)
+
     return """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -99,17 +128,16 @@ def yes():
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='MAINICON-20240501.ico') }}">
     <title>Script</title>
-    <style>/* Basic reset */
+    <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        /* Body styles */
         body {
-            background-color: #121212; /* Dark background */
-            color: #E0E0E0; /* Light text */
+            background-color: #121212;
+            color: #E0E0E0;
             font-family: 'Arial', sans-serif;
             display: flex;
             justify-content: center;
@@ -118,97 +146,87 @@ def yes():
             padding: 20px;
         }
 
-        /* Chapter container */
         .chapter {
-            background-color: #1E1E1E; /* Slightly lighter background for contrast */
+            background-color: #1E1E1E;
             border-radius: 10px;
             padding: 20px;
-            max-width: 120vh; /* Increased width */
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); /* Subtle glow effect */
-            margin: 0 auto; /* Center the container */
+            max-width: 120vh;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            margin: 0 auto;
         }
 
-        /* Content paragraph */
         .content {
             font-size: 1.2em;
-            line-height: 1.6; /* Improved readability */
+            line-height: 1.6;
         }
 
-        /* Speaker names */
         .content .speaker {
             display: block;
             font-weight: bold;
             margin-bottom: 5px;
-            color: #BB86FC; /* Highlight color for speaker names */
+            color: #BB86FC;
             font-size: 60px;
         }
 
-        /* Dialogue text */
         .content .dialogue {
-            margin-left: 20px; /* Indent dialogue for clarity */
-            margin-bottom: 10px; /* Space between dialogues */
+            margin-left: 20px;
+            margin-bottom: 10px;
         }
 
-        /* Adding link styles */
         a {
-            color: #03DAC5; /* Highlight color for links */
+            color: #03DAC5;
             text-decoration: none;
-            transition: color 0.3s ease;
+           
+        transition: color 0.3s ease;
         }
 
         a:hover {
-            color: #BB86FC; /* Link hover color */
+            color: #BB86FC;
         }
 
-        /* Scrollbar styles */
         ::-webkit-scrollbar {
-            width: 10px; /* Width of the scrollbar */
+            width: 10px;
         }
 
-        /* Scrollbar Handle */
         ::-webkit-scrollbar-thumb {
-            background: #bb86fc8e; /* Color of the scrollbar handle */
-            border-radius: 5px; /* Border radius of the scrollbar handle */
+            background: #bb86fc8e;
+            border-radius: 5px;
         }
 
-        /* Scrollbar Track */
         ::-webkit-scrollbar-track {
-            background: #000000; /* Background color of the scrollbar track */
+            background: #000000;
         }
 
-        /* Scrollbar Handle on hover */
         ::-webkit-scrollbar-thumb:hover {
-            background: #bb86fcab; /* Color of the scrollbar handle on hover */
+            background: #bb86fcab;
         }
 
         ::-webkit-scrollbar-thumb:active {
-            background: #bb86fc; /* Color of the scrollbar handle on hover */
+            background: #bb86fc;
         }
 
-        /* Button Styles */
         button {
-            background-color: #BB86FC; /* Initial background color */
-            color: #121212; /* Button text color */
+            background-color: #BB86FC;
+            color: #121212;
             border: none;
-            padding: 10px 20px; /* Padding for the button */
-            font-size: 1em; /* Font size */
-            border-radius: 5px; /* Rounded corners */
-            cursor: pointer; /* Cursor on hover */
-            transition: background-color 0.3s, transform 0.3s; /* Smooth transition for background and scale */
-            margin-top: 20px; /* Space above the button */
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            margin-top: 20px;
         }
 
-        /* Button Hover Effect */
         button:hover {
-            background-color: #BB86FC; /* Background color on hover */
-            transform: scale(1.05); /* Slightly enlarge on hover */
+            background-color: #BB86FC;
+            transform: scale(1.05);
         }
 
-        /* Button Active State */
         button:active {
-            background-color: #6200EE; /* Background color on active */
-            transform: scale(0.95); /* Slightly shrink on click */
-        }</style>
+            background-color: #6200EE;
+            transform: scale(0.95);
+        }
+    </style>
 </head>
 <body>
     <div class="chapter">
@@ -217,7 +235,7 @@ def yes():
                 Complete
             </span>
             <p class="dialogue">
-                All of the chapters are at '/chapter-{chapterNumber}'
+                All of the chapters are at '/chapter-{latest_chapter_number}'
             </p>
         </div>
     </div>
@@ -226,6 +244,3 @@ def yes():
 
 if __name__ == '__main__':
     yes()
-
-
-
