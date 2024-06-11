@@ -91,6 +91,10 @@ def list_novels():
         novels = [folder for folder in os.listdir(novels_folder_path) 
                   if os.path.isdir(os.path.join(novels_folder_path, folder))]
 
+        novels2 = [novel[:-9] for novel in novels]
+        
+        print(novels2)
+        
         return render_template('novels.html', novels=novels)
     except Exception as e:
         return render_template('error.html', error_message=str(e)), 500

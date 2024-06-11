@@ -16,9 +16,11 @@
             <button><a href="/">Home</a></button>
             <ul class="links">
                 {% for novel in novels %}
-                    <li><a href="{{ url_for('show_novel_chapters', novel_title=novel) }}">{{ novel }}</a></li>
+                    {% set modified_novel = novel[:-9] if novel.endswith('.html') else novel %}
+                    <li><button><a href="{{ url_for('show_novel_chapters', novel_title=modified_novel) }}">{{ modified_novel }}</a></button></li>
                 {% endfor %}
             </ul>
+            
         </div>
     </div>
 </body>
