@@ -52,7 +52,7 @@ body {
 }
 
 .links a {
-    color: #03DAC5; /* Link color */
+    color: #563d75; /* Link color */
     text-decoration: none;
     transition: color 0.3s ease;
     font-size: 18px;
