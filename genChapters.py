@@ -14,6 +14,7 @@ def get_latest_chapter_number(base_url):
 
         soup = BeautifulSoup(response.text, 'html.parser')
 
+        
         latest_text = soup.find('p', class_='latest text1row')
         if latest_text:
             chapter_number = ''
@@ -29,8 +30,29 @@ def get_latest_chapter_number(base_url):
         print(f"Request failed: {e}")
         return None
 
+def get_novel_title(base_url):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36'
+    }
 
-def main(url, i):
+    try:
+        response = requests.get(base_url, headers=headers)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        novelTitle = soup.find('h1', class_='novel-title text2row').get_text().strip()
+        
+
+        return novelTitle
+       
+
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+        return None
+
+
+def main(url, i, novelTitle):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36'
     }
@@ -58,6 +80,10 @@ def main(url, i):
             if chapter_container:
                 chapter_text = chapter_container.get_text(separator='\n').strip()
                 
+                novelTitle2 = novelTitle.replace(' ', '%20')
+                
+                
+                
                 html_template = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -73,11 +99,11 @@ def main(url, i):
     <div class="chapter">
         <div class="content">
             <span class="speaker">
-                Chapter {chapterNumber}
+                {novelTitle} - Chapter {chapterNumber}
             </span>
-            <button> <a href=/chapters/{int(chapterNumber)-1}>Previous Chapter</a></button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button> <a href=/chapters/{int(chapterNumber)+1}>Next Chapter</a></button>
+            <button> <a href=/novels/{novelTitle2}-chapters/chapters/{int(chapterNumber)-1}>Previous Chapter</a></button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button> <a href=/novels/{novelTitle2}-chapters/chapters/{int(chapterNumber)+1}>Next Chapter</a></button>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <button> <a href="/">Home</a></button>&nbsp;&nbsp;<button> <a href="/chapters">Chapters</a></button>
+            <button> <a href="/">Home</a></button>&nbsp;&nbsp;<button> <a href="/novels/{novelTitle2}-chapters/chapters">Chapters</a></button>
             
             <p class="content">
                 <br>
@@ -85,19 +111,24 @@ def main(url, i):
             </p>
         </div>
         <br>
-        <button> <a href=/chapters/{int(chapterNumber)-1}>Previous Chapter</a></button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button> <a href=/chapters/{int(chapterNumber)+1}>Next Chapter</a></button>
+        <button> <a href=/novels/{novelTitle2}-chapters/chapters/{int(chapterNumber)-1}>Previous Chapter</a></button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button> <a href=/novels/{novelTitle2}-chapters/chapters/{int(chapterNumber)+1}>Next Chapter</a></button>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <button> <a href="/">Home</a></button>&nbsp;&nbsp;<button> <a href="/chapters">Chapters</a></button>
+        <button> <a href="/">Home</a></button>&nbsp;&nbsp;<button> <a href="/novels/{novelTitle2}-chapters/chapters">Chapters</a></button>
     </div>
 </body>
-</html>"""
-                if not os.path.exists('templates/chapters'):
-                    os.makedirs('templates/chapters')
+</html>"""      
+
                 
-                with open(os.path.join('templates/chapters', f'chapter-{chapterNumber}.html'), 'w', encoding='utf-8') as file:
+                if not os.path.exists(f'templates/novels/'):
+                    os.makedirs(f'templates/novels/')
+                
+                if not os.path.exists(f'templates/novels/{novelTitle}-chapters'):
+                    os.makedirs(f'templates/novels/{novelTitle}-chapters')
+                
+                with open(os.path.join(f'templates/novels/{novelTitle}-chapters', f'chapter-{chapterNumber}.html'), 'w', encoding='utf-8') as file:
                     file.write(html_template)
                     
-                print(f"HTML file created successfully for chapter {chapterNumber}")
+                print(f"HTML file created successfully for {novelTitle} chapter {chapterNumber}")
             else:
                 print("Error: 'chapter-container' not found on the page.")
             
@@ -107,10 +138,11 @@ def main(url, i):
         print(f"Request failed: {e}")
 
 
-def yes():
-    base_url = "https://lightnovelpub.vip/novel/the-beginning-after-the-end-web-novel-11110049"
+def yes(base_url):
     latest_chapter_number = get_latest_chapter_number(base_url)
-
+    novelTitle = get_novel_title(base_url)
+    
+    
     if latest_chapter_number is None:
         print("Failed to get the latest chapter number.")
         return
@@ -118,7 +150,7 @@ def yes():
     print(f"Latest chapter number: {latest_chapter_number}")
 
     for i in range(1, int(latest_chapter_number) + 1):
-        main(url=f"https://lightnovelpub.vip/novel/the-beginning-after-the-end-548/chapter-{i}", i=i)
+        main(url=f"{base_url}/chapter-{i}", i=i, novelTitle=novelTitle)
 
     return """<!DOCTYPE html>
 <html lang="en">
@@ -241,5 +273,4 @@ def yes():
 </body>
 </html>"""
 
-if __name__ == '__main__':
-    yes()
+

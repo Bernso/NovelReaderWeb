@@ -5,21 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
-    <link rel="icon" type="image/png" href="/./static/MAINICON-20240501-rounded.png">
-    <link rel="stylesheet" href="/./static/style.css">
     <title>Home</title>
-    
 </head>
 <body>
     <div class="chapter">
         <div class="content">
             <span class="speaker">Home Page</span>
-            <button id="generateButton">Generate TBATE Chapters</button>
+            <button id="generateButton" onclick="showPrompt()">Generate TBATE Chapters</button>
             <p class="content">
-                <br>Generating TBATE chapters will take around 3-5 minutes, then you will get a pop-up on your screen saying that it has completed it. 
+                <br>Generating TBATE chapters will take around 3-5 minutes, then you will get a pop-up on your screen saying that it has completed it.
                 There is no initial warning to tell you that the script has started running.<br>
-                <br>Generating chapters will create a webpage with the content of the given chapter. And will be uploaded in the Chapters button bellow.
-                <br><button><a href="chapters" >Chapters</a></button><br>
+                <br>Generating chapters will create a webpage with the content of the given chapter. And will be uploaded in the Chapters button below.
+                <br><button><a href="novels">Novels</a></button><br>
             </p>
             <span class="speaker">Plans</span>
             <p class="content">
@@ -27,32 +24,40 @@
                 <br>I plan to make this such that any Light Novel inputted from <a href="https://www.lightnovelpub.vip" style="color: #BB86FC;">lightnovelpub.vip</a> will be scraped and uploaded.<br>
             </p>
             <p class="content">
-                <br>Join the <a href="https://www.discord.gg/k5HBFXqtCB" style="color: #BB86FC;">Discord Server</a> for support <br>
+                <br>Join the <a href="https://www.discord.gg/k5HBFXqtCB" style="color: #BB86FC;">Discord Server</a> for support<br>
                 <br>Made By <a href="https://www.github.com/Bernso" style="color: #BB86FC;">Bernso</a>
             </p>
         </div>
     </div>
-</body>
-<script>
-    document.getElementById('generateButton').addEventListener('click', function() {
-        fetch('/run_script', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({}) 
-        })
-        .then(response => {
-            if (response.ok) {
-                alert('Chapters generated successfully!');
+
+    <script>
+        function showPrompt() {
+            const novelLink = prompt("Please enter the link for your novel:", "Link");
+            if (novelLink) {
+                alert("Starting...");
+                fetch('/run_script', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ novelLink: novelLink })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Chapters generated successfully! Latest chapter: ' + data.latest_chapter);
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Network error. Please try again later.');
+                });
             } else {
-                alert('Error generating chapters!');
+                alert("User cancelled the prompt.");
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Network error. Please try again later.');
-        });
-    });
-</script>
+        }
+    </script>
+</body>
 </html>
