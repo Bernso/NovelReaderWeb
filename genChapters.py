@@ -15,17 +15,26 @@ def get_latest_chapter_number(base_url):
         soup = BeautifulSoup(response.text, 'html.parser')
 
         
-        latest_text = soup.find('p', class_='latest text1row')
-        if latest_text:
-            chapter_number = ''
-            for letter in latest_text.get_text():
-                if letter.isdigit():
-                    chapter_number += letter
-            return chapter_number
-        else:
-            print("Error: 'latest-text1row' not found on the page.")
-            return None
+        header_stats_div = soup.find('div', class_='header-stats')
 
+        extracted_values = []
+
+        if header_stats_div:
+            span_tags = header_stats_div.find_all('span')
+
+            for span in span_tags:
+                strong_tag = span.find('strong')
+                if strong_tag:
+                    text = strong_tag.get_text(strip=True)
+                    value = ''.join(filter(str.isdigit, text))
+                    extracted_values.append(value)
+                    print(f'Extracted value: {value}')
+        else:
+            print('Div with class "header-stats" not found.')
+
+
+        return extracted_values[0]
+        
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
         return None
