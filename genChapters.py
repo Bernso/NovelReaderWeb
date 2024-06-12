@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import os
-
+import re
 
 def get_latest_chapter_number(base_url):
     headers = {
@@ -91,7 +91,7 @@ def main(url, i, novelTitle):
                 
                 novelTitle2 = novelTitle.replace(' ', '%20')
                 
-                
+                novel_title = re.sub(r'\s*\(.*?\)', '', novelTitle)
                 
                 html_template = f"""<!DOCTYPE html>
 <html lang="en">
@@ -108,7 +108,7 @@ def main(url, i, novelTitle):
     <div class="chapter">
         <div class="content">
             <span class="speaker">
-                {novelTitle} - Chapter {chapterNumber}
+                {novel_title} - Chapter {chapterNumber}
             </span>
             <button> <a href=/novels/{novelTitle2}-chapters/chapters/{int(chapterNumber)-1}>Previous Chapter</a></button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button> <a href=/novels/{novelTitle2}-chapters/chapters/{int(chapterNumber)+1}>Next Chapter</a></button>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
