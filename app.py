@@ -52,7 +52,10 @@ def show_chapter(novelTitle, chapter_number):
     except Exception as e:
         return render_template('error.html', error_message=str(e)), 500
     
-    
+
+@app.route('/plans')
+def show_plans():
+     return render_template('plans.html')
 
 
 
