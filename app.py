@@ -74,6 +74,8 @@ def show_novel_chapters(novel_title):
         novel_title2 = novel_title[:-9]
         
         return render_template('novelsChapters.html', novel_title2=novel_title2, chapters=chapter_numbers, novel_title1=novel_title)
+    # Novel title 2 is the one that is meant to look nice and is the one the suer is meant to see,
+    # while novel title 1 is the one that is accurate and is the one the user is not meant to see
     except Exception as e:
         return render_template('error.html', error_message=str(e)), 500
 
