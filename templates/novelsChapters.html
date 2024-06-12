@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='chaptersPageStyle.css') }}">
-    <title>Chapters of {{ novel_title }}</title>
+    <title>Chapters of {{ novel_title2 }}</title>
 </head>
 <body>
     <div class="chapter">
         <div class="content">
-            <h1>Chapters of {{ novel_title }}</h1>
+            <h1>Chapters of {{ novel_title2 }}</h1>
             <button><a href="/novels">Back to Novels</a></button>
             <ul class="links">
                 {% for chapter in chapters %}
-                    <li><a href="{{ url_for('show_chapter', novelTitle=novel_title, chapter_number=loop.index) }}">Chapter {{ chapter }}</a></li>
+                    <li><a href="{{ url_for('show_chapter', novelTitle=novel_title1, chapter_number=loop.index) }}">Chapter {{ chapter }}</a></li>
                 {% endfor %}
             </ul>
         </div>

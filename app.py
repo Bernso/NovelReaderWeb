@@ -71,7 +71,9 @@ def show_novel_chapters(novel_title):
         # Sort chapter numbers
         chapter_numbers.sort()
 
-        return render_template('novelsChapters.html', novel_title=novel_title, chapters=chapter_numbers)
+        novel_title2 = novel_title[:-9]
+        
+        return render_template('novelsChapters.html', novel_title2=novel_title2, chapters=chapter_numbers, novel_title1=novel_title)
     except Exception as e:
         return render_template('error.html', error_message=str(e)), 500
 
