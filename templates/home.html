@@ -15,11 +15,11 @@
             <button><a href="novels">Novels</a></button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <button><a href="plans">Plans</a></button>
             <p class="content">
-                <br>Generating novel chapters will take around 3-5 minutes (depending on how long the novel is of course), then you will get a pop-up on your screen saying that it has completed it.
+                <br>Generating novel chapters will take around 1-2 minutes per 100 chapters (unless they have already been uploaded), then you will get a pop-up on your screen saying that it has completed it.
                 There is no initial warning to tell you that the script has started running.<br>
-                <br>Generating chapters will create a webpage with the content of the given chapter. And will be uploaded in the Chapters button above.<br><br>
-                Any novel from <a href="https://www.lightnovelpub.vip" style="color: #BB86FC;">lightnovelpub.vip</a> can be scraped and uploaded.<br>
-                <br>
+                <br>Generating chapters will create a webpage with the content of the given chapter. And will be uploaded in the Chapters button above.<br>
+                <br>This tool can update novels fast and with quality.<br>
+                <br>Any novel from <a href="https://www.lightnovelpub.vip" style="color: #BB86FC;">lightnovelpub.vip</a> can be scraped and uploaded.<br>
             </p>
         </div>
     </div>
@@ -48,12 +48,12 @@
                     if (data.status === 'success') {
                         alert('Chapters generated successfully! Latest chapter: ' + data.latest_chapter);
                     } else {
-                        alert('Error: ' + data.message);
+                        alert('idk');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Network error. Please try again later.');
+                    alert('idk');
                 });
             } else {
                 alert("User cancelled the prompt.");
