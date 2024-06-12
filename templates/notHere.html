@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
+    <link rel="icon" type="image/png" href="/./static/MAINICON-20240501-rounded.png">
+    <link rel="stylesheet" href="/./static/style.css">
+    <title>Nuh Uh</title>
+    
+</head>
+<body>
+    <div class="chapter">
+        <div class="content">
+            <span class="speaker">
+                You shouldn't be here.
+            </span> 
+            <div class='content'>
+            <br>You are not going to find {{ novel_title }} here.
+            </div>
+            <br><button id="homeButton">Home</button>
+        </div>
+    </div>
+</body>
+<script>
+    document.getElementById('homeButton').addEventListener('click', function() {
+        window.location.href = '/'; // Replace '/home' with your actual home page URL
+    });
+</script>
+</html>
