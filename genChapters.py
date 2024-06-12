@@ -103,7 +103,7 @@ def main(url, i, novelTitle):
             </span>
             <button> <a href=/novels/{novelTitle2}-chapters/chapters/{int(chapterNumber)-1}>Previous Chapter</a></button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button> <a href=/novels/{novelTitle2}-chapters/chapters/{int(chapterNumber)+1}>Next Chapter</a></button>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <button> <a href="/">Home</a></button>&nbsp;&nbsp;<button> <a href="/novels/{novelTitle2}-chapters/chapters">Chapters</a></button>
+            <button> <a href="/">Home</a></button>&nbsp;&nbsp;<button> <a href="/novels/{novelTitle2}-chapters">Chapters</a></button>
             
             <p class="content">
                 <br>
@@ -113,7 +113,7 @@ def main(url, i, novelTitle):
         <br>
         <button> <a href=/novels/{novelTitle2}-chapters/chapters/{int(chapterNumber)-1}>Previous Chapter</a></button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button> <a href=/novels/{novelTitle2}-chapters/chapters/{int(chapterNumber)+1}>Next Chapter</a></button>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <button> <a href="/">Home</a></button>&nbsp;&nbsp;<button> <a href="/novels/{novelTitle2}-chapters/chapters">Chapters</a></button>
+        <button> <a href="/">Home</a></button>&nbsp;&nbsp;<button> <a href="/novels/{novelTitle2}-chapters">Chapters</a></button>
     </div>
 </body>
 </html>"""      

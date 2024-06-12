@@ -14,7 +14,7 @@
             <button><a href="/novels">Back to Novels</a></button>
             <ul class="links">
                 {% for chapter in chapters %}
-                    <li><a href="{{ url_for('show_chapter', novelTitle=novel_title, chapter_number=loop.index) }}">{{ chapter }}</a></li>
+                    <li><a href="{{ url_for('show_chapter', novelTitle=novel_title, chapter_number=loop.index) }}">Chapter {{ chapter }}</a></li>
                 {% endfor %}
             </ul>
         </div>

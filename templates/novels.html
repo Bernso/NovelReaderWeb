@@ -15,15 +15,14 @@
             <h1>Novels</h1>
             <button><a href="/">Home</a></button>
             <ul class="links">
-                {% for novel in novels %}
-                    {% set modified_novel = novel[:-9] if novel.endswith('.html') else novel %}
-                    <li><button><a href="{{ url_for('show_novel_chapters', novel_title=modified_novel) }}">{{ modified_novel }}</a></button></li>
+                {% for original_novel, modified_novel in novels %}
+                    <li><a href="{{ url_for('show_novel_chapters', novel_title=original_novel) }}">{{ modified_novel }}</a></li>
                 {% endfor %}
             </ul>
-            
         </div>
     </div>
 </body>
+
 <script>
     
 </script>

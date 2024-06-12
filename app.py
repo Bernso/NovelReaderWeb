@@ -54,17 +54,6 @@ def show_chapter(novelTitle, chapter_number):
     
     
 
-@app.route('/novels/<novelTitle>/chapters')
-def index():
-    try:
-        subfolder_path = os.path.join(app.root_path, 'templates', 'novels')
-        html_files = [file for file in os.listdir(subfolder_path) if file.endswith('.html')]
-        chapter_numbers = [int(file.split('-')[1].split('.')[0]) for file in html_files]
-        chapter_numbers.sort()
-
-        return render_template('chapters.html', chapter_numbers=chapter_numbers)
-    except Exception as e:
-        return render_template('error.html', error_message=str(e)), 500
 
 
 @app.route('/novels/<novel_title>')
@@ -76,7 +65,13 @@ def show_novel_chapters(novel_title):
         # List all chapter files (assuming chapter files are named in a specific format)
         chapters = [file for file in os.listdir(novel_folder_path) if file.endswith('.html')]
 
-        return render_template('chapters.html', novel_title=novel_title, chapters=chapters)
+        # Extract chapter numbers from filenames
+        chapter_numbers = [int(file.split('-')[1].split('.')[0]) for file in chapters]
+
+        # Sort chapter numbers
+        chapter_numbers.sort()
+
+        return render_template('novelsChapters.html', novel_title=novel_title, chapters=chapter_numbers)
     except Exception as e:
         return render_template('error.html', error_message=str(e)), 500
 
@@ -91,11 +86,12 @@ def list_novels():
         novels = [folder for folder in os.listdir(novels_folder_path) 
                   if os.path.isdir(os.path.join(novels_folder_path, folder))]
 
-        novels2 = [novel[:-9] for novel in novels]
+        novels_with_modified = [(novel, novel[:-9] if len(novel) >= 9 else novel) for novel in novels]
+
         
-        print(novels2)
+        print(novels_with_modified)
         
-        return render_template('novels.html', novels=novels)
+        return render_template('novels.html', novels=novels_with_modified)
     except Exception as e:
         return render_template('error.html', error_message=str(e)), 500
 

@@ -45,7 +45,7 @@ body {
 /* Adding link styles */
 .links {
     display: grid;
-    grid-template-columns: repeat(8, 1fr); /* 4 columns */
+    grid-template-columns: repeat(4, 1fr); /* 8 columns */
     grid-gap: 20px; /* Gap between links */
     margin-top: 20px; /* Add some space between rows */
     list-style-type: none; /* Remove bullet points */
