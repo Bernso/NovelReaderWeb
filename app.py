@@ -2,6 +2,7 @@ try:
     from flask import Flask, render_template, request, jsonify
     import os
     import genChapters
+    import re
 except ImportError as e:
     input(f"Module not found: {e}")
 
@@ -60,26 +61,23 @@ def show_plans():
 @app.route('/novels/<novel_title>')
 def show_novel_chapters(novel_title):
     try:
-        # Path to the novel's folder
         novel_folder_path = os.path.join(app.root_path, 'templates', 'novels', novel_title)
         
-        # List all chapter files (assuming chapter files are named in a specific format)
         chapters = [file for file in os.listdir(novel_folder_path) if file.endswith('.html')]
 
-        # Extract chapter numbers from filenames
         chapter_numbers = [int(file.split('-')[1].split('.')[0]) for file in chapters]
 
-        # Sort chapter numbers
         chapter_numbers.sort()
 
-        novel_title2 = novel_title[:-9]
+        novel_title2 = re.sub(r'\s*\(.*?\)', '', novel_title[:-9] if len(novel_title) >= 9 else novel_title)
         
+        
+        # Novel title 2 is the one that is meant to look nice and is the one the suer is meant to see,
+        # while novel title 1 is the one that is accurate and is the one the user is not meant to see
+
         return render_template('novelsChapters.html', novel_title2=novel_title2, chapters=chapter_numbers, novel_title1=novel_title)
-    # Novel title 2 is the one that is meant to look nice and is the one the suer is meant to see,
-    # while novel title 1 is the one that is accurate and is the one the user is not meant to see
     except Exception as e:
         return render_template('error.html', error_message=str(e)), 500
-
 
 @app.route('/novels')
 def list_novels():
@@ -91,8 +89,10 @@ def list_novels():
         novels = [folder for folder in os.listdir(novels_folder_path) 
                   if os.path.isdir(os.path.join(novels_folder_path, folder))]
 
-        novels_with_modified = [(novel, novel[:-9] if len(novel) >= 9 else novel) for novel in novels]
-
+        novels_with_modified = [
+            (novel, re.sub(r'\s*\(.*?\)', '', novel[:-9] if len(novel) >= 9 else novel)) 
+            for novel in novels
+        ]
         
         print(novels_with_modified)
         
