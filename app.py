@@ -114,9 +114,12 @@ def update_novel(novel_title):
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+
+
 @app.route('/update_novel/<novel_title>')
 def youShouldntBeHere(novel_title):
     return render_template('notHere.html', novel_title=novel_title)
+
 
 
 if __name__ == '__main__':
