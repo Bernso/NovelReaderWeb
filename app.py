@@ -27,10 +27,9 @@ def run_script():
 @app.route('/novels/<novelTitle>/chapters/<int:chapter_number>')
 def show_chapter(novelTitle, chapter_number):   
     try:
-        # Path to the novel's chapters folder
         subfolder_path = os.path.join(app.root_path, 'templates', 'novels', novelTitle)
         
-        # List and sort chapter files
+        # List/sort chapter files
         html_files = [file for file in os.listdir(subfolder_path) if file.endswith('.html')]
         html_files.sort(key=lambda x: int(x.split('-')[1].split('.')[0]))
 
@@ -38,7 +37,6 @@ def show_chapter(novelTitle, chapter_number):
         if chapter_number < 1 or chapter_number > len(html_files):
             return render_template('chapterNotFound.html'), 404
 
-        # Adjust chapter number for 0-based index
         chapter_file = html_files[chapter_number - 1]
         chapter_path = os.path.join(subfolder_path, chapter_file)
 
