@@ -101,6 +101,21 @@ def list_novels():
         return render_template('error.html', error_message=str(e)), 500
 
 
+@app.route('/update_novel/<novel_title>', methods=['POST'])
+def update_novel(novel_title):
+    try:
+        # Assuming the novel's URL is available and stored somewhere accessible
+        novel_url = request.json.get('novelUrl')
+
+        # Call the function that updates the chapters
+        result = genChapters.yes(base_url=novel_url)
+        
+        return jsonify({"status": "success", "message": f"{novel_title} updated successfully.", "result": result})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+
 if __name__ == '__main__':
     try:
         app.run(debug=True)
