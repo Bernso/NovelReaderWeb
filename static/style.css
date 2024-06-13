@@ -70,6 +70,10 @@ a {
     background: #000000; /* Background color of the scrollbar track */
 }
 
+::-webkit-scrollbar-track {
+    display: none;
+}
+
 /* Scrollbar Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
     background: #bb86fcab; /* Color of the scrollbar handle on hover */

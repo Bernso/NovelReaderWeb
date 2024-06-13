@@ -59,7 +59,7 @@ body {
     color: #563d75; /* Link color */
     text-decoration: none;
     font-size: 18px;
-    background-color: #000000; /* Background color of the link box */
+    background-color: #121212; /* Background color of the link box */
     border: 2px solid #000000; /* Border around the link box */
     border-radius: 10px; /* Rounded corners */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
@@ -94,7 +94,7 @@ body {
     color: #563d75; /* Link color */
     text-decoration: none;
     font-size: 16px; /* Slightly smaller font size */
-    background-color: #000000; /* Light background color for the link box */
+    background-color: #121212; /* Light background color for the link box */
     border: 2px solid #000000; /* Light border around the link box */
     border-radius: 8px; /* Rounded corners */
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
@@ -135,6 +135,10 @@ body {
 
 ::-webkit-scrollbar-thumb:active {
     background: #bb86fc; /* Color of the scrollbar handle on hover */
+}
+
+::-webkit-scrollbar-track {
+    display: none;
 }
 
 /* Button Styles */

@@ -196,7 +196,7 @@ def yes(novel_title):
 
     print(f"Latest chapter number: {latest_chapter_number}")
 
-    for i in range(0, int(latest_chapter_number) + 1):
+    for i in range(1, int(latest_chapter_number) + 1):
         main(url=f"{base_url}/chapter-{i}", chapter_number=i, novel_title=novel_title)
 
     return f"""<!DOCTYPE html>
