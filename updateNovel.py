@@ -154,7 +154,7 @@ def main(url, chapter_number, novel_title):
             
             <p class="content">
                 <br>
-                {chapter_text.replace('\n', '<br>')}
+                {chapter_text.replace('\n', '<br><br>')}
             </p>
         </div>
         <br>
