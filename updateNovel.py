@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import os
 import re
 import urllib
+import threading
 
 def transform_title(novel_title):
     """
@@ -353,23 +354,28 @@ def main(url, chapter_number, novel_title):
         print(f"Request failed: {e}")
 
 def yes(novel_title):
-    base_url = get_base_url(novel_title)
+    def thread_target():
+        base_url = get_base_url(novel_title)
 
-    if base_url is None:
-        print("Failed to construct the base URL for the novel.")
-        return
+        if base_url is None:
+            print("Failed to construct the base URL for the novel.")
+            return
 
-    latest_chapter_number = get_latest_chapter_number(base_url)
-    novel_title = get_novel_title(base_url)
+        latest_chapter_number = get_latest_chapter_number(base_url)
+        novel_title_clean = get_novel_title(base_url)
 
-    if latest_chapter_number is None:
-        print("Failed to get the latest chapter number.")
-        return
+        if latest_chapter_number is None:
+            print("Failed to get the latest chapter number.")
+            return
 
-    print(f"Latest chapter number: {latest_chapter_number}")
+        print(f"Latest chapter number: {latest_chapter_number}")
 
-    for i in range(1, int(latest_chapter_number) + 1):
-        main(url=f"{base_url}/chapter-{i}", chapter_number=i, novel_title=novel_title)
+        for i in range(1, int(latest_chapter_number) + 1):
+            main(url=f"{base_url}/chapter-{i}", chapter_number=i, novel_title=novel_title_clean)
+
+    # Creating a new thread for the yes function
+    thread = threading.Thread(target=thread_target)
+    thread.start()
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -484,7 +490,7 @@ def yes(novel_title):
                 Complete
             </span>
             <p class="dialogue">
-                All of the chapters are at '/chapter-{latest_chapter_number}'
+                All of the chapters are at '/chapter-{{latest_chapter_number}}'
             </p>
         </div>
     </div>
