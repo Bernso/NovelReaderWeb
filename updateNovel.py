@@ -148,22 +148,99 @@ def main(url, chapter_number, novel_title):
             <span class="speaker" style="font-size: 40px;">
                 {novel_title_clean} - Chapter {chapter_number}
             </span>
-            <button> <a href=/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}>Previous Chapter</a></button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button> <a href=/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)+1}>Next Chapter</a></button>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <button> <a href="/">Home</a></button>&nbsp;&nbsp;<button> <a href="/novels/{novel_title_encoded}-chapters">Chapters</a></button>
-            
+            <button><a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}">Previous Chapter</a></button>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+            <button><a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)+1}">Next Chapter</a></button>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+            <button><a href="/">Home</a></button>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+            <button><a href="/novels/{novel_title_encoded}-chapters">Chapters</a></button>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+            <button id="openModal">Settings</button>
             <p class="content">
                 <br>
                 {chapter_text.replace('\n', '<br><br>')}
             </p>
         </div>
         <br>
-        <button> <a href=/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}>Previous Chapter</a></button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button> <a href=/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)+1}>Next Chapter</a></button>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <button> <a href="/">Home</a></button>&nbsp;&nbsp;<button> <a href="/novels/{novel_title_encoded}-chapters">Chapters</a></button>
+        <button><a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}">Previous Chapter</a></button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+        <button><a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)+1}">Next Chapter</a></button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+        <button><a href="/">Home</a></button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+        <button><a href="/novels/{novel_title_encoded}-chapters">Chapters</a></button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+        <button id="openModal2">Settings</button>
     </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content" id="modalContent">
+            <span class="close" id="closeModal">&times;</span>
+            <h2>Settings</h2>
+            <input type="range" min="10" max="72" value="16" class="slider" id="fontSizeSlider">
+            <div class="value-display">Current Font Size: <span id="fontSizeValue">16</span>px</div>
+            <div class="theme-selector">
+                <span class="theme-label">Dark Mode:</span>
+                <input type="checkbox" id="themeToggle" class="theme-toggle">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get references to elements
+        const openModalButton = document.getElementById('openModal');
+        const openModalButton2 = document.getElementById('openModal2');
+        const modal = document.getElementById('settingsModal');
+        const closeModalButton = document.getElementById('closeModal');
+        const slider = document.getElementById('fontSizeSlider');
+        const textContent = document.querySelector('.content');
+        const fontSizeValue = document.getElementById('fontSizeValue');
+        const themeToggle = document.getElementById('themeToggle');
+        const modalContent = document.getElementById('modalContent');
+
+        // Function to open the modal
+        openModalButton.onclick = function() {{
+            modal.style.display = "block";
+        }}
+        openModalButton2.onclick = function() {{
+            modal.style.display = "block";
+        }}
+
+        // Function to close the modal
+        closeModalButton.onclick = function() {{
+            modal.style.display = "none";
+        }}
+
+        // Close the modal if the user clicks outside of it
+        window.onclick = function(event) {{
+            if (event.target == modal) {{
+                modal.style.display = "none";
+            }}
+        }}
+
+        // Add an event listener to the slider to update the font size
+        slider.addEventListener('input', function() {{
+            const fontSize = slider.value;
+            textContent.style.fontSize = fontSize + 'px';
+            fontSizeValue.textContent = fontSize;
+        }});
+
+        // Function to toggle light and dark mode
+        themeToggle.addEventListener('change', function() {{
+            if (themeToggle.checked) {{
+                document.body.classList.add('dark-mode');
+                modalContent.classList.add('dark-mode');
+            }} else {{
+                document.body.classList.remove('dark-mode');
+                modalContent.classList.remove('dark-mode');
+            }}
+        }});
+    </script>
 </body>
-</html>"""
+</html>
+"""
 
                 # Ensure the directories exist
                 os.makedirs(f'templates/novels/{novel_title}-chapters', exist_ok=True)
