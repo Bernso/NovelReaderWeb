@@ -106,6 +106,30 @@ def main(url, chapter_number, novel_title):
     <link rel="icon" type="image/png" href="/./static/MAINICON-20240501-rounded.png">
     <link rel="stylesheet" href="{{{{ url_for('static', filename='style.css') }}}}">
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .tts-controls {{
+            margin-top: 20px;
+            text-align: center;
+        }}
+
+        .tts-controls button {{
+            margin: 0 5px;
+        }}
+
+        .value-display {{
+            margin-top: 10px;
+            font-size: 16px;
+        }}
+        
+        .tts-controls select {{
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }}
+    </style>
 </head>
 <body>
     <div class="chapter">
@@ -122,7 +146,7 @@ def main(url, chapter_number, novel_title):
             <button><a href="/novels/{novel_title_encoded}-chapters">Chapters</a></button>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
             <button id="openModal">Settings</button>
-            <p class="content">
+            <p class="content" id='textToRead'>
                 <br>
                 {chapter_text.replace('\n', '<br><br>')}
             </p>
@@ -149,6 +173,13 @@ def main(url, chapter_number, novel_title):
             <div class="theme-selector">
                 <span class="theme-label">Dark Mode:</span>
                 <input type="checkbox" id="themeToggle" class="theme-toggle">
+            </div>
+            <!-- TTS Controls -->
+            <div class="tts-controls">
+                <select id="voiceSelect"></select>
+                <button id="playTTS">Play</button>
+                <button id="pauseTTS">Pause</button>
+                <button id="stopTTS">Stop</button>
             </div>
         </div>
     </div>
@@ -202,6 +233,70 @@ def main(url, chapter_number, novel_title):
                 modalContent.classList.remove('dark-mode');
             }}
         }});
+
+        // Text-to-Speech functionality
+        if ('speechSynthesis' in window) {{
+            const synth = window.speechSynthesis;
+            let voices = [];
+
+            // Load voices
+            function loadVoices() {{
+                voices = synth.getVoices().filter(voice => voice.name.includes('Microsoft'));
+                const voiceSelect = document.getElementById('voiceSelect');
+                voiceSelect.innerHTML = '';
+                voices.forEach(voice => {{
+                    const option = document.createElement('option');
+                    option.textContent = `${{voice.name}} (${{voice.lang}})`;
+                    option.value = voice.name;
+                    voiceSelect.appendChild(option);
+                }});
+            }}
+
+            loadVoices();
+            if (synth.onvoiceschanged !== undefined) {{
+                synth.onvoiceschanged = loadVoices;
+            }}
+
+            // Play TTS
+            document.getElementById('playTTS').addEventListener('click', () => {{
+                if (synth.paused) {{
+                    synth.resume();
+                }} else {{
+                    if (synth.speaking) {{
+                        synth.cancel();
+                    }}
+                    const textToSpeak = document.getElementById('textToRead').innerText;
+                    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                    const selectedVoice = voices.find(voice => voice.name === voiceSelect.value);
+                    utterance.voice = selectedVoice || voices[0];
+                    utterance.rate = 1;
+                    utterance.pitch = 1;
+                    utterance.lang = selectedVoice ? selectedVoice.lang : 'en-US';
+                    utterance.onend = () => {{
+                        console.log('Speech has finished.');
+                    }};
+                    utterance.onerror = (e) => {{
+                        console.error('An error occurred during speech synthesis:', e);
+                    }};
+                    synth.speak(utterance);
+                }}
+            }});
+
+            // Pause TTS
+            document.getElementById('pauseTTS').addEventListener('click', () => {{
+                if (synth.speaking) {{
+                    synth.pause();
+                }}
+            }});
+
+            // Stop TTS
+            document.getElementById('stopTTS').addEventListener('click', () => {{
+                synth.cancel();
+            }});
+
+        }} else {{
+            alert('Sorry, your browser does not support text-to-speech.');
+        }}
     </script>
 </body>
 </html>
