@@ -13,7 +13,7 @@
     <div class='chapter'>
         <div class="content">
             <h1>{{ novel_title2 }}</h1>
-            <button onclick="updateNovel('{{ novel_title1 }}')">Update Novel</button>
+            <button onclick="updateNovel('{{ novel_title1 }}', '{{ novel_title2 }}')">Update Novel</button>
             <ul class='chapters'>
                 {% for chapter in chapters %}
                     <li><a href="/novels/{{ novel_title1 }}/chapters/{{ chapter }}">Chapter {{ chapter }}</a></li>
@@ -24,33 +24,28 @@
 
 
     <script>
-        function updateNovel(novelTitle) {
-            const novelUrl = prompt("Please enter the updated novel URL:");
-            if (novelUrl) {
-                fetch(`/update_novel/${novelTitle}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ novelUrl: novelUrl })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        alert(data.message);
-                        location.reload();
-                    } else {
-                        alert('Error: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Network error. Please try again later.');
-                });
-            } else {
-                alert("Update cancelled.");
-            }
-        }
+        function updateNovel(novelTitle1, novelTitle2) {
+            fetch(`/update_novel/${novelTitle1}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ novelTitle2: novelTitle2 })  // Ensure novelTitle2 is sent in the JSON body
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    location.reload(); // Reload the page after successful update
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Network error. Please try again later.');
+            });
+        }        
     </script>
 </body>
 </html>

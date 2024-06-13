@@ -3,6 +3,7 @@ try:
     import os
     import genChapters
     import re
+    import updateNovel
 except ImportError as e:
     input(f"Module not found: {e}")
 
@@ -104,15 +105,17 @@ def list_novels():
 @app.route('/update_novel/<novel_title>', methods=['POST'])
 def update_novel(novel_title):
     try:
-        # Assuming the novel's URL is available and stored somewhere accessible
-        novel_url = request.json.get('novelUrl')
+        novel_title2 = request.json.get('novelTitle2')  
 
-        # Call the function that updates the chapters
-        result = genChapters.yes(base_url=novel_url)
+        if novel_title2 is None:
+            raise ValueError("novelTitle2 is missing or None.")
+
+        result = updateNovel.yes(novel_title2)
         
         return jsonify({"status": "success", "message": f"{novel_title} updated successfully.", "result": result})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
 
 
 
