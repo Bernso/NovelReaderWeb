@@ -173,30 +173,30 @@ def main(url, chapter_number, novel_title):
             <span class="speaker" style="font-size: 40px;">
                 {novel_title_clean} - Chapter {chapter_number}
             </span>
-            <button><a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}">Previous Chapter</a></button>
+            <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}" class='fancyLink'>Previous Chapter</a>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-            <button><a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)+1}">Next Chapter</a></button>
+            <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)+1}" class='fancyLink'>Next Chapter</a>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-            <button><a href="/">Home</a></button>
+            <a href="/" class='fancyLink'>Home</a>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-            <button><a href="/novels/{novel_title_encoded}-chapters">Chapters</a></button>
+            <a href="/novels/{novel_title_encoded}-chapters" class='fancyLink'>Chapters</a>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-            <button id="openModal">Settings</button>
-            <p class="content" id='textToRead'>
+            <a class='fancyLink' id="openModal">Settings</a>
+            <p class="content no-select no-copy" id='textToRead'>
                 <br>
                 {chapter_text.replace('\n', '<br><br>')}
             </p>
         </div>
         <br>
-        <button><a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}">Previous Chapter</a></button>
+        <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}" class='fancyLink'>Previous Chapter</a>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-        <button><a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)+1}">Next Chapter</a></button>
+        <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)+1}" class='fancyLink'>Next Chapter</a>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-        <button><a href="/">Home</a></button>
+        <a href="/" class='fancyLink'>Home</a>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-        <button><a href="/novels/{novel_title_encoded}-chapters">Chapters</a></button>
+        <a href="/novels/{novel_title_encoded}-chapters" class='fancyLink'>Chapters</a>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-        <button id="openModal2">Settings</button>
+        <a id="openModal2" class='fancyLink'>Settings</a>
     </div>
 
     <!-- Settings Modal -->
@@ -212,6 +212,7 @@ def main(url, chapter_number, novel_title):
             </div>
             <!-- TTS Controls -->
             <div class="tts-controls">
+                <h2>Text To Speech</h2>
                 <select id="voiceSelect"></select>
                 <button id="playTTS">Play</button>
                 <button id="pauseTTS">Pause</button>

@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import re
+import threading
 
 def get_latest_chapter_number(base_url):
     headers = {
@@ -146,7 +147,7 @@ def main(url, chapter_number, novel_title):
             <button><a href="/novels/{novel_title_encoded}-chapters">Chapters</a></button>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
             <button id="openModal">Settings</button>
-            <p class="content" id='textToRead'>
+            <p class="content no-select no-copy" id='textToRead'>
                 <br>
                 {chapter_text.replace('\n', '<br><br>')}
             </p>
@@ -318,18 +319,22 @@ def main(url, chapter_number, novel_title):
         print(f"Request failed: {e}")
 
 def yes(base_url):
-    latest_chapter_number = get_latest_chapter_number(base_url)
-    novel_title = get_novel_title(base_url)
+    def thread_target():
+        latest_chapter_number = get_latest_chapter_number(base_url)
+        novel_title = get_novel_title(base_url)
 
-    if latest_chapter_number is None:
-        print("Failed to get the latest chapter number.")
-        return
+        if latest_chapter_number is None:
+            print("Failed to get the latest chapter number.")
+            return
 
-    print(f"Latest chapter number: {latest_chapter_number}")
+        print(f"Latest chapter number: {latest_chapter_number}")
 
-    for i in range(1, int(latest_chapter_number) + 1):
-        main(url=f"{base_url}/chapter-{i}", chapter_number=i, novel_title=novel_title)
+        for i in range(1, int(latest_chapter_number) + 1):
+            main(url=f"{base_url}/chapter-{i}", chapter_number=i, novel_title=novel_title)
 
+    thread = threading.Thread(target=thread_target)
+    thread.start()
+    
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -443,7 +448,7 @@ def yes(base_url):
                 Complete
             </span>
             <p class="dialogue">
-                All of the chapters are at '/chapter-{latest_chapter_number}'
+                All of the chapters are at '/chapter-{{latest_chapter_number}}'
             </p>
         </div>
     </div>

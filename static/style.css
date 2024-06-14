@@ -24,6 +24,16 @@ body {
     max-width: 120vh; /* Increased width */
     box-shadow: 0 0 15px #bb86fc7e; /* Subtle glow effect   255, 255, 255, 0.2*/
     margin: 0 auto; /* Center the container */
+    animation: pulse-shadow 15s infinite;
+}
+
+@keyframes pulse-shadow {
+    0%, 100% {
+        box-shadow: 0 0 20px #bb86fc7e;
+    }
+    50% {
+        box-shadow: 0 0 40px #bb86fc7e;
+    }
 }
 
 /* Content paragraph */
@@ -109,6 +119,33 @@ button:active {
 }
 
 
+.fancyLink {
+    display: inline-block; /* Makes the link behave like an inline block */
+    padding: 15px 10px; /* Slightly smaller padding for smaller boxes */
+    color: #563d75; /* Link color */
+    text-decoration: none;
+    text-align: center;
+    font-size: 16px; /* Slightly smaller font size */
+    background-color: #121212; /* Light background color for the link box */
+    border: 2px solid #000000; /* Light border around the link box */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transition: all 0.3s ease; /* Smooth transition for all properties */
+    text-shadow: 0 0 10px rgba(42, 20, 102, 0.568); /* Subtle glow effect */
+    margin: 0 10px; /* Add spacing between links */
+    min-width: 100px;
+    cursor: pointer;
+}
+
+/* Hover effects */
+.fancyLink:hover {
+    color: #BB86FC; /* Link hover color */
+    background-color: #000000; /* Dark background color on hover */
+    border-color: #BB86FC; /* Border color on hover */
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15); /* Larger shadow on hover */
+    transform: translateY(-3px); /* Slight lift on hover */
+}
+
 
 
 /* Modal styles */
@@ -184,4 +221,20 @@ body.dark-mode {
 .modal-content.dark-mode {
     background-color: #333;
     color: #E0E0E0;
+}
+
+
+
+/* Disable text selection */
+.no-select {
+    user-select: none; /* Standard CSS property */
+    -webkit-user-select: none; /* Chrome, Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    cursor: default; /* Changes the cursor to default to indicate non-selectable text */
+}
+
+/* Disable copying */
+.no-copy {
+    pointer-events: none; /* Disables mouse events */
 }

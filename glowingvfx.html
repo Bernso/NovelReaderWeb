@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulsing Glowing Shadow</title>
+    <style>
+        /* Basic styles for the body */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Styling the box with a glowing shadow */
+        .glowing-box {
+            width: 200px;
+            height: 200px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+            animation: pulse-shadow 2s infinite;
+        }
+
+        /* Keyframes for the pulsing shadow effect */
+        @keyframes pulse-shadow {
+            0%, 100% {
+                box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 60px rgba(0, 255, 255, 0.8);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="glowing-box"></div>
+</body>
+</html>

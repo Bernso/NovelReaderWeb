@@ -112,6 +112,39 @@ body {
 }
 
 
+
+.fancyLink {
+    display: inline-block; /* Makes the link behave like an inline block */
+    padding: 15px 10px; /* Slightly smaller padding for smaller boxes */
+    color: #563d75; /* Link color */
+    text-decoration: none;
+    text-align: center;
+    font-size: 19px; /* Slightly smaller font size */
+    background-color: #000000a6; /* Light background color for the link box */
+    border: 2px solid #232331; /* Light border around the link box */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transition: all 0.3s ease; /* Smooth transition for all properties */
+    text-shadow: 0 0 10px rgba(42, 20, 102, 0.568); /* Subtle glow effect */
+    margin: 0 10px; /* Add spacing between links */
+    min-width: 200px;
+    cursor: pointer;
+    transform: translateX(-10px);
+}
+
+/* Hover effects */
+.fancyLink:hover {
+    color: #BB86FC; /* Link hover color */
+    background-color: #000000; /* Dark background color on hover */
+    border-color: #BB86FC; /* Border color on hover */
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15); /* Larger shadow on hover */
+    transform: translateY(-3px); /* Slight lift on hover */
+}
+
+
+
+
+
 /* Scrollbar styles */
 ::-webkit-scrollbar {
     width: 10px; /* Width of the scrollbar */
@@ -247,4 +280,19 @@ body.dark-mode {
 .modal-content.dark-mode {
     background-color: #333;
     color: #E0E0E0;
+}
+
+
+/* Disable text selection */
+.no-select {
+    user-select: none; /* Standard CSS property */
+    -webkit-user-select: none; /* Chrome, Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    cursor: default; /* Changes the cursor to default to indicate non-selectable text */
+}
+
+/* Disable copying */
+.no-copy {
+    pointer-events: none; /* Disables mouse events */
 }

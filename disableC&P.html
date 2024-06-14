@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unselectable Text Example</title>
+    <style>
+        /* Disable text selection */
+        .no-select {
+            user-select: none; /* Standard CSS property */
+            -webkit-user-select: none; /* Chrome, Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+            cursor: default; /* Changes the cursor to default to indicate non-selectable text */
+        }
+
+        /* Disable copying */
+        .no-copy {
+            pointer-events: none; /* Disables mouse events */
+        }
+    </style>
+</head>
+<body>
+    <div class="no-select no-copy">
+        This text cannot be selected, copied, or pasted.
+    </div>
+</body>
+</html>
