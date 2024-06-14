@@ -135,6 +135,7 @@ button:active {
     margin: 0 10px; /* Add spacing between links */
     min-width: 100px;
     cursor: pointer;
+    font-weight: bold;
 }
 
 /* Hover effects */
