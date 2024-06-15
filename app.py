@@ -100,7 +100,14 @@ def show_chapter(novelTitle, chapter_number):
 
 @app.route('/plans')
 def show_plans():
-     return render_template('plans.html')
+    return render_template('plans.html')
+
+
+
+
+@app.route('/currentChapter')
+def currentChapter():
+    return render_template('currentChapter.html')
 
 
 
