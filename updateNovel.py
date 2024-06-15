@@ -180,7 +180,7 @@ def main(url, chapter_number, novel_title):
                 <a href="/novels/{novel_title_encoded}-chapters" class='fancyLink'>Chapters</a>   
             </ul>
             <br>
-            <a id="openModal2" class='fancyLink'>Settings</a>
+            <a id="openModal" class='fancyLink'>Settings</a>
             <p class="content no-select no-copy" id='textToRead'>
                 <br>
                 {chapter_text.replace('\n', '<br><br>')}
