@@ -173,16 +173,6 @@ button:active {
     background: #bb86fc; /* Color of the scrollbar handle on hover */
 }
 
-/* Dark mode styles */
-body.dark-mode {
-    background-color: #121212;
-    color: #E0E0E0;
-}
-
-.modal-content.dark-mode {
-    background-color: #333;
-    color: #E0E0E0;
-}
 
 /* Disable text selection */
 .no-select {

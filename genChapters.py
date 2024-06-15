@@ -170,10 +170,7 @@ def main(url, chapter_number, novel_title):
             <h2>Settings</h2><br>
             <input type="range" min="10" max="72" value="16" class="slider" id="fontSizeSlider" style='min-width: 300px;'>
             <div class="value-display">Current Font Size: <span id="fontSizeValue">16</span>px</div>
-            <div class="theme-selector">
-                <span class="theme-label">Dark Mode:</span>
-                <input type="checkbox" id="themeToggle" class="theme-toggle">
-            </div>
+    
             <!-- TTS Controls -->
             <div class="tts-controls">
                 <h2>Text To Speech</h2>
