@@ -1,7 +1,9 @@
+/* Basic reset */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    text-decoration: none;
 }
 
 /* Body styles */
@@ -22,7 +24,7 @@ body {
     border-radius: 10px;
     padding: 20px;
     max-width: 120vh; /* Increased width */
-    box-shadow: 0 0 15px #bb86fc7e; /* Subtle glow effect   255, 255, 255, 0.2*/
+    box-shadow: 0 0 15px #bb86fc7e; /* Subtle glow effect */
     margin: 0 auto; /* Center the container */
     animation: pulse-shadow 15s infinite;
 }
@@ -42,104 +44,45 @@ body {
     line-height: 1.6; /* Improved readability */
 }
 
-/* Speaker names */
 .content .speaker {
     display: block;
     font-weight: bold;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
     color: #BB86FC; /* Highlight color for speaker names */
     font-size: 60px;
 }
 
-/* Dialogue text */
-.content .dialogue {
-    margin-left: 20px; /* Indent dialogue for clarity */
-    margin-bottom: 10px; /* Space between dialogues */
+/* Link container styles */
+.links, .chapters {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* or 10 for chapters */
+    grid-gap: 20px;
+    margin-top: 20px;
+    list-style-type: none;
+    padding: 0;
 }
 
-/* Adding link styles */
-a {
-    color: #000000; /* Highlight color for links */
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-/* Scrollbar styles */
-::-webkit-scrollbar {
-    width: 10px; /* Width of the scrollbar */
-}
-
-/* Scrollbar Handle */
-::-webkit-scrollbar-thumb {
-    background: #bb86fc8e; /* Color of the scrollbar handle */
-    border-radius: 5px; /* Border radius of the scrollbar handle */
-}
-
-/* Scrollbar Track */
-::-webkit-scrollbar-track {
-    background: #000000; /* Background color of the scrollbar track */
-}
-
-::-webkit-scrollbar-track {
-    display: none;
-}
-
-/* Scrollbar Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-    background: #bb86fcab; /* Color of the scrollbar handle on hover */
-}
-
-::-webkit-scrollbar-thumb:active {
-    background: #bb86fc; /* Color of the scrollbar handle on hover */
-}
-
-/* Button Styles */
-button {
-    background-color: #BB86FC; /* Initial background color */
-    color: #121212; /* Button text color */
-    border: none;
-    padding: 10px 20px; /* Padding for the button */
-    font-size: 1em; /* Font size */
-    border-radius: 5px; /* Rounded corners */
-    cursor: pointer; /* Cursor on hover */
-    transition: background-color 0.3s, transform 0.3s; /* Smooth transition for background and scale */
-    margin-top: 20px; /* Space above the button */
-}
-
-/* Button Hover Effect */
-button:hover {
-    background-color: #BB86FC; /* Background color on hover */
-    transform: scale(1.05); /* Slightly enlarge on hover */
-}
-
-/* Button Active State */
-button:active {
-    background-color: #6200EE; /* Background color on active */
-    transform: scale(0.95); /* Slightly shrink on click */
-}
-
-
-.fancyLink {
-    display: inline-block; /* Makes the link behave like an inline block */
-    padding: 15px 10px; /* Slightly smaller padding for smaller boxes */
+/* Individual link styles */
+.links a, .chapters a, .fancyLink {
+    display: block;
+    padding: 15px 10px;
     color: #563d75; /* Link color */
     text-decoration: none;
-    text-align: center;
-    font-size: 16px; /* Slightly smaller font size */
     background-color: #121212; /* Light background color for the link box */
     border: 2px solid #000000; /* Light border around the link box */
     border-radius: 8px; /* Rounded corners */
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
     transition: all 0.3s ease; /* Smooth transition for all properties */
     text-shadow: 0 0 10px rgba(42, 20, 102, 0.568); /* Subtle glow effect */
-    margin: 0 10px; /* Add spacing between links */
-    min-width: 100px;
-    cursor: pointer;
     font-weight: bold;
+    cursor: pointer;
+    transform: translateX(-10px); /* For .fancyLink */
+    margin: 0 10px; /* Add spacing between links */
+    min-width: 100px; /* or 200px for .fancyLink */
 }
 
 /* Hover effects */
-.fancyLink:hover {
+.links a:hover, .chapters a:hover, .fancyLink:hover {
     color: #BB86FC; /* Link hover color */
     background-color: #000000; /* Dark background color on hover */
     border-color: #BB86FC; /* Border color on hover */
@@ -147,9 +90,29 @@ button:active {
     transform: translateY(-3px); /* Slight lift on hover */
 }
 
+/* Additional Styles */
+button {
+    background-color: #BB86FC; /* Initial background color */
+    color: #121212; /* Button text color */
+    border: none;
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Cursor on hover */
+    transition: background-color 0.3s, transform 0.3s;
+    margin-top: 20px;
+}
 
+button:hover {
+    background-color: #BB86FC; /* Background color on hover */
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
 
-/* Modal styles */
+button:active {
+    background-color: #6200EE; /* Background color on active */
+    transform: scale(0.95); /* Slightly shrink on click */
+}
+
 .modal {
     display: none; /* Hidden by default */
     position: fixed;
@@ -188,29 +151,26 @@ button:active {
     cursor: pointer;
 }
 
-.slider {
-    margin-top: 20px;
-    width: 100%;
+/* Scrollbar styles */
+::-webkit-scrollbar {
+    width: 10px; /* Width of the scrollbar */
 }
 
-.value-display {
-    margin-top: 10px;
+::-webkit-scrollbar-thumb {
+    background: #bb86fc8e; /* Color of the scrollbar handle */
+    border-radius: 5px;
 }
 
-.theme-selector {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+::-webkit-scrollbar-track {
+    background: #000000; /* Background color of the scrollbar track */
 }
 
-.theme-label {
-    margin-right: 10px;
-    font-size: 16px;
+::-webkit-scrollbar-thumb:hover {
+    background: #bb86fcab; /* Color of the scrollbar handle on hover */
 }
 
-.theme-toggle {
-    cursor: pointer;
+::-webkit-scrollbar-thumb:active {
+    background: #bb86fc; /* Color of the scrollbar handle on hover */
 }
 
 /* Dark mode styles */
@@ -224,18 +184,13 @@ body.dark-mode {
     color: #E0E0E0;
 }
 
-
-
 /* Disable text selection */
 .no-select {
-    user-select: none; /* Standard CSS property */
-    -webkit-user-select: none; /* Chrome, Safari */
-    -moz-user-select: none; /* Firefox */
-    -ms-user-select: none; /* Internet Explorer/Edge */
-    cursor: default; /* Changes the cursor to default to indicate non-selectable text */
+    user-select: none;
+    cursor: default;
 }
 
 /* Disable copying */
 .no-copy {
-    pointer-events: none; /* Disables mouse events */
+    pointer-events: none;
 }

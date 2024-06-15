@@ -4,18 +4,56 @@ try:
     import genChapters
     import re
     import updateNovel
+    import requests
+    import json
+    from dotenv import load_dotenv
 except ImportError as e:
     input(f"Module not found: {e}")
 
+
+
+
+def send_discord_message(message):
+    load_dotenv()
+    webhook_url = os.getenv("WEBHOOK_URL")
+    data = {
+        "content": message,
+        "username": "WebhookBot"
+    }
+
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(webhook_url, data=json.dumps(data), headers=headers)
+
+    if response.status_code == 204:
+        print("Message sent successfully!")
+    else:
+        print(f"Failed to send message. Response status code: {response.status_code}")
+        print(f"Response body: {response.text}")
+
+
+
+
 app = Flask(__name__)
+
+
+
 
 @app.route('/')
 def home():
     return render_template('home.html')
 
+
+
+
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('404.html'), 404
+
+
+
 
 @app.route('/run_script', methods=['POST'])
 def run_script():
@@ -25,6 +63,9 @@ def run_script():
         return jsonify({"result": result})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+
 
 @app.route('/novels/<novelTitle>/chapters/<int:chapter_number>')
 def show_chapter(novelTitle, chapter_number):   
@@ -50,12 +91,17 @@ def show_chapter(novelTitle, chapter_number):
     except FileNotFoundError:
         return render_template('chapterNotFound.html'), 404
     except Exception as e:
-        return render_template('error.html', error_message=str(e)), 500
+        error_message=str(e)
+        send_discord_message(error_message)
+        return render_template('error.html'), 500
     
+
+
 
 @app.route('/plans')
 def show_plans():
      return render_template('plans.html')
+
 
 
 
@@ -78,7 +124,12 @@ def show_novel_chapters(novel_title):
 
         return render_template('novelsChapters.html', novel_title2=novel_title2, chapters=chapter_numbers, novel_title1=novel_title)
     except Exception as e:
-        return render_template('error.html', error_message=str(e)), 500
+        error_message=str(e)
+        send_discord_message(error_message)
+        return render_template('error.html'), 500
+
+
+
 
 @app.route('/novels')
 def list_novels():
@@ -99,7 +150,11 @@ def list_novels():
         
         return render_template('novels.html', novels=novels_with_modified)
     except Exception as e:
-        return render_template('error.html', error_message=str(e)), 500
+        error_message=str(e)
+        send_discord_message(error_message)
+        return render_template('error.html'), 500
+
+
 
 
 @app.route('/update_novel/<novel_title>', methods=['POST'])

@@ -173,38 +173,37 @@ def main(url, chapter_number, novel_title):
             <span class="speaker" style="font-size: 40px;">
                 {novel_title_clean} - Chapter {chapter_number}
             </span>
-            <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}" class='fancyLink'>Previous Chapter</a>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-            <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)+1}" class='fancyLink'>Next Chapter</a>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-            <a href="/" class='fancyLink'>Home</a>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-            <a href="/novels/{novel_title_encoded}-chapters" class='fancyLink'>Chapters</a>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-            <a class='fancyLink' id="openModal">Settings</a>
+            <ul class='chapters'>
+                <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}">Previous Chapter</a>
+                <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)+1}">Next Chapter</a>
+                <a href="/" class='fancyLink'>Home</a>
+                <a href="/novels/{novel_title_encoded}-chapters" class='fancyLink'>Chapters</a>   
+            </ul>
+            <br>
+            <a id="openModal2" class='fancyLink'>Settings</a>
             <p class="content no-select no-copy" id='textToRead'>
                 <br>
                 {chapter_text.replace('\n', '<br><br>')}
             </p>
-        </div>
+        
         <br>
-        <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}" class='fancyLink'>Previous Chapter</a>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-        <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)+1}" class='fancyLink'>Next Chapter</a>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-        <a href="/" class='fancyLink'>Home</a>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-        <a href="/novels/{novel_title_encoded}-chapters" class='fancyLink'>Chapters</a>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+        <ul class='chapters'>
+            <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}">Previous Chapter</a>
+            <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)+1}">Next Chapter</a>
+            <a href="/" class='fancyLink'>Home</a>
+            <a href="/novels/{novel_title_encoded}-chapters" class='fancyLink'>Chapters</a>   
+        </ul>
+        <br>
         <a id="openModal2" class='fancyLink'>Settings</a>
+        </div>
     </div>
 
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal">
         <div class="modal-content" id="modalContent">
             <span class="close" id="closeModal">&times;</span>
-            <h2>Settings</h2>
-            <input type="range" min="10" max="72" value="16" class="slider" id="fontSizeSlider">
+            <h2>Settings</h2><br>
+            <input type="range" min="10" max="72" value="16" class="slider" id="fontSizeSlider" style='min-width: 300px;'>
             <div class="value-display">Current Font Size: <span id="fontSizeValue">16</span>px</div>
             <div class="theme-selector">
                 <span class="theme-label">Dark Mode:</span>

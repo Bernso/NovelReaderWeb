@@ -7,13 +7,14 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
     <link rel="icon" type="image/png" href="/./static/MAINICON-20240501-rounded.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='chaptersPageStyle.css') }}">
-    <link rel="stylesheet" href="/./static/chaptersPageStyle.css">
+    <link rel="stylesheet" href="/./static/style.css">
 </head>
 <body>
     <div class='chapter'>
         <div class="content">
             <h1 class='speaker'>{{ novel_title2 }}</h1>
-            <a onclick="updateNovel('{{ novel_title1 }}', '{{ novel_title2 }}')" class='fancyLink'>Update Novel</a>
+            <a onclick="updateNovel('{{ novel_title1 }}', '{{ novel_title2 }}')" class='fancyLink'>Update Novel</a><br>
+            <a class='fancyLink' href='/'>Home</a>
             <ul class='chapters'>
                 {% for chapter in chapters %}
                     <li><a href="/novels/{{ novel_title1 }}/chapters/{{ chapter }}">Chapter {{ chapter }}</a></li>
