@@ -5,27 +5,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
-    <link rel="icon" type="image/png" href="/./static/MAINICON-20240501-rounded.png">
-    <link rel="stylesheet" href="/./static/style.css">
-    <title>Nuh Uh</title>
-    
+    <title>Why Here?</title>
 </head>
 <body>
-    <div class="chapter">
-        <div class="content">
-            <span class="speaker">
-                You shouldn't be here.
-            </span> 
-            <div class='content'>
-            <br>You are not going to find {{ novel_title }} here.
-            </div>
-            <br><a id="homeButton" class='fancyLink'>Home</button>
+    <header class="header">
+        <div class="logo">
+            <h1><a href='/'>Novel Reader</a></h1>
         </div>
-    </div>
+        <nav class="nav">
+            <ul>
+                <li>
+                    <a class="start-reading" id="generateButton" onclick="showPrompt()" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Get Chapters
+                    </a>
+                </li>
+
+                <li>
+                    <a class="start-reading" href="/novels" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Novels
+                    </a>
+                </li>
+
+                <li>
+                    <a class="start-reading" href="/plans" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Plans
+                    </a>
+                </li>
+
+                <li>
+                    <a class="start-reading" href="/currentChapter" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Current Chapter
+                    </a>
+                </li>
+                
+                <li>
+                    &nbsp;&nbsp;
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h2>Welcome to the World of Novels</h2>
+            <p>Seamlessly generate and read your favorite novels with a dark, majestic interface.</p>
+        </section>
+
+        <section class="features">
+            <div class="feature" style='align: center;'>
+                <a href='/'>
+                    <div class="icon">📚</div>
+                    <h3>Why Are You Here?</h3>
+                    <p>Your Not Going To Find {{ novel_title }} Here.</p>
+                </a>
+            </div>
+            
+        </section>
+
+        <section class="community">
+            <h2>Join Our Community</h2>
+            <p>Connect with other readers on our <a href="https://www.discord.gg/k5HBFXqtCB" target="_blank" style='text-decoration: none;'>Discord Server</a>.</p>
+            <p>Created by <a href="https://www.github.com/Bernso" target="_blank" style='text-decoration: none;'>Bernso</a></p>
+        </section>
+    </main>
+
+    
+
+    <script>
+        function showPrompt() {
+            const novelLink = prompt("Enter the link for your novel:", "Link");
+            if (novelLink) {
+                alert("Processing...");
+                fetch('/run_script', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ novelLink: novelLink })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Chapters generated successfully! Latest chapter: ' + data.latest_chapter);
+                    } else {
+                        alert('An error occurred. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                });
+            } else {
+                alert("Prompt cancelled.");
+            }
+        }
+    </script>
 </body>
-<script>
-    document.getElementById('homeButton').addEventListener('click', function() {
-        window.location.href = '/'; // Replace '/home' with your actual home page URL
-    });
-</script>
 </html>

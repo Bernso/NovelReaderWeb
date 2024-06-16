@@ -163,10 +163,10 @@ def list_novels():
             (novel, re.sub(r'\s*\(.*?\)', '', novel[:-9] if len(novel) >= 9 else novel)) 
             for novel in novels
         ]
-        
+        emojis = ["🌙", "📚", "✨", "🌟", "🔥", "🌹", "💫", "📖"]
         print(novels_with_modified)
         
-        return render_template('novels.html', novels=novels_with_modified)
+        return render_template('novels.html', novels=novels_with_modified, emojis=emojis)
     except Exception as e:
         error_message=str(e)
         send_discord_message(error_message)
@@ -196,6 +196,9 @@ def update_novel(novel_title):
 def youShouldntBeHere(novel_title):
     return render_template('notHere.html', novel_title=novel_title)
 
+@app.route('/error_test')
+def error_test():
+    return render_template('error.html')
 
 
 if __name__ == '__main__':

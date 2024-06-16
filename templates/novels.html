@@ -38,15 +38,17 @@
 
         <section class="features">
             {% for original_novel, modified_novel in novels %}
-            <div class="feature">
-                <a href='{{ url_for('show_novel_chapters', novel_title=original_novel) }}'>
-                    <div class="icon">🌙</div>
-                    <h3>{{ modified_novel }}</h3>
-                    <p>This is a very good novel, you should read it.</p>
-                </a>
-            </div>
+                <div class="feature">
+                    <a href='{{ url_for('show_novel_chapters', novel_title=original_novel) }}'>
+                        <div class="icon">{{ emojis[loop.index0 % emojis|length] }}</div>
+                        <h3>{{ modified_novel }}</h3>
+                        <p>This is a very good novel, you should read it.</p>
+                    </a>
+                </div>
             {% endfor %}
         </section>
+        
+        
         
 
        

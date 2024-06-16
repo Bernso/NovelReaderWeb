@@ -5,23 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
-    <link rel="icon" type="image/png" href="/./static/MAINICON-20240501-rounded.png">
-    <link rel="stylesheet" href="/./static/style.css">
-    <title>Home</title>
-    
+    <title>Current Chapter</title>
 </head>
 <body>
-    <div class="chapter">
-        <div class="content">
-            <span class="speaker">TBATE</span>
-            <p class="content">
-                Chapter 430
-            </p>
-            
+    <header class="header">
+        <div class="logo">
+            <h1><a href='/'>Novel Reader</a></h1>
         </div>
-    </div>
-</body>
-<script>
+        <nav class="nav">
+            <ul>
+                <li>
+                    <a class="start-reading" id="generateButton" onclick="showPrompt()" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Get Chapters
+                    </a>
+                </li>
 
-</script>
+                <li>
+                    <a class="start-reading" href="/novels" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Novels
+                    </a>
+                </li>
+
+                <li>
+                    <a class="start-reading" href="/plans" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Plans
+                    </a>
+                </li>
+
+                <li>
+                    <a class="start-reading" href="/currentChapter" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Current Chapter
+                    </a>
+                </li>
+                
+                <li>
+                    &nbsp;&nbsp;
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h2>Bernso's Current Chapters</h2>
+        </section>
+
+        <section class="features">
+            <div class="feature">
+                <a href='/novels/The%20Beginning%20After%20The%20End%20(Web%20Novel)-chapters'>
+                    <div class="icon">📚</div>
+                    <h3>TBATE</h3>
+                    <p>Chapter 430</p>
+                </a>
+            </div>
+            <div class="feature">
+                <a href='/novels/Lord%20of%20the%20Mysteries%20(Web%20Novel)-chapters' style='cursor: pointer;'>
+                    <div class="icon">⚡</div>
+                    <h3>Lord Of The Mysteries</h3>
+                    <p>Chapter x</p>
+                </a>
+            </div>
+            <div class="feature">
+                <a href='/novels/Shadow%20Slave-chapters'>
+                    <div class="icon">🌙</div>
+                    <h3>Shadow Slave</h3>
+                    <p>Chapter x</p>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    
+
+    <script>
+        function showPrompt() {
+            const novelLink = prompt("Enter the link for your novel:", "Link");
+            if (novelLink) {
+                alert("Processing...");
+                fetch('/run_script', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ novelLink: novelLink })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Chapters generated successfully! Latest chapter: ' + data.latest_chapter);
+                    } else {
+                        alert('An error occurred. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                });
+            } else {
+                alert("Prompt cancelled.");
+            }
+        }
+    </script>
+</body>
 </html>
