@@ -184,7 +184,7 @@ a:hover {
 }
 
 .feature {
-    background-color: #1f1f1f;
+    background: linear-gradient(145deg, #111111, #222222);
     padding: 20px;
     border-radius: 10px;
     text-align: center;
