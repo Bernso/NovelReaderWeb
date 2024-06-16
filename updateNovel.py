@@ -94,7 +94,7 @@ def get_novel_title(base_url):
 
 def main(url, chapter_number, novel_title):
     # Define the file path for the chapter
-    file_path = f'templates/novels/{novel_title}-chapters/chapter-{chapter_number}.txt'
+    file_path = f"templates/novels/{novel_title}-chapters/chapter-{chapter_number}.txt"
 
     # Check if the chapter file already exists
     if os.path.exists(file_path):
@@ -175,4 +175,4 @@ def yes(novel_title):
 
 
 if __name__ == '__main__':
-    yes("A Regressor’s Tale of Cultivation") 
+    yes("Vampire's Slice Of Life") 
