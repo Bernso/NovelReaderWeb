@@ -3,6 +3,15 @@ from bs4 import BeautifulSoup
 import os
 import re
 
+
+
+#################################### NOT USED ANYMORE ####################################
+
+
+
+
+
+
 def get_latest_chapter_number(base_url):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36'
