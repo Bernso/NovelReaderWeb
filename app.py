@@ -67,33 +67,47 @@ def run_script():
 
 
 
+from flask import Flask, render_template
+import os
+
+app = Flask(__name__)
+
 @app.route('/novels/<novelTitle>/chapters/<int:chapter_number>')
 def show_chapter(novelTitle, chapter_number):   
     try:
         subfolder_path = os.path.join(app.root_path, 'templates', 'novels', novelTitle)
         
-        # List/sort chapter files
-        html_files = [file for file in os.listdir(subfolder_path) if file.endswith('.html')]
-        html_files.sort(key=lambda x: int(x.split('-')[1].split('.')[0]))
+        text_files = [file for file in os.listdir(subfolder_path) if file.endswith('.txt')]
+        text_files.sort(key=lambda x: int(x.split('-')[1].split('.')[0]))
 
-        # Validate chapter number
-        if chapter_number < 1 or chapter_number > len(html_files):
+        if chapter_number < 1 or chapter_number > len(text_files):
             return render_template('chapterNotFound.html'), 404
 
-        chapter_file = html_files[chapter_number - 1]
+        chapter_file = text_files[chapter_number - 1]
         chapter_path = os.path.join(subfolder_path, chapter_file)
 
         with open(chapter_path, 'r', encoding='utf-8') as f:
-            rendered_html = f.read()
+            chapter_text = f.read()
 
+        novel_title_clean = re.sub(r'\s*\(.*?\)', '', novelTitle[:-9] if len(novelTitle) >= 9 else novelTitle)
+        
+        
+        
+        novel_title_encoded = novelTitle.replace(' ', '%20')
 
-        return rendered_html
+        return render_template('chapterPage.html',
+                               novel_title_clean=novel_title_clean,
+                               novel_title_encoded=novel_title_encoded,
+                               chapter_number=chapter_number,
+                               chapter_text=chapter_text)
+
     except FileNotFoundError:
         return render_template('chapterNotFound.html'), 404
     except Exception as e:
-        error_message=str(e)
+        error_message = str(e)
         send_discord_message(error_message)
         return render_template('error.html'), 500
+
     
 
 
