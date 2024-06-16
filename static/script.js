@@ -82,3 +82,38 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+
+
+
+
+
+
+
+function showPrompt() {
+    const novelLink = prompt("Enter the link for your novel:", "Link");
+    if (novelLink) {
+        alert("Processing...");
+        fetch('/run_script', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ novelLink: novelLink })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Chapters generated successfully! Latest chapter: ' + data.latest_chapter);
+            } else {
+                alert('An error occurred. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
+    } else {
+        alert("Prompt cancelled.");
+    }
+}

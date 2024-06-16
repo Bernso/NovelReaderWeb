@@ -131,7 +131,7 @@ def show_novel_chapters(novel_title):
     try:
         novel_folder_path = os.path.join(app.root_path, 'templates', 'novels', novel_title)
         
-        chapters = [file for file in os.listdir(novel_folder_path) if file.endswith('.html')]
+        chapters = [file for file in os.listdir(novel_folder_path) if file.endswith('.txt')]
 
         chapter_numbers = [int(file.split('-')[1].split('.')[0]) for file in chapters]
 
