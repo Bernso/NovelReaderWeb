@@ -67,10 +67,7 @@ def run_script():
 
 
 
-from flask import Flask, render_template
-import os
 
-app = Flask(__name__)
 
 @app.route('/novels/<novelTitle>/chapters/<int:chapter_number>')
 def show_chapter(novelTitle, chapter_number):   
