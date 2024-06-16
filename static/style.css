@@ -174,12 +174,20 @@ a:hover {
     grid-gap: 20px;
 }
 
+.features2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 60px 20px;
+    background-color: #121212;
+    animation: fadeIn 1.5s ease-in-out;
+}
+
 .feature {
     background-color: #1f1f1f;
     padding: 20px;
     border-radius: 10px;
     text-align: center;
-    width: 30%;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     transition: transform 0.3s, box-shadow 0.3s;
 }
@@ -204,6 +212,9 @@ a:hover {
 .feature p {
     color: #cccccc;
 }
+
+
+
 
 /* Community Section */
 .community {
@@ -530,4 +541,108 @@ footer {
     font-size: 1.2em;
     margin-bottom: 40px;
     color: #dddddd;
+}
+
+
+
+
+
+
+/* Settings Menu */
+.settings-menu {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #1a1a1a;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 1000px rgb(0, 0, 0);
+    z-index: 1000;
+    width: 750px;
+    max-width: 80%;
+    backdrop-filter: blur(5px); /* Apply backdrop blur */
+}
+
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.settings-header h3 {
+    color: #bb86fc;
+    margin: 0;
+}
+
+.settings-header h1 {
+    color: #bb86fc;
+    margin: 0;
+}
+
+.settings-header button {
+    background: none;
+    border: none;
+    color: #bb86fc;
+    font-size: 1.3em;
+    cursor: pointer;
+}
+
+.settings-content {
+    margin-top: 20px;
+}
+
+.settings-content h4 {
+    color: #bb86fc;
+    margin: 10px 0;
+}
+
+.settings-content p {
+    color: #bb86fc;
+}
+
+#text-size-slider {
+    width: 100%;
+}
+
+#font-selector, #voice-selector {
+    width: 100%;
+    padding: 5px;
+    margin-top: 10px;
+    background-color: #2c2c2c;
+    color: #bb86fc;
+    border: 1px solid #bb86fc;
+    border-radius: 5px;
+}
+
+#start-speech, #pause-speech, #stop-speech {
+    width: 32%;
+    padding: 10px;
+    background-color: #2c2c2c;
+    color: #bb86fc;
+    border: 1px solid #bb86fc;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px 1%;
+}
+
+#start-speech:hover, #pause-speech:hover, #stop-speech:hover {
+    background-color: #bb86fc;
+    color: #2c2c2c;
+}
+
+
+
+/* Blur background effect */
+body.settings-open::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    z-index: 999; /* Ensure this overlay is below the settings menu */
 }

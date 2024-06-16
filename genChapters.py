@@ -108,27 +108,19 @@ def main(url, chapter_number, novel_title):
     <link rel="stylesheet" href="{{{{ url_for('static', filename='style.css') }}}}">
     <link rel="stylesheet" href="/static/style.css">
     <style>
-        .tts-controls {{
-            margin-top: 20px;
-            text-align: center;
+        /* Corrected .features section */
+        .features {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            justify-content: center;
+            padding: 60px 20px;
+            background-color: #121212;
+            animation: fadeIn 1.5s ease-in-out;
         }}
 
-        .tts-controls button {{
-            margin: 0 5px;
-        }}
-
-        .value-display {{
-            margin-top: 10px;
-            font-size: 16px;
-        }}
-        
-        .tts-controls select {{
-            padding: 10px;
-            margin: 5px;
-            border-radius: 5px;
+        #settingsButton #settingsButton2 {{
             cursor: pointer;
-            border: 1px solid #ccc;
-            margin-bottom: 10px;
         }}
     </style>
 </head>
@@ -163,19 +155,21 @@ def main(url, chapter_number, novel_title):
                     </a>
                 </li>
                 
+                
+                
                 <li>
                     &nbsp;&nbsp;
                 </li>
             </ul>
         </nav>
     </header>
-    
     <main>
         <section class="hero">
             <h2>{novel_title_clean}</h2>
             <p>Chapter {chapter_number}</p>
         </section>
-        <section class="features">
+        
+        <section class="features2">
             <div class="feature">
                 <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}">
                     <div class="icon">📚</div>
@@ -189,6 +183,14 @@ def main(url, chapter_number, novel_title):
                     <div class="icon">⚡</div>
                     <h3>Home</h3>
                     <p>Generate chapters quickly and efficiently.</p>
+                </a>
+            </div>
+            
+            <div class="feature">
+                <a id="settingsButton">
+                    <div class="icon">⚙️</div>
+                    <h3>Settings</h3>
+                    <p>Text-To-Speech, Font Customization, and Font Size Control</p>
                 </a>
             </div>
             
@@ -201,17 +203,12 @@ def main(url, chapter_number, novel_title):
             </div>
         </section>
 
-        
-        
-        
         <section class="hero2">
             <p class="no-select no-copy" id='textToRead'>
                 {chapter_text.replace('\n', '<br><br>')}
             </p>
         </section>
-        
-        
-        <section class="features">
+        <section class="features2">
             <div class="feature">
                 <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}">
                     <div class="icon">📚</div>
@@ -229,6 +226,14 @@ def main(url, chapter_number, novel_title):
             </div>
             
             <div class="feature">
+                <a id="settingsButton2">
+                    <div class="icon">⚙️</div>
+                    <h3>Settings</h3>
+                    <p>Text-To-Speech, Font Customization, and Font Size Control</p>
+                </a>
+            </div>
+            
+            <div class="feature">
                 <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)+1}">
                     <div class="icon">🌙</div>
                     <h3>Next Chapter</h3>
@@ -236,7 +241,6 @@ def main(url, chapter_number, novel_title):
                 </a>
             </div>
         </section>
-            
         
         <section class="community">
             <h2>Join Our Community</h2>
@@ -244,30 +248,40 @@ def main(url, chapter_number, novel_title):
             <p>Created by <a href="https://www.github.com/Bernso" target="_blank" style='text-decoration: none;'>Bernso</a></p>
         </section>
     </main>
-    
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="modal">
-        <div class="modal-content" id="modalContent">
-            <span class="close" id="closeModal">&times;</span>
-            <h2>Settings</h2><br>
-            <input type="range" min="10" max="72" value="16" class="slider" id="fontSizeSlider" style='min-width: 300px;'>
-            <div class="value-display">Current Font Size: <span id="fontSizeValue">16</span>px</div>
-    
-            <!-- TTS Controls -->
-            <div class="tts-controls">
-                <h2>Text To Speech</h2>
-                <select id="voiceSelect"></select>
-                <button id="playTTS">Play</button>
-                <button id="pauseTTS">Pause</button>
-                <button id="stopTTS">Stop</button>
-            </div>
+    <section id="settings-menu" class="settings-menu">
+        <div class="settings-header">
+            <h1>Settings</h1>
+            <button id="close-settings">✖</button>
         </div>
-    </div>
-
+        <div class="settings-content">
+            <h4><br>Text Size</h4>
+            <input type="range" id="text-size-slider" min="10" max="30" value="16" style="background-color: #333; width: 100%; height: 10px; cursor: pointer; border-radius: 5px;">
+            <p>Current Size: <span id="current-size">16</span>px</p>
+            
+            <p>&nbsp;</p>
+            
+            <h4>Font</h4>
+            <select id="font-selector">
+                <option value="sans-serif">Sans-Serif</option>
+                <option value="serif">Serif</option>
+                <option value="monospace">Monospace</option>
+            </select>
+            
+            <p>&nbsp;</p>
+            
+            <h4><br>Text to Speech</h4>
+            <select id="voice-selector"></select>
+            <button id="start-speech">Start</button>
+            <button id="pause-speech">Pause</button>
+            <button id="stop-speech">Stop</button>
+        </div>
+    </section>
+    <footer>
+        <p>Hi</p>
+    </footer>
+    
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
     <script src="/./static/script.js"></script>
-    <script>
-        console.log('Script loaded successfully.');
-    </script>
 
 </body>
 </html>
