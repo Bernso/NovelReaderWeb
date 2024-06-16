@@ -6,7 +6,6 @@ const closeModalButton = document.getElementById('closeModal');
 const slider = document.getElementById('fontSizeSlider');
 const textContent = document.querySelector('.content');
 const fontSizeValue = document.getElementById('fontSizeValue');
-const themeToggle = document.getElementById('themeToggle');
 const modalContent = document.getElementById('modalContent');
 const voiceSelect = document.getElementById('voiceSelect');
 

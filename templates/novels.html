@@ -4,32 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
-    <link rel="icon" type="image/png" href="/./static/MAINICON-20240501-rounded.png">
-    <link rel="stylesheet" href="{{ url_for('static', filename='chaptersPageStyle.css') }}">
-    <link rel="stylesheet" href="/./static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>Novels</title>
 </head>
 <body>
-    <div class="chapter">
-        <div class="content">
-            <span class='speaker' style="font-size: 60px;">Novels</span>
-            <a href="/" class='fancyLink'>Home</a>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
-            <ul class="links">
-                {% for original_novel, modified_novel in novels %}
-                    <li><a href="{{ url_for('show_novel_chapters', novel_title=original_novel) }}">{{ modified_novel }}</a></li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-</body>
-
-<script>
     
-</script>
+    <header class="header">
+        <div class="logo">
+            <h1><a href='/'>Novel Reader</a></h1>
+        </div>
+        <nav class="nav">
+            <ul>
+                <li><a class="start-reading" id="generateButton" onclick="showPrompt()" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>Get Chapters</a></li>
+
+                <li><a class="start-reading" href="/novels" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>Novels</a></li>
+
+                <li><a class="start-reading" href="/plans" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>Plans</a></li>
+
+                <li><a class="start-reading" href="/currentChapter" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>Current Chapter</a></li>
+                
+                <li>&nbsp;&nbsp;</li>
+            </ul>
+        </nav>
+    </header>
+
+
+    <main>
+        <section class="hero">
+            <h2>Novels</h2>
+            <p>Read all of your favourite novels in a dark, majestic interface.</p>
+        </section>
+
+        <section class="features">
+            {% for original_novel, modified_novel in novels %}
+            <div class="feature">
+                <a href='{{ url_for('show_novel_chapters', novel_title=original_novel) }}'>
+                    <div class="icon">🌙</div>
+                    <h3>{{ modified_novel }}</h3>
+                    <p>This is a very good novel, you should read it.</p>
+                </a>
+            </div>
+            {% endfor %}
+        </section>
+        
+
+       
+
+        <section class="community">
+            <h2>Join Our Community</h2>
+            <p>Connect with other readers on our <a href="https://www.discord.gg/k5HBFXqtCB" target="_blank" style='text-decoration: none;'>Discord Server</a></p>
+            <p>Created by <a href="https://www.github.com/Bernso" target="_blank" style='text-decoration: none;'>Bernso</a></p>
+        </section>
+    </main>
+</body>
 </html>
-
-
-
-

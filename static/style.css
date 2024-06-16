@@ -1,190 +1,533 @@
-/* Basic reset */
+/* Reset */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    text-decoration: none;
+    font-family: sans-serif;
 }
 
-/* Body styles */
+/* Body */
 body {
-    background-color: #121212; /* Dark background */
-    color: #E0E0E0; /* Light text */
-    font-family: 'Arial', sans-serif;
+    background-color: #0d0d0d;
+    color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+a {
+    text-decoration: none;
+    color: #BB86FC;
+    display: inline-block; 
+    margin-bottom: 10px;
+}
+
+a:hover {
+    
+    color: #BB86FC; 
+}
+
+
+.start-reading {
+    padding: 20px;
+    background-color: #1a1a1a;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    justify-content: space-between;
+    align-items: center;
+    border: 2px solid #BB86FC; /* Border around the box */
+    border-radius: 5px; /* Rounded corners for the box */
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.start-reading:hover {
+    background-color: #1a1a1a63;
+    border-color: #8725ff; /* Change border color on hover */
+    color: #8725ff;
+}
+
+
+/* Animations */
+@keyframes slideDown {
+    from { top: -100px; }
+    to { top: 0; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { bottom: -100px; }
+    to { bottom: 0; }
+}
+
+@keyframes fadeInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Header */
+.header {
+    width: 100%;
+    padding: 20px 0;
+    background-color: #1a1a1a;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    z-index: 10;
+    animation: slideDown 0.5s ease-in-out;
+    max-height: 100px;
+}
+
+.logo h1 {
+    font-size: 1.5em;
+    color: #bb86fc;
+    padding: 0 20px;
+}
+
+.nav ul {
+    display: flex;
+    gap: 20px;
+}
+
+.nav-link {
+    display: inline-block;
+    margin: 0 10px;
+    padding: 10px 20px;
+    background-color: transparent;
+    color: #e0e0e0;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.nav-link:hover {
+    background-color: #282828;
+    color: #e0e0e0;
+}
+
+
+/* Hero Section */
+.hero {
+    width: 100%;
+    /*max-width: 1200px;*/
+    text-align: center;
+    padding: 100px 20px 60px;
+    background: linear-gradient(145deg, #111111, #222222);
+    margin-top: 60px;
+    animation: fadeIn 1s ease-in-out;
+}
+
+.hero h2 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #bb86fc;
+    text-shadow: 0 0 10px rgba(187, 134, 252, 0.5);
+}
+
+.hero p {
+    font-size: 1.2em;
+    margin-bottom: 40px;
+    color: #dddddd;
+}
+
+.cta-button {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    color: #0d0d0d;
+    background-color: #bb86fc;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.cta-button:hover {
+    background-color: #aa76eb;
+    transform: translateY(-5px);
+}
+
+/* Features Section */
+.features {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 60px 20px;
+    background-color: #121212;
+    animation: fadeIn 1.5s ease-in-out;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* or 10 for chapters */
+    grid-gap: 20px;
+}
+
+.feature {
+    background-color: #1f1f1f;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 30%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.feature:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+}
+
+.icon {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    color: #bb86fc;
+}
+
+.feature h3 {
+    margin-bottom: 10px;
+    color: #bb86fc;
+    text-shadow: 0 0 5px rgba(187, 134, 252, 0.3);
+}
+
+.feature p {
+    color: #cccccc;
+}
+
+/* Community Section */
+.community {
+    padding: 60px 20px;
+    background: linear-gradient(145deg, #111111, #222222);
+    text-align: center;
+    animation: fadeIn 2s ease-in-out;
+}
+
+.community h2 {
+    font-size: 2em;
+    margin-bottom: 20px;
+    color: #bb86fc;
+    text-shadow: 0 0 10px rgba(187, 134, 252, 0.5);
+}
+
+.community p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    color: #dddddd;
+}
+
+.community a {
+    color: #bb86fc;
+    text-decoration: underline;
+    transition: color 0.3s;
+}
+
+.community a:hover {
+    color: #aa76eb;
+}
+
+/* Footer */
+footer {
+    width: 100%;
+    padding: 20px 0;
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    text-align: center;
+    position: relative;
+    bottom: 0;
+    animation: slideUp 0.5s ease-in-out;
+}
+
+/* Container */
+.chapter, .container {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 20px;
+    padding: 2rem;
 }
 
-/* Chapter container */
-.chapter {
-    background-color: #1E1E1E; /* Slightly lighter background for contrast */
+/* Content */
+.content, .content-wrapper {
+    background-color: #0f3460;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 2rem;
+    max-width: 800px;
+    width: 100%;
+    text-align: center;
+    animation: fadeInUp 0.5s ease-in-out;
+}
+
+.main-content {
+    font-size: 1.1rem;
+    color: #e0e0e0;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+/* Typography */
+.header .title {
+    font-size: 2.5rem;
+    color: #BB86FC;
+    margin-bottom: 1.5rem;
+}
+
+.speaker {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #BB86FC;
+    margin-bottom: 1rem;
+}
+
+/* Links */
+.nav-link {
+    display: inline-block;
+    margin: 1rem 0;
+    padding: 0.6rem 1.2rem;
+    background: #1f4068;
+    color: #BB86FC;
     border-radius: 10px;
-    padding: 20px;
-    max-width: 120vh; /* Increased width */
-    box-shadow: 0 0 15px #bb86fc7e; /* Subtle glow effect */
-    margin: 0 auto; /* Center the container */
-    animation: pulse-shadow 15s infinite;
+    border: 1px solid #BB86FC;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
-@keyframes pulse-shadow {
-    0%, 100% {
-        box-shadow: 0 0 20px #bb86fc7e;
-    }
-    50% {
-        box-shadow: 0 0 40px #bb86fc7e;
-    }
+.nav-link:hover {
+    background: #BB86FC;
+    color: #1f4068;
 }
 
-/* Content paragraph */
-.content {
-    font-size: 1.2em;
-    line-height: 1.6; /* Improved readability */
+.fancyLink {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: #0f3460;
+    color: #BB86FC;
+    border: 1px solid #BB86FC;
+    border-radius: 8px;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-.content .speaker {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #BB86FC; /* Highlight color for speaker names */
-    font-size: 60px;
+.fancyLink:hover {
+    background: #BB86FC;
+    color: #0f3460;
+    border-color: #ff4081;
 }
 
-/* Link container styles */
-.links, .chapters {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* or 10 for chapters */
-    grid-gap: 20px;
-    margin-top: 20px;
-    list-style-type: none;
+/* Lists */
+ul {
+    list-style: none;
     padding: 0;
 }
 
-/* Individual link styles */
-.links a, .chapters a, .fancyLink {
+li {
+    margin: 0.5rem 0;
+}
+
+.novel-list, .chapter-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.novel-list li, .chapter-list li {
+    margin: 0.5rem 0;
+}
+
+li a, .novel-link, .chapter-link {
     display: block;
-    padding: 15px 10px;
-    color: #563d75; /* Link color */
-    text-decoration: none;
-    background-color: #121212; /* Light background color for the link box */
-    border: 2px solid #000000; /* Light border around the link box */
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-    transition: all 0.3s ease; /* Smooth transition for all properties */
-    text-shadow: 0 0 10px rgba(42, 20, 102, 0.568); /* Subtle glow effect */
-    font-weight: bold;
-    cursor: pointer;
-    transform: translateX(-10px); /* For .fancyLink */
-    margin: 0 10px; /* Add spacing between links */
-    min-width: 100px; /* or 200px for .fancyLink */
+    padding: 0.75rem 1rem;
+    background: #162447;
+    border-radius: 8px;
+    transition: background 0.3s ease, transform 0.2s ease;
+    color: #e0e0e0;
 }
 
-/* Hover effects */
-.links a:hover, .chapters a:hover, .fancyLink:hover {
-    color: #BB86FC; /* Link hover color */
-    background-color: #000000; /* Dark background color on hover */
-    border-color: #BB86FC; /* Border color on hover */
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15); /* Larger shadow on hover */
-    transform: translateY(-3px); /* Slight lift on hover */
+li a:hover, .novel-link:hover, .chapter-link:hover {
+    background: #BB86FC;
+    color: #2c1f68;
+    transform: translateX(5px);
 }
 
-/* Additional Styles */
-button {
-    background-color: #BB86FC; /* Initial background color */
-    color: #121212; /* Button text color */
-    border: none;
-    padding: 10px 20px;
-    font-size: 1em;
-    border-radius: 5px; /* Rounded corners */
-    cursor: pointer; /* Cursor on hover */
-    transition: background-color 0.3s, transform 0.3s;
-    margin-top: 20px;
-}
-
-button:hover {
-    background-color: #BB86FC; /* Background color on hover */
-    transform: scale(1.05); /* Slightly enlarge on hover */
-}
-
-button:active {
-    background-color: #6200EE; /* Background color on active */
-    transform: scale(0.95); /* Slightly shrink on click */
-}
-
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4); /* Dark overlay */
-}
-
-.modal-content {
-    background-color: #1E1E1E; /* Modal background */
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 400px;
-    text-align: center;
-    border-radius: 10px;
-}
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-/* Scrollbar styles */
 ::-webkit-scrollbar {
-    width: 10px; /* Width of the scrollbar */
-}
-
-::-webkit-scrollbar-thumb {
-    background: #bb86fc8e; /* Color of the scrollbar handle */
-    border-radius: 5px;
-}
-
-::-webkit-scrollbar-track {
-    background: #000000; /* Background color of the scrollbar track */
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #bb86fcab; /* Color of the scrollbar handle on hover */
-}
-
-::-webkit-scrollbar-thumb:active {
-    background: #bb86fc; /* Color of the scrollbar handle on hover */
-}
-
-
-::-webkit-scrollbar-track {
     display: none;
 }
 
-/* Disable text selection */
-.no-select {
-    user-select: none;
-    cursor: default;
+/* Adjustments for Specific Pages */
+
+/* Home Page */
+.hero {
+    padding: 120px 20px 60px;
 }
 
-/* Disable copying */
+.features {
+    padding: 80px 20px;
+}
+
+.feature {
+    width: 100%;
+    max-width: 300px;
+}
+
+.community {
+    padding: 80px 20px;
+}
+
+/* Novel List Page */
+.novel-link {
+    padding: 1rem 2rem;
+}
+
+/* Chapter Page */
+.chapter {
+    padding: 2rem 0;
+}
+
+.content-wrapper {
+    max-width: 100%;
+    padding: 2rem;
+}
+
+.chapter-list {
+    margin-top: 2rem;
+}
+
+.chapter-link {
+    padding: 1rem 2rem;
+}
+
+/* Plans Page */
+.content {
+    max-width: 100%;
+    padding: 2rem;
+}
+
+.speaker {
+    font-size: 2rem;
+}
+
+/* Footer */
+footer {
+    padding: 20px 0;
+}
+
+/* Responsive Design */
+
+@media only screen and (max-width: 768px) {
+    .hero {
+        padding: 100px 20px 40px;
+    }
+
+    .features {
+        padding: 60px 20px;
+    }
+
+    .feature {
+        width: 100%;
+    }
+
+    .community {
+        padding: 60px 20px;
+    }
+
+    .nav-link {
+        padding: 0.6rem 1rem;
+    }
+
+    .fancyLink {
+        padding: 0.5rem 0.8rem;
+    }
+
+    .novel-link, .chapter-link {
+        padding: 0.75rem 1rem;
+    }
+
+    .speaker {
+        font-size: 1.5rem;
+    }
+}
+
+@media only screen and (max-width: 480px) {
+    .hero {
+        padding: 80px 20px 40px;
+    }
+
+    .features {
+        padding: 40px 20px;
+    }
+
+    .feature {
+        width: 100%;
+    }
+
+    .community {
+        padding: 40px 20px;
+    }
+
+    .nav-link {
+        padding: 0.6rem 0.8rem;
+    }
+
+    .fancyLink {
+        padding: 0.5rem 0.6rem;
+    }
+
+    .novel-link, .chapter-link {
+        padding: 0.5rem 0.8rem;
+    }
+
+    .speaker {
+        font-size: 1.2rem;
+        
+    }
+}
+
+.no-select {
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Standard syntax */
+}
+
 .no-copy {
-    pointer-events: none;
+    pointer-events: none; /* Disable mouse events */
+}
+
+.no-copy::selection {
+    background-color: transparent; /* Disable text selection */
+}
+
+
+.hero2 {
+    width: 100%;
+    max-width: 1200px;
+    
+    padding: 100px 20px 60px;
+    background: linear-gradient(145deg, #111111, #222222);
+    margin-top: 60px;
+    animation: fadeIn 1s ease-in-out;
+}
+
+.hero2 h2 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #bb86fc;
+    text-shadow: 0 0 10px rgba(187, 134, 252, 0.5);
+}
+
+.hero2 p {
+    
+    font-size: 1.2em;
+    margin-bottom: 40px;
+    color: #dddddd;
 }

@@ -133,36 +133,118 @@ def main(url, chapter_number, novel_title):
     </style>
 </head>
 <body>
-    <div class="chapter">
-        <div class="content">
-            <span class="speaker" style="font-size: 40px;">
-                {novel_title_clean} - Chapter {chapter_number}
-            </span>
-            <ul class='chapters'>
-                <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}">Previous Chapter</a>
-                <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)+1}">Next Chapter</a>
-                <a href="/" class='fancyLink'>Home</a>
-                <a href="/novels/{novel_title_encoded}-chapters" class='fancyLink'>Chapters</a>   
+    <header class="header">
+        <div class="logo">
+            <h1><a href='/'>Novel Reader</a></h1>
+        </div>
+        <nav class="nav">
+            <ul>
+                <li>
+                    <a class="start-reading" id="generateButton" onclick="showPrompt()" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Get Chapters
+                    </a>
+                </li>
+
+                <li>
+                    <a class="start-reading" href="/novels" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Novels
+                    </a>
+                </li>
+
+                <li>
+                    <a class="start-reading" href="/plans" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Plans
+                    </a>
+                </li>
+
+                <li>
+                    <a class="start-reading" href="/currentChapter" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Current Chapter
+                    </a>
+                </li>
+                
+                <li>
+                    &nbsp;&nbsp;
+                </li>
             </ul>
-            <br>
-            <a id="openModal" class='fancyLink'>Settings</a>
-            <p class="content no-select no-copy" id='textToRead'>
-                <br>
+        </nav>
+    </header>
+    
+    <main>
+        <section class="hero">
+            <h2>{novel_title_clean}</h2>
+            <p>Chapter {chapter_number}</p>
+        </section>
+        <section class="features">
+            <div class="feature">
+                <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}">
+                    <div class="icon">📚</div>
+                    <h3>Previous Chapter</h3>
+                    <p>Access a vast collection of novels with a single click.</p>
+                </a>
+            </div>
+            
+            <div class="feature">
+                <a href='/'>
+                    <div class="icon">⚡</div>
+                    <h3>Home</h3>
+                    <p>Generate chapters quickly and efficiently.</p>
+                </a>
+            </div>
+            
+            <div class="feature">
+                <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)+1}">
+                    <div class="icon">🌙</div>
+                    <h3>Next Chapter</h3>
+                    <p>Enjoy reading with an eye-friendly dark mode.</p>
+                </a>
+            </div>
+        </section>
+
+        
+        
+        
+        <section class="hero2">
+            <p class="no-select no-copy" id='textToRead'>
                 {chapter_text.replace('\n', '<br><br>')}
             </p>
+        </section>
         
-        <br>
-        <ul class='chapters'>
-            <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}">Previous Chapter</a>
-            <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)+1}">Next Chapter</a>
-            <a href="/" class='fancyLink'>Home</a>
-            <a href="/novels/{novel_title_encoded}-chapters" class='fancyLink'>Chapters</a>   
-        </ul>
-        <br>
-        <a id="openModal2" class='fancyLink'>Settings</a>
-        </div>
-    </div>
-
+        
+        <section class="features">
+            <div class="feature">
+                <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)-1}">
+                    <div class="icon">📚</div>
+                    <h3>Previous Chapter</h3>
+                    <p>Access a vast collection of novels with a single click.</p>
+                </a>
+            </div>
+            
+            <div class="feature">
+                <a href='/'>
+                    <div class="icon">⚡</div>
+                    <h3>Home</h3>
+                    <p>Generate chapters quickly and efficiently.</p>
+                </a>
+            </div>
+            
+            <div class="feature">
+                <a href="/novels/{novel_title_encoded}-chapters/chapters/{int(chapter_number)+1}">
+                    <div class="icon">🌙</div>
+                    <h3>Next Chapter</h3>
+                    <p>Enjoy reading with an eye-friendly dark mode.</p>
+                </a>
+            </div>
+        </section>
+            
+        
+        <section class="community">
+            <h2>Join Our Community</h2>
+            <p>Connect with other readers on our <a href="https://www.discord.gg/k5HBFXqtCB" target="_blank" style='text-decoration: none;'>Discord Server</a>.</p>
+            <p>Created by <a href="https://www.github.com/Bernso" target="_blank" style='text-decoration: none;'>Bernso</a></p>
+        </section>
+    </main>
+    
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal">
         <div class="modal-content" id="modalContent">

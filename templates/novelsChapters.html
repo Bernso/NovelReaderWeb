@@ -10,18 +10,90 @@
     <link rel="stylesheet" href="/./static/style.css">
 </head>
 <body>
-    <div class='chapter'>
-        <div class="content">
-            <h1 class='speaker'>{{ novel_title2 }}</h1>
-            <a onclick="updateNovel('{{ novel_title1 }}', '{{ novel_title2 }}')" class='fancyLink'>Update Novel</a><br>
-            <a class='fancyLink' href='/'>Home</a>
-            <ul class='chapters'>
-                {% for chapter in chapters %}
-                    <li><a href="/novels/{{ novel_title1 }}/chapters/{{ chapter }}">Chapter {{ chapter }}</a></li>
-                {% endfor %}
-            </ul>
+
+    <header class="header">
+        <div class="logo">
+            <h1><a href='/'>Novel Reader</a></h1>
         </div>
-    </div>
+        <nav class="nav">
+            <ul>
+                <li>
+                    <a class="start-reading" id="generateButton" onclick="showPrompt()" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Get Chapters
+                    </a>
+                </li>
+
+                <li>
+                    <a class="start-reading" href="/novels" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Novels
+                    </a>
+                </li>
+
+                <li>
+                    <a class="start-reading" href="/plans" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Plans
+                    </a>
+                </li>
+
+                <li>
+                    <a class="start-reading" href="/currentChapter" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Current Chapter
+                    </a>
+                </li>
+                
+                <li>
+                    &nbsp;&nbsp;
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+
+
+
+    <main style='min-width: 800px;'>
+        <section class="hero">
+            <h2>
+                {{ novel_title2 }}
+            </h2>
+
+            <p>
+                Read all of your favourite novels in a dark, majestic interface.
+            </p>
+            
+            <a class='start-reading' href="/novels/{{ novel_title1 }}/chapters/{{ chapters[0] }}">
+                Start Reading
+            </a>
+
+            <a class='start-reading' href="/novels/{{ novel_title1 }}/chapters/{{ chapters[0] }}">
+                Continue Reading
+            </a>
+            
+            <a class='start-reading' onclick="updateNovel('{{ novel_title1 }}', '{{ novel_title2 }}')">
+                Update Novel
+            </a>
+        </section>
+
+        <section class="features">
+            {% for chapter in chapters %}
+            <div class="feature">
+                <a href="/novels/{{ novel_title1 }}/chapters/{{ chapter }}">
+                    <h2>Chapter {{ chapter }}</h2>
+                </a>
+            </div>
+            {% endfor %}
+        </section>
+        
+
+       
+
+        <section class="community">
+            <h2>Join Our Community</h2>
+            <p>Connect with other readers on our <a href="https://www.discord.gg/k5HBFXqtCB" target="_blank" style='text-decoration: none;'>Discord Server</a></p>
+            <p>Created by <a href="https://www.github.com/Bernso" target="_blank" style='text-decoration: none;'>Bernso</a></p>
+        </section>
+    </main>
+    
 
 
     <script>
