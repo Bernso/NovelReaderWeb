@@ -185,6 +185,3 @@ def yes(novel_title):
 if __name__ == '__main__':
     yes("Atticus's Odyssey Reincarnated Into A Playground")
 
-
-#Atticus’s Odyssey Reincarnated Into A Playground-chapters
-#Atticus's Odyssey Reincarnated Into A Playground-chapters
