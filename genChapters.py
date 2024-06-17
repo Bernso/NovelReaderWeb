@@ -111,6 +111,16 @@ def get_novel_title(base_url):
 
 # Function to fetch and save chapter content
 def main(url, chapter_number, novel_title):
+    folder_name = valid_dir_name(novel_title)
+    file_dir = f'templates/novels/{folder_name}-chapters'
+    os.makedirs(file_dir, exist_ok=True)
+    file_path = os.path.join(file_dir, f'chapter-{chapter_number}.txt')
+
+    # Check if the file already exists
+    if os.path.exists(file_path):
+        print(f"Chapter {chapter_number} already downloaded. Skipping...")
+        return
+
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
@@ -120,12 +130,6 @@ def main(url, chapter_number, novel_title):
         chapter_container = soup.find('div', id='chapter-container')
         if chapter_container:
             chapter_text = chapter_container.get_text(separator='\n').strip()
-
-            folder_name = valid_dir_name(novel_title)
-            file_dir = f'templates/novels/{folder_name}-chapters'
-            os.makedirs(file_dir, exist_ok=True)
-
-            file_path = os.path.join(file_dir, f'chapter-{chapter_number}.txt')
 
             with open(file_path, 'w', encoding='utf-8') as file:
                 file.write(chapter_text.replace('\n', '<br><br>'))
