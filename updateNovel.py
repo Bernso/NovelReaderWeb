@@ -10,20 +10,24 @@ headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36'
 }
 
-# Function to transform the novel title
+# Function to transform the novel title for URL
 def transform_title(novel_title):
     """
     Transform the novel title for URL:
     1. Decode URL-encoded characters.
-    2. Convert to lowercase.
-    3. Remove apostrophes and URL-encoded apostrophes.
-    4. Replace spaces with hyphens.
+    2. Remove anything within brackets (including brackets).
+    3. Convert to lowercase.
+    4. Replace special characters and spaces with hyphens.
+    5. Remove trailing hyphens and spaces.
     """
-    decoded_title = urllib.parse.unquote(novel_title)
+    # Remove anything within brackets and the brackets themselves
+    novel_title_cleaned = re.sub(r'\(.*?\)', '', novel_title)
+    decoded_title = urllib.parse.unquote(novel_title_cleaned)
     transformed_title = decoded_title.lower()
-    transformed_title = transformed_title.replace("'", "").replace("’", "").replace("%E2%80%99", "")
+    transformed_title = re.sub(r"[’'’]", "", transformed_title)  # Remove special apostrophes
     transformed_title = re.sub(r'[^a-zA-Z0-9\s]', '', transformed_title)  # Remove non-alphanumeric characters
     transformed_title = transformed_title.replace(" ", "-")
+    transformed_title = transformed_title.rstrip('- ')  # Remove trailing hyphens and spaces
     return transformed_title
 
 # Function to get the base URL
@@ -162,4 +166,4 @@ def yes(novel_title):
 
 # Example usage
 if __name__ == '__main__':
-    yes("Infinite Mana In The Apocalypse")
+    yes("The Author's POV")

@@ -1,8 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 import os
-import urllib
 import threading
+import urllib
 import re
 
 # Define headers to mimic browser requests
@@ -10,12 +10,25 @@ headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 }
 
-
+# Function to transform the novel title for URL
+def transform_title(novel_title):
+    """
+    Transform the novel title for URL:
+    1. Decode URL-encoded characters.
+    2. Convert to lowercase.
+    3. Replace special characters and spaces with hyphens.
+    """
+    decoded_title = urllib.parse.unquote(novel_title)
+    transformed_title = decoded_title.lower()
+    transformed_title = re.sub(r"[’'’]", "", transformed_title)  # Remove special apostrophes
+    transformed_title = re.sub(r'[^a-zA-Z0-9\s]', '', transformed_title)  # Remove non-alphanumeric characters
+    transformed_title = transformed_title.replace(" ", "-")
+    return transformed_title
 
 # Function to scrape categories and save them to a file
-def scrape_categories(url):
+def scrape_categories(base_url):
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(base_url, headers=headers)
         response.raise_for_status()
         
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -146,5 +159,5 @@ def yes(base_url):
 
 # Example usage
 if __name__ == '__main__':
-    base_url = 'https://lightnovelpub.vip/novel/the-beginning-after-the-end-web-novel-11110049'
+    base_url = 'https://lightnovelpub.vip/novel/omniscient-readers-viewpoint'
     yes(base_url)
