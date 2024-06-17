@@ -196,9 +196,7 @@ def update_novel(novel_title):
 def youShouldntBeHere(novel_title):
     return render_template('notHere.html', novel_title=novel_title)
 
-@app.route('/error_test')
-def error_test():
-    return render_template('error.html')
+
 
 
 if __name__ == '__main__':
