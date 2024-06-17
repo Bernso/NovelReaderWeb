@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
+    <title>404 - Chapter Not Found</title>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <h1><a href='/'>Novel Reader</a></h1>
+        </div>
+        <nav class="nav">
+            <ul>
+                <li>
+                    <a class="start-reading" id="generateButton" onclick="showPrompt()" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Get Chapters
+                    </a>
+                </li>
+
+                <li>
+                    <a class="start-reading" href="/novels" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Novels
+                    </a>
+                </li>
+
+                <li>
+                    <a class="start-reading" href="/plans" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Plans
+                    </a>
+                </li>
+
+                <li>
+                    <a class="start-reading" href="/currentChapter" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Current Chapter
+                    </a>
+                </li>
+                
+                <li>
+                    &nbsp;&nbsp;
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="hero">
+            <h2>404 - Chapter Not Found</h2>
+            <p>This Chapter is not accessible or does not exist.</p>
+            <a style='cursor: pointer;' id="homeButton">Return To Home</a>
+        </section>
+        
+    </main>
+    <script>
+        document.getElementById('homeButton').addEventListener('click', function() {
+            window.location.href = '/';
+        });
+    </script>
+</body>
+</html>

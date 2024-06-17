@@ -24,7 +24,7 @@ def transform_title(novel_title):
     novel_title_cleaned = re.sub(r'\(.*?\)', '', novel_title)
     decoded_title = urllib.parse.unquote(novel_title_cleaned)
     transformed_title = decoded_title.lower()
-    transformed_title = re.sub(r"[’'’]", "", transformed_title)  # Remove special apostrophes
+    transformed_title = re.sub(r"[''']", "", transformed_title)  # Remove special apostrophes
     transformed_title = re.sub(r'[^a-zA-Z0-9\s]', '', transformed_title)  # Remove non-alphanumeric characters
     transformed_title = transformed_title.replace(" ", "-")
     transformed_title = transformed_title.rstrip('- ')  # Remove trailing hyphens and spaces
@@ -37,9 +37,10 @@ def valid_dir_name(novel_title):
     1. Remove special characters and spaces.
     2. Replace certain characters like ':' and '/'.
     """
-    novel_title_clean = re.sub(r"[’'’]", "'", novel_title)
+    novel_title_clean = re.sub(r"[''']", "'", novel_title)
     novel_title_clean = novel_title_clean.replace(":", "")
     novel_title_clean = novel_title_clean.replace("/", "") 
+    novel_title_clean = novel_title_clean.replace("’", "'")
     return novel_title_clean
 
 # Function to get the base URL
@@ -126,6 +127,13 @@ def main(url, chapter_number, novel_title):
     file_path = os.path.join(base_dir, f'chapter-{chapter_number}.txt')
     categories_path = os.path.join(base_dir, 'categories.txt')
 
+    # Debug print to check the file path
+
+    # Check if the chapter file already exists and skip if it does
+    if os.path.exists(file_path):
+        print(f"Chapter {chapter_number} already exists. Skipping...")
+        return
+
     try:
         if not os.path.exists(categories_path):
             categories = scrape_categories(get_base_url(novel_title))
@@ -136,22 +144,18 @@ def main(url, chapter_number, novel_title):
             else:
                 print("Failed to scrape categories. Skipping...")
 
-        if os.path.exists(file_path):
-            print(f"Chapter {chapter_number} already exists. Skipping...")
-            return
-
         response = requests.get(url, headers=headers)
         response.raise_for_status()
-
-        soup = BeautifulSoup(response.text, 'html.parser')
-        chapter_container = soup.find('div', id='chapter-container')
-        if chapter_container:
-            chapter_text = chapter_container.get_text(separator='\n').strip()
-            with open(file_path, 'w', encoding='utf-8') as file:
-                file.write(chapter_text.replace('\n', '<br><br>'))
-            print(f"TXT file created successfully for {novel_title} chapter {chapter_number}")
-        else:
-            print("Error: 'chapter-container' not found on the page.")
+        if not os.path.exists(file_path):
+            soup = BeautifulSoup(response.text, 'html.parser')
+            chapter_container = soup.find('div', id='chapter-container')
+            if chapter_container:
+                chapter_text = chapter_container.get_text(separator='\n').strip()
+                with open(file_path, 'w', encoding='utf-8') as file:
+                    file.write(chapter_text.replace('\n', '<br><br>'))
+                print(f"TXT file created successfully for {novel_title} chapter {chapter_number}")
+            else:
+                print("Error: 'chapter-container' not found on the page.")
 
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
@@ -180,3 +184,7 @@ def yes(novel_title):
 # Example usage
 if __name__ == '__main__':
     yes("Atticus's Odyssey Reincarnated Into A Playground")
+
+
+#Atticus’s Odyssey Reincarnated Into A Playground-chapters
+#Atticus's Odyssey Reincarnated Into A Playground-chapters

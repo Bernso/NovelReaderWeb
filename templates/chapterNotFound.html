@@ -5,27 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
-    <link rel="icon" type="image/png" href="/./static/MAINICON-20240501-rounded.png">
-    <link rel="stylesheet" href="/./static/style.css">
-    <title>404</title>
-
+    <title>404 - Chapter Not Found</title>
 </head>
 <body>
-    <div class="chapter">
-        <div class="content">
-            <span class="speaker">
-                404 - Page Not Found
-            </span>
-            <p class="dialogue">
-                This Chapter is not accessable or does not exist.
-            </p>
-            <button id="homeButton">Return To Home</button>
+    <header class="header">
+        <div class="logo">
+            <h1><a href='/'>Novel Reader</a></h1>
         </div>
-    </div>
+        <nav class="nav">
+            <ul>
+                <li><a class="start-reading" href="/novels">Novels</a></li>
+                <li><a class="start-reading" href="/plans">Plans</a></li>
+                <li><a class="start-reading" href="/currentChapter">Current Chapter</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="hero">
+            <h2>404 - Chapter Not Found</h2>
+            <p>This Chapter is not accessible or does not exist.</p>
+            <button id="homeButton">Return To Home</button>
+        </section>
+    </main>
+    <script>
+        document.getElementById('homeButton').addEventListener('click', function() {
+            window.location.href = '/';
+        });
+    </script>
 </body>
-<script>
-    document.getElementById('homeButton').addEventListener('click', function() {
-        window.location.href = '/'; // Replace '/home' with your actual home page URL
-    });
-</script>
 </html>

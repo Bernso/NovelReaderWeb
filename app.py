@@ -38,7 +38,9 @@ def send_discord_message(message):
 
 app = Flask(__name__)
 
-
+@app.route('/test')
+def test_site():
+    return render_template('test.html')
 
 
 @app.route('/')
