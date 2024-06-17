@@ -29,12 +29,13 @@ def scrape_categories(url):
         return
 
     list_items = ul.find_all('li')
-    with open('categories.txt', 'w') as file:
-        for item in list_items:
-            text = item.get_text(strip=True)
-            file.write(text + '\n')
+    categories = []
+    for item in list_items:
+        text = item.get_text(strip=True)
+        categories.append(text)
+    
+    return categories            
 
-    print("Categories content saved to categories.txt")
 
 # Function to get the latest chapter number
 def get_latest_chapter_number(base_url):
@@ -79,11 +80,19 @@ def get_novel_title(base_url):
 # Function to fetch and save chapter content
 def main(url, chapter_number, novel_title):
     file_path = f'templates/novels/{novel_title}-chapters/chapter-{chapter_number}.txt'
-
+    categories_path = f'templates/novels/{novel_title}-chapters/categories.txt'
+    
+    if not os.path.exists(categories_path):
+        categories = scrape_categories(base_url)
+        with open(categories_path, 'w') as f:
+            f.write('\n'.join(categories))
+    
     if os.path.exists(file_path):
         print(f"Chapter {chapter_number} already exists. Skipping...")
         return
-
+    
+    
+        
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
@@ -99,7 +108,7 @@ def main(url, chapter_number, novel_title):
             with open(file_path, 'w', encoding='utf-8') as file:
                 file.write(chapter_text.replace('\n', '<br><br>'))
 
-            print(f"HTML file created successfully for {novel_title} chapter {chapter_number}")
+            print(f"TXT file created successfully for {novel_title} chapter {chapter_number}")
 
         else:
             print("Error: 'chapter-container' not found on the page.")
@@ -110,7 +119,7 @@ def main(url, chapter_number, novel_title):
 # Function to iterate over all chapters and save them
 def yes(base_url):
     def thread_target():
-        categories = scrape_categories(base_url)
+        
         latest_chapter_number = get_latest_chapter_number(base_url)
         novel_title = get_novel_title(base_url)
 
