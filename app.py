@@ -162,29 +162,30 @@ def currentChapter():
 @app.route('/novels/<novel_title>')
 def show_novel_chapters(novel_title):
     try:
-        # Construct the path to the novel's folder
         novel_folder_path = os.path.join(app.root_path, 'templates', 'novels', novel_title)
         
-        # List all .txt files in the novel's folder
         chapters = [file for file in os.listdir(novel_folder_path) if file.endswith('.txt')]
         
-        # Filter out the 'categories.txt' file
+        categories_file = os.path.join(novel_folder_path, 'categories.txt')
+        if os.path.exists(categories_file):
+            with open(categories_file, 'r', encoding='utf-8') as f:
+                categories = f.read().strip().split('\n')
+                categories_str = ', '.join(categories)
+        else:
+            categories_str = ""
+
         chapters = [file for file in chapters if not file.startswith('categories')]
 
-        # Extract chapter numbers from filenames
         chapter_numbers = [int(file.split('-')[1].split('.')[0]) for file in chapters]
 
-        # Sort the chapter numbers
         chapter_numbers.sort()
 
-        # Clean up the novel title for display
-        novel_title2 = re.sub(r'\s*\(.*?\)', '', novel_title[:-9] if len(novel_title) >= 9 else novel_title)
-        
-        # Novel title 2 is the one that is meant to look nice and is the one the suer is meant to see,
-        # while novel title 1 is the one that is accurate and is the one the user is not meant to see
-        
-        # Render the template with the chapters and titles
-        return render_template('novelsChapters.html', novel_title2=novel_title2, chapters=chapter_numbers, novel_title1=novel_title)
+        novel_title_clean = re.sub(r'\s*\(.*?\)', '', novel_title[:-9] if len(novel_title) >= 9 else novel_title)
+
+        categories_string = f"{categories_str}" if categories_str else ""
+
+        return render_template('novelsChapters.html', novel_title2=novel_title_clean, chapters=chapter_numbers, novel_title1=novel_title, categories=categories_string)
+    
     except Exception as e:
         error_message = str(e)
         send_discord_message(error_message)

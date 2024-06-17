@@ -23,9 +23,22 @@ def transform_title(novel_title):
     transformed_title = re.sub(r"[’'’]", "", transformed_title)  # Remove special apostrophes
     transformed_title = re.sub(r'[^a-zA-Z0-9\s]', '', transformed_title)  # Remove non-alphanumeric characters
     transformed_title = transformed_title.replace(" ", "-")
+    transformed_title = transformed_title.replace(":", "")
+    transformed_title = transformed_title.replace("/", "")  # Remove slashes
     return transformed_title
 
-# Function to scrape categories and save them to a file
+
+
+def valid_dir_name(novel_title):
+    novel_title = re.sub(r"[’'’]", "'", novel_title)
+    novel_title = novel_title.replace(":", "")
+    novel_title = novel_title.replace("/", "") 
+    return novel_title
+
+
+
+
+# Function to scrape categories
 def scrape_categories(base_url):
     try:
         response = requests.get(base_url, headers=headers)
@@ -89,6 +102,7 @@ def get_novel_title(base_url):
 
         soup = BeautifulSoup(response.text, 'html.parser')
         novel_title = soup.find('h1', class_='novel-title text2row').get_text().strip()
+
         return novel_title
 
     except requests.exceptions.RequestException as e:
@@ -97,23 +111,7 @@ def get_novel_title(base_url):
 
 # Function to fetch and save chapter content
 def main(url, chapter_number, novel_title):
-    file_path = f'templates/novels/{novel_title}-chapters/chapter-{chapter_number}.txt'
-    categories_path = f'templates/novels/{novel_title}-chapters/categories.txt'
-    
     try:
-        if not os.path.exists(categories_path):
-            categories = scrape_categories(base_url)
-            if categories:
-                with open(categories_path, 'w') as f:
-                    f.write('\n'.join(categories))
-                    print(f"Categories saved to {categories_path}")
-            else:
-                print("Failed to scrape categories. Skipping...")
-
-        if os.path.exists(file_path):
-            print(f"Chapter {chapter_number} already exists. Skipping...")
-            return
-
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 
@@ -123,7 +121,11 @@ def main(url, chapter_number, novel_title):
         if chapter_container:
             chapter_text = chapter_container.get_text(separator='\n').strip()
 
-            os.makedirs(f'templates/novels/{novel_title}-chapters', exist_ok=True)
+            folder_name = valid_dir_name(novel_title)
+            file_dir = f'templates/novels/{folder_name}-chapters'
+            os.makedirs(file_dir, exist_ok=True)
+
+            file_path = os.path.join(file_dir, f'chapter-{chapter_number}.txt')
 
             with open(file_path, 'w', encoding='utf-8') as file:
                 file.write(chapter_text.replace('\n', '<br><br>'))
@@ -142,9 +144,22 @@ def main(url, chapter_number, novel_title):
 def yes(base_url):
     def thread_target():
         
-        latest_chapter_number = get_latest_chapter_number(base_url)
         novel_title = get_novel_title(base_url)
+        categories = scrape_categories(base_url)
 
+        if categories:
+            folder_name = valid_dir_name(novel_title)
+            file_dir = f'templates/novels/{folder_name}-chapters'
+            os.makedirs(file_dir, exist_ok=True)
+
+            categories_path = os.path.join(file_dir, 'categories.txt')
+
+            with open(categories_path, 'w') as f:
+                f.write('\n'.join(categories))
+                print(f"Categories saved to {categories_path}")
+        else:            print("Failed to scrape categories. Skipping...")
+
+        latest_chapter_number = get_latest_chapter_number(base_url)
         if latest_chapter_number is None:
             print("Failed to get the latest chapter number.")
             return
@@ -159,5 +174,5 @@ def yes(base_url):
 
 # Example usage
 if __name__ == '__main__':
-    base_url = 'https://lightnovelpub.vip/novel/omniscient-readers-viewpoint'
+    base_url = 'https://lightnovelpub.vip/novel/atticuss-odyssey-reincarnated-into-a-playground'
     yes(base_url)

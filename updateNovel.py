@@ -30,6 +30,18 @@ def transform_title(novel_title):
     transformed_title = transformed_title.rstrip('- ')  # Remove trailing hyphens and spaces
     return transformed_title
 
+# Function to sanitize novel title for use in directory names
+def valid_dir_name(novel_title):
+    """
+    Sanitize novel title for use in directory names:
+    1. Remove special characters and spaces.
+    2. Replace certain characters like ':' and '/'.
+    """
+    novel_title_clean = re.sub(r"[’'’]", "'", novel_title)
+    novel_title_clean = novel_title_clean.replace(":", "")
+    novel_title_clean = novel_title_clean.replace("/", "") 
+    return novel_title_clean
+
 # Function to get the base URL
 def get_base_url(novel_title):
     """
@@ -109,7 +121,7 @@ def get_novel_title(base_url):
 
 # Function to fetch and save chapter content
 def main(url, chapter_number, novel_title):
-    base_dir = f'templates/novels/{novel_title}-chapters'
+    base_dir = f'templates/novels/{valid_dir_name(novel_title)}-chapters'
     os.makedirs(base_dir, exist_ok=True)
     file_path = os.path.join(base_dir, f'chapter-{chapter_number}.txt')
     categories_path = os.path.join(base_dir, 'categories.txt')
@@ -163,7 +175,8 @@ def yes(novel_title):
 
     thread = threading.Thread(target=thread_target)
     thread.start()
-
+    
+    
 # Example usage
 if __name__ == '__main__':
-    yes("The Author's POV")
+    yes("Atticus's Odyssey Reincarnated Into A Playground")
