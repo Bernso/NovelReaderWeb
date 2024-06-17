@@ -13,7 +13,7 @@ headers = {
 # Function to transform the novel title
 def transform_title(novel_title):
     """
-    Transform the novel title:
+    Transform the novel title for URL:
     1. Decode URL-encoded characters.
     2. Convert to lowercase.
     3. Remove apostrophes and URL-encoded apostrophes.
@@ -22,6 +22,7 @@ def transform_title(novel_title):
     decoded_title = urllib.parse.unquote(novel_title)
     transformed_title = decoded_title.lower()
     transformed_title = transformed_title.replace("'", "").replace("’", "").replace("%E2%80%99", "")
+    transformed_title = re.sub(r'[^a-zA-Z0-9\s]', '', transformed_title)  # Remove non-alphanumeric characters
     transformed_title = transformed_title.replace(" ", "-")
     return transformed_title
 
@@ -35,25 +36,32 @@ def get_base_url(novel_title):
 
 # Function to scrape categories and return them as a list
 def scrape_categories(url):
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
-        print(f"Failed to retrieve the webpage. Status code: {response.status_code}")
-        return []
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.content, 'html.parser')
 
-    soup = BeautifulSoup(response.content, 'html.parser')
-    categories_div = soup.find('div', class_='categories')
-    if categories_div is None:
-        print("No 'div' with class 'categories' found.")
-        return []
+        categories_div = soup.find('div', class_='categories')
+        if categories_div is None:
+            print("No 'div' with class 'categories' found.")
+            return []
 
-    ul = categories_div.find('ul')
-    if ul is None:
-        print("No 'ul' found inside the 'div.categories'.")
-        return []
+        ul = categories_div.find('ul')
+        if ul is None:
+            print("No 'ul' found inside the 'div.categories'.")
+            return []
 
-    list_items = ul.find_all('li')
-    categories = [item.get_text(strip=True) for item in list_items]
-    return categories
+        list_items = ul.find_all('li')
+        categories = [item.get_text(strip=True) for item in list_items]
+        return categories
+
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+        return []
+    except Exception as e:
+        print(f"Error scraping categories: {e}")
+        return []
 
 # Function to get the latest chapter number
 def get_latest_chapter_number(base_url):
@@ -102,17 +110,20 @@ def main(url, chapter_number, novel_title):
     file_path = os.path.join(base_dir, f'chapter-{chapter_number}.txt')
     categories_path = os.path.join(base_dir, 'categories.txt')
 
-    if not os.path.exists(categories_path):
-        categories = scrape_categories(get_base_url(novel_title))
-        with open(categories_path, 'w') as f:
-            f.write('\n'.join(categories))
-        print(f"Categories saved to {categories_path}")
-
-    if os.path.exists(file_path):
-        print(f"Chapter {chapter_number} already exists. Skipping...")
-        return
-
     try:
+        if not os.path.exists(categories_path):
+            categories = scrape_categories(get_base_url(novel_title))
+            if categories:
+                with open(categories_path, 'w') as f:
+                    f.write('\n'.join(categories))
+                print(f"Categories saved to {categories_path}")
+            else:
+                print("Failed to scrape categories. Skipping...")
+
+        if os.path.exists(file_path):
+            print(f"Chapter {chapter_number} already exists. Skipping...")
+            return
+
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 
@@ -128,12 +139,13 @@ def main(url, chapter_number, novel_title):
 
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
+    except Exception as e:
+        print(f"Error: {e}")
 
 # Function to iterate over all chapters and save them
 def yes(novel_title):
     def thread_target():
         base_url = get_base_url(novel_title)
-
         latest_chapter_number = get_latest_chapter_number(base_url)
         if not latest_chapter_number:
             print("Failed to get the latest chapter number.")
@@ -150,4 +162,4 @@ def yes(novel_title):
 
 # Example usage
 if __name__ == '__main__':
-    yes("Vampire's Slice Of Life")
+    yes("Infinite Mana In The Apocalypse")

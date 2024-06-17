@@ -1,41 +1,46 @@
 import requests
 from bs4 import BeautifulSoup
 import os
-import re
+import urllib
 import threading
+import re
 
 # Define headers to mimic browser requests
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 }
 
+
+
 # Function to scrape categories and save them to a file
 def scrape_categories(url):
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
-        print(f"Failed to retrieve the webpage. Status code: {response.status_code}")
-        return
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.content, 'html.parser')
 
-    soup = BeautifulSoup(response.content, 'html.parser')
+        categories_div = soup.find('div', class_='categories')
+        if categories_div is None:
+            print("No 'div' with class 'categories' found.")
+            return []
 
-    categories_div = soup.find('div', class_='categories')
-    if categories_div is None:
-        print("No 'div' with class 'categories' found.")
-        return
+        ul = categories_div.find('ul')
+        if ul is None:
+            print("No 'ul' found inside the 'div.categories'.")
+            return []
 
-    ul = categories_div.find('ul')
-    if ul is None:
-        print("No 'ul' found inside the 'div.categories'.")
-        return
+        list_items = ul.find_all('li')
+        categories = [item.get_text(strip=True) for item in list_items]
 
-    list_items = ul.find_all('li')
-    categories = []
-    for item in list_items:
-        text = item.get_text(strip=True)
-        categories.append(text)
-    
-    return categories            
+        return categories
 
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+        return []
+    except Exception as e:
+        print(f"Error scraping categories: {e}")
+        return []
 
 # Function to get the latest chapter number
 def get_latest_chapter_number(base_url):
@@ -82,18 +87,20 @@ def main(url, chapter_number, novel_title):
     file_path = f'templates/novels/{novel_title}-chapters/chapter-{chapter_number}.txt'
     categories_path = f'templates/novels/{novel_title}-chapters/categories.txt'
     
-    if not os.path.exists(categories_path):
-        categories = scrape_categories(base_url)
-        with open(categories_path, 'w') as f:
-            f.write('\n'.join(categories))
-    
-    if os.path.exists(file_path):
-        print(f"Chapter {chapter_number} already exists. Skipping...")
-        return
-    
-    
-        
     try:
+        if not os.path.exists(categories_path):
+            categories = scrape_categories(base_url)
+            if categories:
+                with open(categories_path, 'w') as f:
+                    f.write('\n'.join(categories))
+                    print(f"Categories saved to {categories_path}")
+            else:
+                print("Failed to scrape categories. Skipping...")
+
+        if os.path.exists(file_path):
+            print(f"Chapter {chapter_number} already exists. Skipping...")
+            return
+
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 
@@ -115,6 +122,8 @@ def main(url, chapter_number, novel_title):
 
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
+    except Exception as e:
+        print(f"Error: {e}")
 
 # Function to iterate over all chapters and save them
 def yes(base_url):
@@ -135,10 +144,7 @@ def yes(base_url):
     thread = threading.Thread(target=thread_target)
     thread.start()
 
-
-
 # Example usage
 if __name__ == '__main__':
     base_url = 'https://lightnovelpub.vip/novel/the-beginning-after-the-end-web-novel-11110049'
-    
     yes(base_url)
