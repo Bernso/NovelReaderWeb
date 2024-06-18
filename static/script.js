@@ -44,7 +44,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to toggle settings menu visibility
     function toggleSettingsMenu() {
-        settingsMenu.style.display = settingsMenu.style.display === 'none' ? 'block' : 'none';
+        if (settingsMenu.style.display === 'block') {
+            settingsMenu.style.display = 'none';
+        } else {
+            settingsMenu.style.display = 'block';
+        }
     }
 
     // Event listeners for opening and closing settings menu

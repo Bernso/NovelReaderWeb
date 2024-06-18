@@ -617,6 +617,12 @@ footer {
     border-radius: 5px;
 }
 
+.tts-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px; /* Add margin above the buttons */
+}
+
 #start-speech, #pause-speech, #stop-speech {
     width: 32%;
     padding: 10px;

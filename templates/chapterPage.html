@@ -109,11 +109,11 @@
                 </a>
             </div>
             <div class="feature">
-                <a id="settingsButton2">
+                <p id="settingsButton2">
                     <div class="icon">⚙️</div>
                     <h3>Settings</h3>
                     <p>Text-To-Speech, Font Customization, and Font Size Control</p>
-                </a>
+                </p>
             </div>
             <div class="feature">
                 <a href="/novels/{{novel_title_encoded}}/chapters/{{chapter_number + 1}}">
@@ -139,7 +139,7 @@
             <input type="range" id="text-size-slider" min="10" max="30" value="16" style="background-color: #333; width: 100%; height: 10px; cursor: pointer; border-radius: 5px;">
             <p>Current Size: <span id="current-size">16</span>px</p>
             <p>&nbsp;</p>
-            
+
             <h4>Font</h4>
             <select id="font-selector">
                 <option value="sans-serif">Sans-Serif</option>
@@ -155,9 +155,11 @@
             
             <h4><br>Text to Speech</h4>
             <select id="voice-selector"></select>
-            <button id="start-speech">Start</button>
-            <button id="pause-speech">Pause</button>
-            <button id="stop-speech">Stop</button>
+            <div class="tts-buttons">
+                <button id="start-speech">Start</button>
+                <button id="pause-speech">Pause</button>
+                <button id="stop-speech">Stop</button>
+            </div>
         </div>
     </section>
     
