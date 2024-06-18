@@ -60,6 +60,8 @@
             <p>
                 {{ categories }}
             </p>
+
+            
             
             <a class='start-reading' href="/novels/{{ novel_title1 }}/chapters/{{ chapters[0] }}">
                 Start Reading
@@ -71,7 +73,9 @@
             
             <a class='start-reading' onclick='updateNovel("{{ novel_title1 }}", "{{ novel_title2 }}")'>
                 Update Novel
-            </a>
+            </a><section class="search">
+                <input type="text" id="searchInput" onkeyup="searchChapters()" placeholder="Search for chapters...">
+            </section>
         </section>
 
         <section class="features">
@@ -120,5 +124,24 @@
             });
         }        
     </script>
+    <script>
+        function searchChapters() {
+            var input, filter, features, feature, h2, i, txtValue;
+            input = document.getElementById('searchInput');
+            filter = input.value.toUpperCase();
+            features = document.getElementsByClassName('feature');
+
+            for (i = 0; i < features.length; i++) {
+                h2 = features[i].getElementsByTagName('h2')[0];
+                txtValue = h2.textContent || h2.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    features[i].style.display = "";
+                } else {
+                    features[i].style.display = "none";
+                }
+            }
+        }
+    </script>
 </body>
 </html>
+
