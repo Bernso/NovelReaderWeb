@@ -707,3 +707,29 @@ input[type="range"]::-ms-track {
     border-color: transparent;
     color: transparent;
 }
+
+.search {
+    margin: 20px;
+    text-align: center;
+}
+
+.search input[type="text"] {
+    width: 80%; /* Adjust width as needed */
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #111111; /* Dark grey background */
+    border: 1px solid rgba(187, 134, 252, 0.5); /* Purple border */
+    border-radius: 5px;
+    color: #bb86fc; /* Light purple text color */
+    font-size: 16px;
+}
+
+.search input[type="text"]::placeholder {
+    color: rgba(187, 134, 252, 0.7); /* Lighter purple for placeholder */
+}
+
+.search input[type="text"]:focus {
+    outline: none;
+    border-color: #bb86fc; /* Brighter purple when focused */
+    box-shadow: 0 0 8px rgba(187, 134, 252, 0.5); /* Subtle glow effect */
+}

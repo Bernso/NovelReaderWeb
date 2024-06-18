@@ -5,6 +5,7 @@ try:
     import re
     import updateNovel
     import requests
+    import urllib
     import json
     from dotenv import load_dotenv
 except ImportError as e:
@@ -65,6 +66,8 @@ def run_script():
         return jsonify({"result": result})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
 
 
 
@@ -194,39 +197,102 @@ def show_novel_chapters(novel_title):
         return render_template('error.html'), 500
 
 
+def transform_title(novel_title):
+
+    """
+
+    Transform the novel title for URL:
+
+    1. Decode URL-encoded characters.
+
+    2. Convert to lowercase.
+
+    3. Replace special characters and spaces with hyphens.
+
+    """
+
+    decoded_title = urllib.parse.unquote(novel_title)
+
+    transformed_title = decoded_title.lower()
+
+    transformed_title = re.sub(r"[''']", "", transformed_title)  # Remove special apostrophes
+
+    transformed_title = re.sub(r'[^a-zA-Z0-9\s]', '', transformed_title)  # Remove non-alphanumeric characters
+
+    transformed_title = transformed_title.replace(" ", "-")
+
+    transformed_title = transformed_title.replace(":", "")
+
+    transformed_title = transformed_title.replace("/", "")  # Remove slashes
+
+    return transformed_title
+
+
 
 
 
 @app.route('/novels')
+
 def list_novels():
+
     try:
+
         # Path to the novels folder
+
         novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
 
+
+
         # List directories only, assuming each novel has its own directory
+
         novels_with_data = []
+
         emojis = ["🌙", "📚", "✨", "🌟", "🔥", "🌹", "💫", "📖"]
 
+
+
         for novel in os.listdir(novels_folder_path):
+
             novel_path = os.path.join(novels_folder_path, novel)
+
             categories_file = os.path.join(novel_path, 'categories.txt')
 
+
+
             if os.path.exists(categories_file):
+
                 with open(categories_file, 'r', encoding='utf-8') as f:
+
                     categories = f.read().strip().split('\n')
+
                     categories_str = ', '.join(categories)
+
             else:
+
                 categories_str = ""
 
+
+
             novel_name_clean = re.sub(r'\s*\(.*?\)', '', novel[:-9] if len(novel) >= 9 else novel)
+
             novels_with_data.append((novel, novel_name_clean, categories_str))
+
+
 
         return render_template('novels.html', novels=novels_with_data, emojis=emojis)
 
+
+
     except Exception as e:
+
         error_message = str(e)
+
         send_discord_message(error_message)
+
         return render_template('error.html'), 500
+
+
+
 
 
 
@@ -256,8 +322,13 @@ def youShouldntBeHere(novel_title):
 
 
 
+
+
+
+
 if __name__ == '__main__':
     try:
         app.run(debug=True)
     except Exception as e:
         input(f"Error running the app: {e}")
+
