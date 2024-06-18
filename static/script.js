@@ -13,6 +13,35 @@ document.addEventListener('DOMContentLoaded', function () {
     const opacitySlider = document.getElementById('opacity-slider');
     const currentOpacityLabel = document.getElementById('current-opacity');
 
+    // Load settings from localStorage
+    function loadSettings() {
+        const textSize = localStorage.getItem('textSize');
+        const font = localStorage.getItem('font');
+        const opacity = localStorage.getItem('opacity');
+
+        if (textSize) {
+            textToRead.style.fontSize = `${textSize}px`;
+            textSizeSlider.value = textSize;
+            currentSizeLabel.textContent = textSize;
+        }
+        if (font) {
+            textToRead.style.fontFamily = font;
+            fontSelector.value = font;
+        }
+        if (opacity) {
+            textToRead.style.opacity = opacity;
+            opacitySlider.value = opacity;
+            currentOpacityLabel.textContent = opacity;
+        }
+    }
+
+    // Save settings to localStorage
+    function saveSettings() {
+        localStorage.setItem('textSize', textSizeSlider.value);
+        localStorage.setItem('font', fontSelector.value);
+        localStorage.setItem('opacity', opacitySlider.value);
+    }
+
     // Function to toggle settings menu visibility
     function toggleSettingsMenu() {
         settingsMenu.style.display = settingsMenu.style.display === 'none' ? 'block' : 'none';
@@ -25,23 +54,26 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('settingsButton2').addEventListener('click', toggleSettingsMenu);
     closeSettingsButton.addEventListener('click', toggleSettingsMenu);
 
-    // Adjust text size
+    // Adjust text size and save
     textSizeSlider.addEventListener('input', function () {
         const newSize = `${textSizeSlider.value}px`;
         textToRead.style.fontSize = newSize;
         currentSizeLabel.textContent = textSizeSlider.value;
+        saveSettings();
     });
 
-    // Change font
+    // Change font and save
     fontSelector.addEventListener('change', function () {
         textToRead.style.fontFamily = fontSelector.value;
+        saveSettings();
     });
 
-    // Adjust text opacity
+    // Adjust text opacity and save
     opacitySlider.addEventListener('input', function () {
         const newOpacity = opacitySlider.value;
         textToRead.style.opacity = newOpacity;
         currentOpacityLabel.textContent = newOpacity;
+        saveSettings();
     });
 
     // Text-to-speech functionality
@@ -87,6 +119,9 @@ document.addEventListener('DOMContentLoaded', function () {
             speechSynthesis.cancel();
         }
     });
+
+    // Load settings on page load
+    loadSettings();
 });
 
 function showPrompt() {
