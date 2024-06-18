@@ -42,21 +42,22 @@ a:hover, .nav-link:hover, .fancyLink:hover {
 }
 
 .start-reading {
-    padding: 20px;
-    background-color: var(--background-dark);
-    box-shadow: var(--box-shadow);
-    justify-content: space-between;
-    align-items: center;
-    border: 2px solid var(--primary-color);
-    border-radius: var(--border-radius);
+    color: var(--primary-color); /* Change text color to white */
+    margin-top: 30px;
+    padding: 30px;
+    margin: 5px;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: bold;
+    background-color: var(--background-light); /* Use the primary purple color for background */
+    padding: 25px 20px; /* Add some padding for better visual spacing */
+    text-decoration: none; /* Remove underline from links */
+    border-radius: 5px; /* Add rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add subtle shadow for depth */
+    transition: transform 0.5s; /* Smooth transition for hover effects */
 }
 
 .start-reading:hover {
-    background-color: rgba(26, 26, 26, 0.39);
-    border-color: var(--hover-color);
-    color: var(--hover-color);
+    transform: translateY(-2px); /* Slight lift effect on hover */
 }
 
 /* Animations */
@@ -666,12 +667,12 @@ input[type="range"]::-ms-track {
 .search input[type="text"] {
     width: 80%; /* Adjust width as needed */
     padding: 10px;
-    margin-top: 10px;
     background-color: var(--background-light); /* Dark grey background */
     border: 1px solid rgba(187, 134, 252, 0.5); /* Purple border */
     border-radius: 5px;
     color: var(--primary-color); /* Light purple text color */
     font-size: 16px;
+    margin-top: 30px;
 }
 
 .search input[type="text"]::placeholder {
