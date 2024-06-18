@@ -543,11 +543,6 @@ footer {
     color: #dddddd;
 }
 
-
-
-
-
-
 /* Settings Menu */
 .settings-menu {
     display: none; /* Hidden by default */
@@ -651,4 +646,64 @@ body.settings-open::before {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
     z-index: 999; /* Ensure this overlay is below the settings menu */
+}
+
+/* Slider thumb styles for WebKit browsers */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #BB86FC; /* Purple color */
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+/* Slider thumb styles for WebKit browsers */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background: #BB86FC; /* Purple color to match the theme */
+    cursor: pointer;
+    border-radius: 50%;
+    border: none; /* Remove any default border */
+}
+
+/* Slider thumb styles for Firefox */
+input[type="range"]::-moz-range-thumb {
+    background: #BB86FC; /* Purple color to match the theme */
+    cursor: pointer;
+    border-radius: 50%;
+    border: none; /* Remove any default border */
+}
+
+/* Slider track styles for WebKit browsers */
+input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    background: #333; /* Dark background for the track */
+    border-radius: 5px;
+}
+
+/* Slider track styles for Firefox */
+input[type="range"]::-moz-range-track {
+    width: 100%;
+    background: #333; /* Dark background for the track */
+    border-radius: 5px;
+}
+
+/* Optional: Styles for IE to handle the slider thumb */
+input[type="range"]::-ms-thumb {
+    color: #BB86FC; /* Purple color to match the theme */
+    cursor: pointer;
+    border-radius: 50%;
+    border: none; /* Remove any default border */
+}
+
+/* Optional: Styles for IE to handle the slider track */
+input[type="range"]::-ms-track {
+    width: 100%;
+    height: 10px; /* Adjusted height for better visual alignment with the thumb */
+    background: #333; /* Dark background for the track */
+    border-color: transparent;
+    color: transparent;
 }

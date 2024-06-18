@@ -46,8 +46,19 @@ document.addEventListener('DOMContentLoaded', function () {
     function toggleSettingsMenu() {
         if (settingsMenu.style.display === 'block') {
             settingsMenu.style.display = 'none';
+            document.removeEventListener('click', handleOutsideClick, true);
         } else {
             settingsMenu.style.display = 'block';
+            // Delay adding the event listener to avoid the immediate click event that triggers the menu to open
+            setTimeout(() => {
+                document.addEventListener('click', handleOutsideClick, true);
+            }, 0);
+        }
+    }
+
+    function handleOutsideClick(event) {
+        if (!settingsMenu.contains(event.target) && event.target.id !== 'settingsButton' && event.target.id !== 'settingsButton2') {
+            toggleSettingsMenu();
         }
     }
 
