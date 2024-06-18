@@ -61,8 +61,6 @@
                 {{ categories }}
             </p>
 
-            
-            
             <a class='start-reading' href="/novels/{{ novel_title1 }}/chapters/{{ chapters[0] }}">
                 Start Reading
             </a>
@@ -73,10 +71,13 @@
             
             <a class='start-reading' onclick='updateNovel("{{ novel_title1 }}", "{{ novel_title2 }}")'>
                 Update Novel
-            </a><section class="search">
+            </a>
+            
+            <section class="search">
                 <input type="text" id="searchInput" onkeyup="searchChapters()" placeholder="Search for chapters...">
             </section>
         </section>
+
 
         <section class="features">
             {% for chapter in chapters %}
