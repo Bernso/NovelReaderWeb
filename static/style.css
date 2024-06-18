@@ -142,7 +142,7 @@ a:hover {
 .hero p {
     font-size: 1.2em;
     margin-bottom: 40px;
-    color: #dddddd;
+    color: #ccccccbd;
 }
 
 .cta-button {
@@ -210,7 +210,7 @@ a:hover {
 }
 
 .feature p {
-    color: #cccccc;
+    color: #ccccccbd;
 }
 
 
@@ -234,7 +234,7 @@ a:hover {
 .community p {
     font-size: 1.2em;
     margin-bottom: 20px;
-    color: #dddddd;
+    color: #ccccccbd;
 }
 
 .community a {

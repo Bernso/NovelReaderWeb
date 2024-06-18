@@ -95,7 +95,7 @@
     </main>
     
 
-
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script>
         function updateNovel(novelTitle1, novelTitle2) {
             fetch(`/update_novel/${novelTitle1}`, {

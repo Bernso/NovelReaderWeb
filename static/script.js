@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const textToRead = document.getElementById('textToRead');
     const currentSizeLabel = document.getElementById('current-size');
     const voiceSelector = document.getElementById('voice-selector');
+    const opacitySlider = document.getElementById('opacity-slider');
+    const currentOpacityLabel = document.getElementById('current-opacity');
 
     // Function to toggle settings menu visibility
     function toggleSettingsMenu() {
@@ -20,11 +22,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('settingsButton').addEventListener('click', toggleSettingsMenu);
     closeSettingsButton.addEventListener('click', toggleSettingsMenu);
 
-
-    
     document.getElementById('settingsButton2').addEventListener('click', toggleSettingsMenu);
     closeSettingsButton.addEventListener('click', toggleSettingsMenu);
-
 
     // Adjust text size
     textSizeSlider.addEventListener('input', function () {
@@ -36,6 +35,13 @@ document.addEventListener('DOMContentLoaded', function () {
     // Change font
     fontSelector.addEventListener('change', function () {
         textToRead.style.fontFamily = fontSelector.value;
+    });
+
+    // Adjust text opacity
+    opacitySlider.addEventListener('input', function () {
+        const newOpacity = opacitySlider.value;
+        textToRead.style.opacity = newOpacity;
+        currentOpacityLabel.textContent = newOpacity;
     });
 
     // Text-to-speech functionality
@@ -82,13 +88,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
-
-
-
-
-
-
-
 
 function showPrompt() {
     const novelLink = prompt("Enter the link for your novel:", "Link");
