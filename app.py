@@ -1,5 +1,5 @@
 try:
-    from flask import Flask, render_template, request, jsonify
+    from flask import Flask, render_template, request, jsonify, session
     import os
     import genChapters
     import re
@@ -38,6 +38,10 @@ def send_discord_message(message):
 
 
 app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY")
+
+
+
 
 @app.route('/test')
 def test_site():
@@ -80,51 +84,37 @@ def show_chapter(novelTitle, chapter_number):
         # Construct the path to the novel's subfolder
         subfolder_path = os.path.join(app.root_path, 'templates', 'novels', novelTitle)
 
-        # Debug: Check if the directory exists
+        # Check if the directory exists
         if not os.path.exists(subfolder_path):
             print(f"Directory not found: {subfolder_path}")
             return render_template('chapterNotFound.html'), 404
 
         # List and sort text files in the subfolder
         text_files = [file for file in os.listdir(subfolder_path) if file.endswith('.txt')]
-        
-        # Debug: Log the initial list of files
-        print(f"Files in {subfolder_path}: {text_files}")
+        valid_files = sorted([file for file in text_files if re.match(r'chapter-(\d+)\.txt', file)],
+                             key=lambda x: int(re.match(r'chapter-(\d+)\.txt', x).group(1)))
 
-        # Ensure we are only processing valid chapter files
-        valid_files = []
-        for file in text_files:
-            match = re.match(r'chapter-(\d+)\.txt', file)
-            if match:
-                valid_files.append(file)
-
-        # Sort the valid files
-        valid_files.sort(key=lambda x: int(re.match(r'chapter-(\d+)\.txt', x).group(1)))
-
-        # Debug: Log the sorted list of valid files
-        print(f"Valid sorted files for {novelTitle}: {valid_files}")
-
-        # Check if the chapter number is valid
-        if chapter_number < 1 or chapter_number > int(re.match(r'chapter-(\d+)\.txt', valid_files[-1]).group(1)):
-            print(f"Chapter number {chapter_number} is out of range. Available chapters: {int(re.match(r'chapter-(\d+)\.txt', valid_files[-1]).group(1))}")
+        # Check if the chapter number is within the valid range
+        if not valid_files or chapter_number < 1 or chapter_number > int(re.match(r'chapter-(\d+)\.txt', valid_files[-1]).group(1)):
+            print(f"Chapter number {chapter_number} is out of range or no valid chapters found.")
             return render_template('chapterNotFound.html'), 404
 
         # Access the correct chapter file
         chapter_file = f'chapter-{chapter_number}.txt'
-        
         if chapter_file not in valid_files:
             print(f"Chapter file {chapter_file} not found in valid files.")
             return render_template('chapterNotFound.html'), 404
 
-        chapter_path = os.path.join(subfolder_path, chapter_file)
-
         # Read the chapter content
+        chapter_path = os.path.join(subfolder_path, chapter_file)
         with open(chapter_path, 'r', encoding='utf-8') as f:
             chapter_text = f.read()
 
         # Clean and encode the novel title for display and URL
         novel_title_clean = re.sub(r'\s*\(.*?\)', '', novelTitle[:-9] if len(novelTitle) >= 9 else novelTitle)
         novel_title_encoded = novelTitle.replace(' ', '%20')
+
+        session[f'last_read_{novelTitle}'] = chapter_number
 
         return render_template('chapterPage.html',
                                novel_title_clean=novel_title_clean,

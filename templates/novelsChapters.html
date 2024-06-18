@@ -65,7 +65,7 @@
                 Start Reading
             </a>
 
-            <a class='start-reading' href="/novels/{{ novel_title1 }}/chapters/{{ chapters[0] }}">
+            <a class='start-reading' href="/novels/{{ novel_title1 }}/chapters/{{ session.get('last_read_' + novel_title1, 1) }}">
                 Continue Reading
             </a>
             
