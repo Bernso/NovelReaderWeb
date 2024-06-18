@@ -102,8 +102,8 @@ def show_chapter(novelTitle, chapter_number):
         print(f"Valid sorted files for {novelTitle}: {valid_files}")
 
         # Check if the chapter number is valid
-        if chapter_number < 1 or chapter_number > len(valid_files):
-            print(f"Chapter number {chapter_number} is out of range. Available chapters: {len(valid_files)}")
+        if chapter_number < 1 or chapter_number > int(re.match(r'chapter-(\d+)\.txt', valid_files[-1]).group(1)):
+            print(f"Chapter number {chapter_number} is out of range. Available chapters: {int(re.match(r'chapter-(\d+)\.txt', valid_files[-1]).group(1))}")
             return render_template('chapterNotFound.html'), 404
 
         # Access the correct chapter file
