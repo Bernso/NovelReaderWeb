@@ -20,6 +20,10 @@
         #settingsButton, #settingsButton2 {
             cursor: pointer;
         }
+
+        .hero2 {
+            background: #111111; /* Solid color */
+        }
     </style>
 </head>
 <body>
@@ -109,11 +113,11 @@
                 </a>
             </div>
             <div class="feature">
-                <p id="settingsButton2">
+                <a id="settingsButton2" onclick="toggleSettingsMenu()">
                     <div class="icon">⚙️</div>
                     <h3>Settings</h3>
                     <p>Text-To-Speech, Font Customization, and Font Size Control</p>
-                </p>
+                </a>
             </div>
             <div class="feature">
                 <a href="/novels/{{novel_title_encoded}}/chapters/{{chapter_number + 1}}">
