@@ -106,7 +106,11 @@ a:hover, .nav-link:hover, .fancyLink:hover {
 .logo h1 {
     font-size: 1.5em;
     color: var(--primary-color);
-    padding: 0 20px;
+    padding: 20px;
+}
+
+.logo a {
+    padding: 20px;
 }
 
 .nav ul {
