@@ -34,12 +34,9 @@ body {
 a, .nav-link, .fancyLink {
     text-decoration: none;
     color: var(--primary-color);
-    transition: color 0.3s ease;
 }
 
-a:hover, .nav-link:hover, .fancyLink:hover {
-    color: var(--hover-color);
-}
+
 
 .start-reading {
     color: var(--primary-color); /* Change text color to white */
@@ -57,7 +54,27 @@ a:hover, .nav-link:hover, .fancyLink:hover {
 }
 
 .start-reading:hover {
-    transform: translateY(-2px); /* Slight lift effect on hover */
+    transform: translateY(-2px) scale(1.05); 
+}
+
+.novelsChaptersButtons {
+    color: var(--primary-color); /* Change text color to white */
+    margin-top: 30px;
+    padding: 30px;
+    margin: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    background-color: var(--background-light); /* Use the primary purple color for background */
+    padding: 25px 20px; /* Add some padding for better visual spacing */
+    text-decoration: none; /* Remove underline from links */
+    border-radius: 5px; /* Add rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add subtle shadow for depth */
+    transition: transform 0.5s; /* Smooth transition for hover effects */
+}
+
+
+.novelsChaptersButtons:hover {
+    transform: translateY(-2px) scale(1.05) !important; 
 }
 
 /* Animations */
@@ -201,9 +218,17 @@ a:hover, .nav-link:hover, .fancyLink:hover {
     transition: transform 0.3s, box-shadow 0.3s;
 }
 
+.feature h3 {
+    text-align: center !important;  /* Center-align the text */
+}
+
 .feature:hover {
     transform: scale(1.05);
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+}
+
+.section-class .feature h3 {
+    text-align: center !important;
 }
 
 .icon {

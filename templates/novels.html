@@ -45,7 +45,7 @@
                 <div class="feature">
                     <a href='{{ url_for('show_novel_chapters', novel_title=original_novel) }}'>
                         <div class="icon">{{ emojis[loop.index0 % emojis|length] }}</div>
-                        <h3>{{ modified_novel }}</h3>
+                        <h3 style='align: center;'>{{ modified_novel }}</h3>
                         <p>{{ categories }}</p>
                     </a>
                 </div>
