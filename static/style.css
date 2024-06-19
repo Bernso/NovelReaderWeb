@@ -36,8 +36,6 @@ a, .nav-link, .fancyLink {
     color: var(--primary-color);
 }
 
-
-
 .start-reading {
     color: var(--primary-color); /* Change text color to white */
     margin-top: 30px;
@@ -72,7 +70,6 @@ a, .nav-link, .fancyLink {
     transition: transform 0.5s; /* Smooth transition for hover effects */
 }
 
-
 .novelsChaptersButtons:hover {
     transform: translateY(-2px) scale(1.05) !important; 
 }
@@ -103,6 +100,17 @@ a, .nav-link, .fancyLink {
         opacity: 1;
     }
 }
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+
 
 /* Header */
 .header {
@@ -135,21 +143,7 @@ a, .nav-link, .fancyLink {
     gap: 20px;
 }
 
-.nav-link {
-    display: inline-block;
-    margin: 0 10px;
-    padding: 10px 20px;
-    background-color: transparent;
-    color: var(--text-color);
-    text-decoration: none;
-    border-radius: var(--border-radius);
-    transition: color 0.3s ease, background-color 0.3s ease;
-}
 
-.nav-link:hover {
-    background-color: #282828;
-    color: var(--text-color);
-}
 
 /* Hero Section */
 .hero {
@@ -432,6 +426,24 @@ footer {
 /* Responsive Design */
 
 @media only screen and (max-width: 768px) {
+    body {
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .header, .nav ul {
+        width: 100%;
+    }
+
+    .nav li {
+        display: block;
+        text-align: center;
+    }
+
+    .feature {
+        width: 100%; /* Make each feature take full width on smaller screens */
+    }
+
     .hero {
         padding: 100px 20px 40px;
     }
