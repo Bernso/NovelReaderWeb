@@ -163,18 +163,6 @@ function showPrompt() {
             },
             body: JSON.stringify({ novelLink: novelLink })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                alert('Chapters generated successfully! Latest chapter: ' + data.latest_chapter);
-            } else {
-                alert('An error occurred. Please try again.');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred. Please try again.');
-        });
     } else {
         alert("Prompt cancelled.");
     }
