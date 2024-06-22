@@ -134,7 +134,7 @@ def main(url, chapter_number, novel_title):
             with open(file_path, 'w', encoding='utf-8') as file:
                 file.write(chapter_text.replace('\n', '<br><br>'))
 
-            print(f"TXT file created successfully for {novel_title} chapter {chapter_number}")
+            print(f"TXT file created successfully for * {novel_title} * chapter * {chapter_number} *")
 
         else:
             print("Error: 'chapter-container' not found on the page.")
@@ -172,6 +172,7 @@ def yes(base_url):
 
         for i in range(1, int(latest_chapter_number) + 1):
             main(url=f"{base_url}/chapter-{i}", chapter_number=i, novel_title=novel_title)
+        print(f"Finished scraping * {novel_title} *")
 
     thread = threading.Thread(target=thread_target)
     thread.start()

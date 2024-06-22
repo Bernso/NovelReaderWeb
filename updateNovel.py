@@ -153,7 +153,7 @@ def main(url, chapter_number, novel_title):
                 chapter_text = chapter_container.get_text(separator='\n').strip()
                 with open(file_path, 'w', encoding='utf-8') as file:
                     file.write(chapter_text.replace('\n', '<br><br>'))
-                print(f"TXT file created successfully for {novel_title} chapter {chapter_number}")
+                print(f"TXT file created successfully for * {novel_title} * chapter * {chapter_number} *")
             else:
                 print("Error: 'chapter-container' not found on the page.")
 
@@ -176,9 +176,11 @@ def yes(novel_title):
 
         for i in range(1, int(latest_chapter_number) + 1):
             main(url=f"{base_url}/chapter-{i}", chapter_number=i, novel_title=novel_title_clean)
+        print(f"Finished updating * {novel_title_clean} *")
 
     thread = threading.Thread(target=thread_target)
     thread.start()
+    
     
     
 # Example usage
