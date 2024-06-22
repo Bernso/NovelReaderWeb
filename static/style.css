@@ -293,6 +293,13 @@ footer {
     padding: 2rem;
 }
 
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        padding: 1rem;
+    }
+}
+
 /* Content */
 .content, .content-wrapper {
     background-color: #0f3460;

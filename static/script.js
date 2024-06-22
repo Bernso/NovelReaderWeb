@@ -42,6 +42,19 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.setItem('opacity', opacitySlider.value);
     }
 
+    window.onload = function() {
+        var features = document.querySelectorAll('.feature');
+        var maxHeight = 0;
+        features.forEach(function(feature) {
+            if (feature.offsetHeight > maxHeight) {
+                maxHeight = feature.offsetHeight;
+            }
+        });
+        features.forEach(function(feature) {
+            feature.style.minHeight = maxHeight + 'px';
+        });
+    };
+
     // Function to toggle settings menu visibility
     function toggleSettingsMenu() {
         if (settingsMenu.style.display === 'block') {

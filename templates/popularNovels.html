@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
-    <title>Novel Reader</title>
+    <title>Popular Novels</title>
 </head>
 <body>
     <header class="header">
@@ -44,35 +44,23 @@
             </ul>
         </nav>
     </header>
-
     <main>
-        <section class="hero">
+        <section style='margin-bottom: 0;' class="hero">
             <h2>Welcome to the World of Novels</h2>
-            <p>Seamlessly generate and read your favorite novels with a dark, majestic interface.</p>
-            <p>View our popular novels <a href='/popular-novels'>here</a></p>
+            <p>Here are our most loved novels by you guys!</p>
         </section>
 
-        <section class="features">
-            <div class="feature">
-                <a href='/novels'>
-                    <div class="icon">📚</div>
-                    <h3>Extensive Library</h3>
-                    <p>Access a vast collection of novels with a single click.</p>
+            <section class="features">
+                {% for display_title, emoji, url_title in novel_emoji_pairs %}
+                <a href="/novels/{{ url_title }}">
+                    <div class="feature">
+                        <div class="icon">{{ emoji }}</div>
+                        <h3>{{ display_title }}</h3>
+                        <p>Read Now</p>
+                    </div>
                 </a>
-            </div>
-            <div class="feature">
-                <a onclick="showPrompt()" style='cursor: pointer;'>
-                    <div class="icon">⚡</div>
-                    <h3>Fast Generation</h3>
-                    <p>Generate chapters quickly and efficiently.</p>
-                </a>
-            </div>
-            <div class="feature">
-                <div class="icon">🌙</div>
-                <h3>Dark Mode</h3>
-                <p>Enjoy reading with an eye-friendly dark mode.</p>
-            </div>
-        </section>
+                {% endfor %}
+            </section>
 
         <section class="community">
             <h2>Join Our Community</h2>
@@ -80,37 +68,8 @@
             <p>Created by <a href="https://www.github.com/Bernso" target="_blank" style='text-decoration: none;'>Bernso</a></p>
         </section>
     </main>
-
-    
-
-    <script>
-        function showPrompt() {
-            const novelLink = prompt("Enter the link for your novel:", "Link");
-            if (novelLink) {
-                alert("Processing...");
-                fetch('/run_script', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ novelLink: novelLink })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        alert('Chapters generated successfully! Latest chapter: ' + data.latest_chapter);
-                    } else {
-                        alert('An error occurred. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
-                });
-            } else {
-                alert("Prompt cancelled.");
-            }
-        }
-    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src='/./script.js'></script>
 </body>
 </html>
+

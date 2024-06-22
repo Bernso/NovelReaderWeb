@@ -4,6 +4,7 @@ try:
     import genChapters
     import re
     import updateNovel
+    import random
     import requests
     import urllib
     import json
@@ -188,33 +189,20 @@ def show_novel_chapters(novel_title):
 
 
 def transform_title(novel_title):
-
     """
-
     Transform the novel title for URL:
-
     1. Decode URL-encoded characters.
-
-    2. Convert to lowercase.
-
-    3. Replace special characters and spaces with hyphens.
-
+    2. Remove anything within brackets (including brackets).
+    3. Convert to lowercase.
+    4. Replace special characters and spaces with hyphens.
+    5. Remove trailing hyphens and spaces.
     """
-
-    decoded_title = urllib.parse.unquote(novel_title)
-
-    transformed_title = decoded_title.lower()
-
-    transformed_title = re.sub(r"[''']", "", transformed_title)  # Remove special apostrophes
-
+    transformed_title = re.sub(r"[''']", "", novel_title)  # Remove special apostrophes
     transformed_title = re.sub(r'[^a-zA-Z0-9\s]', '', transformed_title)  # Remove non-alphanumeric characters
-
-    transformed_title = transformed_title.replace(" ", "-")
-
-    transformed_title = transformed_title.replace(":", "")
-
-    transformed_title = transformed_title.replace("/", "")  # Remove slashes
-
+    transformed_title = transformed_title.replace(" ", "%20")
+    transformed_title = transformed_title.rstrip('- ')  # Remove trailing hyphens and spaces
+    transformed_title = transformed_title[:-8]
+    transformed_title += '-chapters'
     return transformed_title
 
 
@@ -310,7 +298,36 @@ def youShouldntBeHere(novel_title):
     return render_template('notHere.html', novel_title=novel_title)
 
 
+def fetch_popular_novels():
+    novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
+    all_novels = [novel for novel in os.listdir(novels_folder_path) if os.path.isdir(os.path.join(novels_folder_path, novel))]
+    popular_novels = random.sample(all_novels, 3) if len(all_novels) >= 3 else all_novels
+    return popular_novels
 
+
+@app.route('/popular-novels')
+def popular_novels():
+    try:
+        novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
+        all_novels = [novel for novel in os.listdir(novels_folder_path) if os.path.isdir(os.path.join(novels_folder_path, novel))]
+        selected_novels = random.sample(all_novels, 3) if len(all_novels) >= 3 else all_novels
+
+        # Transform titles for URL usage
+        transformed_titles = [transform_title(novel) for novel in selected_novels]
+
+        # Clean up the titles of the selected novels
+        cleaned_titles = [re.sub(r'\s*\(.*?\)', '', novel[:-9] if len(novel) >= 9 else novel) for novel in selected_novels]
+
+        # Prepare emoji pairs
+        emojis = ["📚", "📘", "📖", "📕", "📗", "📙", "📔", "📒", "📓", "📑"]
+        random_emojis = [random.choice(emojis) for _ in cleaned_titles]
+        novel_emoji_pairs = zip(cleaned_titles, random_emojis, transformed_titles)
+
+        return render_template('popularNovels.html', novel_emoji_pairs=novel_emoji_pairs)
+    except Exception as e:
+        error_message = str(e)
+        send_discord_message(error_message)
+        return render_template('error.html'), 500
 
 
 
