@@ -1,4 +1,3 @@
-// Open and close settings menu
 document.addEventListener('DOMContentLoaded', function () {
     const settingsMenu = document.getElementById('settings-menu');
     const closeSettingsButton = document.getElementById('close-settings');
