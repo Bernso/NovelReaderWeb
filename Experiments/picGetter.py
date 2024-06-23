@@ -20,15 +20,18 @@ def download_image_from_link():
             if not os.path.exists('pics'):
                 os.makedirs('pics')
             if img_url.startswith('data:image'):
-                # Extract the base64 part by removing the prefix
-                base64_str = img_url.split(",")[1]
+                # Handle base64 encoded images
+                format, base64_str = img_url.split(';base64,')
                 image_data = base64.b64decode(base64_str)
-                img_name = 'downloaded_image.png'  # You might want to generate a unique name or different format
-                with open(os.path.join('pics', img_name), 'wb') as f:
-                    f.write(image_data)
+                img_format = format.split('/')[-1]
+                img_name = f'downloaded_image.{img_format}'
+                image = Image.open(io.BytesIO(image_data))
+                image = image.convert('RGB')
+                image.save(os.path.join('pics', img_name), format='JPEG')
                 print(f"Image decoded from base64 and saved as {img_name} in 'pics' folder.")
             else:
-                img_data = requests.get(img_url, headers=headers).content  # Use headers for image request too
+                # Handle standard image URLs
+                img_data = requests.get(img_url, headers=headers).content
                 img_name = os.path.basename(img_url)
                 with open(os.path.join('pics', img_name), 'wb') as f:
                     f.write(img_data)
@@ -38,7 +41,7 @@ def download_image_from_link():
     else:
         print("No figure with class 'cover' found.")
 
-
 download_image_from_link()
 
 #Generate some code that will download the image from the link inputted, the image will be in the 'cover' figure and inside of that there will be an 'img' this is where the image is, i want this to be downloaded to a folder called 'pics' if it doesnt already exist i want it to create the directory
+
