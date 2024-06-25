@@ -775,11 +775,11 @@ input[type="range"]::-ms-track {
     cursor: pointer;
     border-radius: 5px;
     margin-bottom: 10px;
-    transition: background-color 0.3s;
+    transition: opacity 0.3s;
 }
 
 #toggleFiltersButton:hover {
-    background-color: var(--hover-color);
+    opacity: 0.8;
 }
 
 /* Style for the category filters */
@@ -797,11 +797,11 @@ input[type="range"]::-ms-track {
     display: flex;
     align-items: center;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: opacity 0.3s;
 }
 
 #categoryFilters label:hover {
-    background-color: var(--hover-color);
+    opacity: 0.8;
 }
 
 #categoryFilters input[type="checkbox"] {
