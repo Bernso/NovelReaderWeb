@@ -184,15 +184,22 @@ a, .nav-link, .fancyLink {
     transform: translateY(-5px);
 }
 
-/* Features Section */
+
+
+
 .features {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
     padding: 60px 20px;
     background-color: #121212;
+    justify-content: center; /* Center the entire grid content horizontally */
+    place-items: center; /* Center items within the grid */
+    justify-items: center; /* Ensure items are centered in their grid area */
     animation: fadeIn 1.5s ease-in-out;
 }
+ 
+
 
 .features2 {
     display: grid;
@@ -204,17 +211,28 @@ a, .nav-link, .fancyLink {
 }
 
 .feature {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     background: linear-gradient(145deg, var(--background-light), #222222);
     padding: 20px;
     border-radius: 10px;
     text-align: center;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     transition: transform 0.3s, box-shadow 0.3s;
+    width: 100%; /* Ensure the feature takes up available width */
 }
 
+
+
 .feature h3 {
-    text-align: center !important;  /* Center-align the text */
+    text-align: center;
+    width: 100%; /* Ensures the text occupies the full width of its container */
+    margin: 0; /* Removes any default margins */
+    padding: 10px; /* Adds some space around the text */
 }
+
 
 .feature:hover {
     transform: scale(1.05);
@@ -293,12 +311,25 @@ footer {
     padding: 2rem;
 }
 
-@media (max-width: 768px) {
-    .container {
-        flex-direction: column;
-        padding: 1rem;
+@media only screen and (max-width: 768px) {
+    .features {
+        grid-template-columns: 1fr; /* Single column on small screens */
     }
 }
+
+@media only screen and (min-width: 769px) and (max-width: 1200px) {
+    .features {
+        grid-template-columns: repeat(2, 1fr); /* Two columns on medium screens */
+    }
+}
+
+@media only screen and (min-width: 1201px) {
+    .features {
+        grid-template-columns: repeat(3, 1fr); /* Three columns on large screens */
+    }
+}
+
+
 
 /* Content */
 .content, .content-wrapper {
@@ -731,4 +762,87 @@ input[type="range"]::-ms-track {
     outline: none;
     border-color: var(--primary-color); /* Brighter purple when focused */
     box-shadow: 0 0 8px rgba(187, 134, 252, 0.5); /* Subtle glow effect */
+}
+
+
+
+
+#toggleFiltersButton {
+    background-color: var(--background-light);
+    color: var(--primary-color);
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    transition: background-color 0.3s;
+}
+
+#toggleFiltersButton:hover {
+    background-color: var(--hover-color);
+}
+
+/* Style for the category filters */
+#categoryFilters {
+    display: none; /* Initially hidden */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+#categoryFilters label {
+    background-color: var(--background-light);
+    color: var(--primary-color);
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#categoryFilters label:hover {
+    background-color: var(--hover-color);
+}
+
+#categoryFilters input[type="checkbox"] {
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+    background-color: var(--background-light);
+    border: 2px solid var(--primary-color);
+    border-radius: 3px;
+    appearance: none;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+    position: relative;
+}
+
+#categoryFilters input[type="checkbox"]:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+#categoryFilters input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 12px;
+    border: solid var(--background-light);
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* Responsive Design for Category Filters */
+@media only screen and (max-width: 768px) {
+    #categoryFilters {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media only screen and (max-width: 480px) {
+    #categoryFilters {
+        grid-template-columns: 1fr;
+    }
 }

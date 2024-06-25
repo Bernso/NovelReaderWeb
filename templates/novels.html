@@ -8,8 +8,6 @@
     <title>Novels</title>
 </head>
 <body>
-
-    
     <header class="header">
         <div class="logo">
             <h1><a href='/'>Novel Reader</a></h1>
@@ -17,45 +15,45 @@
         <nav class="nav">
             <ul>
                 <li><a class="start-reading" id="generateButton" onclick="showPrompt()" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>Get Chapters</a></li>
-
                 <li><a class="start-reading" href="/novels" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>Novels</a></li>
-
                 <li><a class="start-reading" href="/plans" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>Plans</a></li>
-
                 <li><a class="start-reading" href="/currentChapter" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>Current Chapter</a></li>
-                
                 <li>&nbsp;&nbsp;</li>
             </ul>
         </nav>
-        
     </header>
-
 
     <main style='min-width: 980px;'>
         <section class="hero">
             <h2>Novels</h2>
-            <p style="margin-bottom: 0;">Read all of your favourite novels in a dark, majestic interface.</p>
+            <p style="margin-bottom: 0;">Read all of your favourite novels in a dark, majestic interface</p>
             <section class="search" style="margin-top: 0;">
                 <input type="text" id="searchInput" onkeyup="searchNovels()" placeholder="Search for novels...">
+            </section>
+            <section class="filter">
+                <button id="toggleFiltersButton" onclick="toggleFilters()">Categories</button>
+                <div id="categoryFilters" style="display: none;">
+                    {% for category in all_categories %}
+                        <label>
+                            <input type="checkbox" class="category-checkbox" value="{{ category }}">
+                            {{ category }}
+                        </label>
+                    {% endfor %}
+                </div>
             </section>
         </section>
 
         <section class="features">
             {% for original_novel, modified_novel, categories in novels %}
-                <div class="feature">
+                <div class="feature" data-categories="{{ categories }}">
                     <a href='{{ url_for('show_novel_chapters', novel_title=original_novel) }}'>
                         <div class="icon">{{ emojis[loop.index0 % emojis|length] }}</div>
-                        <h3 style='align: center;'>{{ modified_novel }}</h3>
-                        <p>{{ categories }}</p>
+                            <h3>{{ modified_novel }}</h3>
+                            <p>{{ categories }}</p>
                     </a>
                 </div>
             {% endfor %}
         </section>
-        
-        
-        
-
-       
 
         <section class="community">
             <h2>Join Our Community</h2>
@@ -70,9 +68,9 @@
             input = document.getElementById('searchInput');
             filter = input.value.toUpperCase();
             features = document.getElementsByClassName('feature');
-    
+
             for (i = 0; i < features.length; i++) {
-                h3 = features[i].getElementsByTagName('h3')[0];
+                h3 = features[i].getElementsByTagName('h3')[0]; 
                 txtValue = h3.textContent || h3.innerText;
                 if (txtValue.toUpperCase().indexOf(filter) > -1) {
                     features[i].style.display = "";
@@ -81,6 +79,39 @@
                 }
             }
         }
+
+        function filterNovels() {
+            var checkboxes = document.querySelectorAll('.category-checkbox');
+            var selectedCategories = Array.from(checkboxes).filter(checkbox => checkbox.checked).map(checkbox => checkbox.value.trim());
+            var features = document.getElementsByClassName('feature');
+
+            for (var i = 0; i < features.length; i++) {
+                var categories = features[i].getAttribute('data-categories').split(/\s*,\s*/).map(cat => cat.trim());
+                if (selectedCategories.length === 0 || selectedCategories.every(category => categories.includes(category))) {
+                    features[i].style.display = "";
+                } else {
+                    features[i].style.display = "none";
+                }
+            }
+        }
+
+        function isElementHidden(element) {
+            var style = window.getComputedStyle(element);
+            return style.display === 'none';
+        }
+
+        function toggleFilters() {
+            var filters = document.getElementById('categoryFilters');
+            if (isElementHidden(filters)) {
+                filters.style.display = 'grid';
+            } else {
+                filters.style.display = 'none';
+            }
+        }
+
+        document.querySelectorAll('.category-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', filterNovels);
+        });
     </script>
 </body>
 </html>

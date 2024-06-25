@@ -188,6 +188,8 @@ def show_novel_chapters(novel_title):
         return render_template('error.html'), 500
 
 
+
+
 def transform_title(novel_title):
     """
     Transform the novel title for URL:
@@ -210,64 +212,39 @@ def transform_title(novel_title):
 
 
 @app.route('/novels')
-
 def list_novels():
-
     try:
-
-        # Path to the novels folder
-
         novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
-
-
-
-        # List directories only, assuming each novel has its own directory
-
         novels_with_data = []
-
         emojis = ["🌙", "📚", "✨", "🌟", "🔥", "🌹", "💫", "📖"]
 
-
+        all_categories = set()
 
         for novel in os.listdir(novels_folder_path):
-
             novel_path = os.path.join(novels_folder_path, novel)
-
             categories_file = os.path.join(novel_path, 'categories.txt')
 
-
-
             if os.path.exists(categories_file):
-
                 with open(categories_file, 'r', encoding='utf-8') as f:
-
-                    categories = f.read().strip().split('\n')
-
+                    categories = [line.strip() for line in f if line.strip()]
                     categories_str = ', '.join(categories)
-
+                    all_categories.update(categories)
             else:
-
                 categories_str = ""
 
-
-
             novel_name_clean = re.sub(r'\s*\(.*?\)', '', novel[:-9] if len(novel) >= 9 else novel)
-
             novels_with_data.append((novel, novel_name_clean, categories_str))
 
+        # Sort the categories by words
+        sorted_categories = sorted(all_categories, key=lambda x: x.lower())
 
-
-        return render_template('novels.html', novels=novels_with_data, emojis=emojis)
-
-
-
+        return render_template('novels.html', novels=novels_with_data, emojis=emojis, all_categories=sorted_categories)
     except Exception as e:
-
         error_message = str(e)
-
         send_discord_message(error_message)
-
         return render_template('error.html'), 500
+
+
 
 
 
@@ -338,4 +315,5 @@ if __name__ == "__main__":
         app.run(debug=True)
     except Exception as e:
         input(f"Error running the app: {e}")
+
 
