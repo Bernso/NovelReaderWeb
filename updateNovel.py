@@ -5,6 +5,9 @@ import re
 import urllib
 import threading
 
+# Script needed to update the novels
+
+
 # Define headers to mimic browser requests
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36'
