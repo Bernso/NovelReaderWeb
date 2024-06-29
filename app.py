@@ -41,7 +41,7 @@ def send_discord_message(message):
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
-
+currentPath = os.getcwd()
 
 
 @app.route('/test')
@@ -214,6 +214,11 @@ def transform_title(novel_title):
 @app.route('/novels')
 def list_novels():
     try:
+        if not os.path.exists(f"{currentPath}/templates/novels"):
+            os.makedirs(f"{currentPath}/templates/novels")
+        else:
+            print("Novel folder already exists")
+
         novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
         novels_with_data = []
         emojis = ["🌙", "📚", "✨", "🌟", "🔥", "🌹", "💫", "📖"]
