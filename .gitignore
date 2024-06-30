@@ -6,3 +6,4 @@ auto.bat
 templates/novels/
 .env
 pics/
+offlineChapters.py
