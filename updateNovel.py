@@ -28,9 +28,10 @@ def transform_title(novel_title):
     decoded_title = urllib.parse.unquote(novel_title_cleaned)
     transformed_title = decoded_title.lower()
     transformed_title = re.sub(r"[''']", "", transformed_title)  # Remove special apostrophes
-    transformed_title = re.sub(r'[^a-zA-Z0-9\s]', '', transformed_title)  # Remove non-alphanumeric characters
     transformed_title = transformed_title.replace(" ", "-")
+    transformed_title = transformed_title.replace("é", "e")
     transformed_title = transformed_title.rstrip('- ')  # Remove trailing hyphens and spaces
+    transformed_title = re.sub(r'[^a-zA-Z0-9\s-]', '', transformed_title)  # Remove non-alphanumeric characters except hyphens
     return transformed_title
 
 # Function to sanitize novel title for use in directory names
