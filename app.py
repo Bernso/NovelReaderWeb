@@ -69,8 +69,8 @@ def page_not_found(error):
 def run_script():
     try:
         novel_link = request.json.get('novelLink')
-        pic = getPics.main(novel_link)
         result = genChapters.yes(base_url=novel_link)
+        getPics.main(novel_link)
         return jsonify({"result": result})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -279,9 +279,9 @@ def update_novel(novel_title):
         if novel_title2 is None:
             raise ValueError("novelTitle2 is missing or None.")
         
-        withoutLink(novel_title2)
-        result = updateNovel.yes(novel_title2)
         
+        result = updateNovel.yes(novel_title2)
+        withoutLink(novel_title2)
         return jsonify({"status": "success", "message": f"{novel_title} updated successfully.", "result": result})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500

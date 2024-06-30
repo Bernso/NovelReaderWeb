@@ -146,7 +146,8 @@ def main(url, chapter_number, novel_title):
                 print(f"Categories saved to {categories_path}")
             else:
                 print("Failed to scrape categories. Skipping...")
-
+        
+        
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         if not os.path.exists(file_path):
@@ -167,6 +168,8 @@ def main(url, chapter_number, novel_title):
 
 # Function to iterate over all chapters and save them
 def yes(novel_title):
+    if 'Death Is The Only Ending For The Villainess' in novel_title:
+        novel_title = novel_title[:-3]
     def thread_target():
         base_url = get_base_url(novel_title)
         latest_chapter_number = get_latest_chapter_number(base_url)

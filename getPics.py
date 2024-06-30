@@ -41,6 +41,7 @@ def valid_dir_name(novel_title):
     novel_title_clean = novel_title_clean.replace(":", "")
     novel_title_clean = novel_title_clean.replace("/", "") 
     novel_title_clean = novel_title_clean.replace("’", "'")
+    novel_title_clean = novel_title_clean.replace(u"\u2019", "'")
     return novel_title_clean
 
 def get_base_url(novel_title):
@@ -146,6 +147,8 @@ def download_image(image_url, novel_title, filename="cover_image.jpg"):
 # Main function to orchestrate the workflow
 def main(base_url):
     url = base_url
+    if 'death-is-the-only-ending-for-the-villainess' in url:
+        url = url[:-3]
     page_source = get_page_source(url)
     try:
         image_url, novel_title = find_image_url_and_title(page_source)
