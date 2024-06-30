@@ -1,3 +1,4 @@
+import sys
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -10,7 +11,6 @@ import os
 import requests
 import re
 import urllib
-
 
 def transform_title(novel_title):
     """
@@ -31,14 +31,24 @@ def transform_title(novel_title):
     transformed_title = transformed_title.rstrip('- ')  # Remove trailing hyphens and spaces
     return transformed_title
 
+def valid_dir_name(novel_title):
+    """
+    Sanitize novel title for use in directory names:
+    1. Remove special characters and spaces.
+    2. Replace certain characters like ':' and '/'.
+    """
+    novel_title_clean = re.sub(r"[''']", "'", novel_title)
+    novel_title_clean = novel_title_clean.replace(":", "")
+    novel_title_clean = novel_title_clean.replace("/", "") 
+    novel_title_clean = novel_title_clean.replace("’", "'")
+    return novel_title_clean
+
 def get_base_url(novel_title):
     """
     Construct the base URL using the transformed title.
     """
     base_url = f"https://lightnovelpub.vip/novel/{transform_title(novel_title)}"
     return base_url
-
-
 
 # Function to set up the web driver and fetch page source
 def get_page_source(url):
@@ -133,18 +143,6 @@ def download_image(image_url, novel_title, filename="cover_image.jpg"):
 
     print(f"Image downloaded successfully as {file_path}.")
 
-def valid_dir_name(novel_title):
-    """
-    Sanitize novel title for use in directory names:
-    1. Remove special characters and spaces.
-    2. Replace certain characters like ':' and '/'.
-    """
-    novel_title_clean = re.sub(r"[''']", "'", novel_title)
-    novel_title_clean = novel_title_clean.replace(":", "")
-    novel_title_clean = novel_title_clean.replace("/", "") 
-    novel_title_clean = novel_title_clean.replace("'", "'")
-    return novel_title_clean
-
 # Main function to orchestrate the workflow
 def main(base_url):
     url = base_url
@@ -154,19 +152,17 @@ def main(base_url):
         download_image(image_url, novel_title)
     except Exception as e:
         print(f"An error occurred: {e}")
-
+        raise  # Re-raise the exception for further debugging
+    finally:
+        sys.exit()  # Terminate the script after execution
 
 def withoutLink(novel_title):
     url = get_base_url(novel_title)
     main(url)
-    
-
-
-
-
-
-
-
 
 if __name__ == "__main__":
-    main("https://lightnovelpub.vip/novel/shadow-slave-05122222")
+    try:
+        main("https://lightnovelpub.vip/novel/shadow-slave-05122222")
+    except Exception as e:
+        print(f"Failed to run the script: {e}")
+        sys.exit()  # Terminate the script after execution

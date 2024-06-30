@@ -1,7 +1,9 @@
 try:
-    from flask import Flask, render_template, request, jsonify, session
+    from flask import Flask, render_template, request, jsonify, session, send_file
     import os
     import genChapters
+    import getPics
+    from getPics import withoutLink
     import re
     import updateNovel
     import random
@@ -67,6 +69,7 @@ def page_not_found(error):
 def run_script():
     try:
         novel_link = request.json.get('novelLink')
+        pic = getPics.main(novel_link)
         result = genChapters.yes(base_url=novel_link)
         return jsonify({"result": result})
     except Exception as e:
@@ -252,8 +255,18 @@ def list_novels():
 
 
 
-
-
+@app.route('/images/<novel_title>')
+def serve_image(novel_title):
+    try:
+        image_path = os.path.join(app.root_path, 'templates', 'novels', novel_title, 'cover_image.jpg')
+        if os.path.exists(image_path):
+            return send_file(image_path, mimetype='image/jpeg')
+        else:
+            return "Image not found", 404
+    except Exception as e:
+        error_message = str(e)
+        send_discord_message(error_message)
+        return "Error serving image", 500
 
 
 
@@ -265,7 +278,8 @@ def update_novel(novel_title):
 
         if novel_title2 is None:
             raise ValueError("novelTitle2 is missing or None.")
-
+        
+        withoutLink(novel_title2)
         result = updateNovel.yes(novel_title2)
         
         return jsonify({"status": "success", "message": f"{novel_title} updated successfully.", "result": result})
@@ -280,11 +294,15 @@ def youShouldntBeHere(novel_title):
     return render_template('notHere.html', novel_title=novel_title)
 
 
+
+
 def fetch_popular_novels():
     novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
     all_novels = [novel for novel in os.listdir(novels_folder_path) if os.path.isdir(os.path.join(novels_folder_path, novel))]
     popular_novels = random.sample(all_novels, 3) if len(all_novels) >= 3 else all_novels
     return popular_novels
+
+
 
 
 @app.route('/popular-novels')

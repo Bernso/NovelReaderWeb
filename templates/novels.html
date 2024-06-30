@@ -6,6 +6,49 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>Novels</title>
+    <style>
+        .features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Display 2 novels per row */
+            gap: 20px;
+            justify-content: center;
+            padding: 20px;
+            max-width: 100%;
+        }
+        
+        .feature {
+            display: grid; /* Use grid for layout */
+            grid-template-columns: auto 1fr; /* Image on the left, text on the right */
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 8px;
+            align-items: center; /* Center items vertically */
+            column-gap: 2px; /* Space between image and text */
+        }
+        
+        .feature img {
+            width: 80%;
+            height: 80%;
+            object-fit: cover;
+            border-radius: 8px; /* Ensure image corners are rounded */
+            margin-right: 20px; /* Space between image and text */
+        }
+        
+        .feature .text {
+            display: grid;
+        }
+        
+        .feature h3,
+        .feature p {
+            margin: 0;
+        }
+        
+        .feature a {
+            color: #BB86FC;
+            text-decoration: none;
+        }
+        
+    </style>
 </head>
 <body>
     <header class="header">
@@ -47,9 +90,11 @@
             {% for original_novel, modified_novel, categories in novels %}
                 <div class="feature" data-categories="{{ categories }}">
                     <a href='{{ url_for('show_novel_chapters', novel_title=original_novel) }}'>
-                        <div class="icon">{{ emojis[loop.index0 % emojis|length] }}</div>
+                        <img src="{{ url_for('serve_image', novel_title=original_novel) }}" alt="Cover Image">
+                        <div class="text">
                             <h3>{{ modified_novel }}</h3>
                             <p>{{ categories }}</p>
+                        </div>
                     </a>
                 </div>
             {% endfor %}
