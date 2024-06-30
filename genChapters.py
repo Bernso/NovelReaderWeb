@@ -146,8 +146,7 @@ def main(url, chapter_number, novel_title):
 
 # Function to iterate over all chapters and save them
 def yes(base_url):
-    if 'Death Is The Only Ending For The Villainess' in novel_title:
-        novel_title = novel_title[:-3]
+    
     def thread_target():
         
         novel_title = get_novel_title(base_url)

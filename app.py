@@ -68,11 +68,14 @@ def page_not_found(error):
 @app.route('/run_script', methods=['POST'])
 def run_script():
     try:
+        print("Received request to /run_script")  # Debugging statement
         novel_link = request.json.get('novelLink')
+        print(f"Novel link received: {novel_link}")  # Debugging statement
         result = genChapters.yes(base_url=novel_link)
         getPics.main(novel_link)
         return jsonify({"result": result})
     except Exception as e:
+        print(f"Error occurred: {str(e)}")  # Debugging statement
         return jsonify({"error": str(e)}), 500
 
 
