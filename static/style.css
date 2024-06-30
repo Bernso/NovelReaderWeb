@@ -198,8 +198,6 @@ a, .nav-link, .fancyLink {
     justify-items: center; /* Ensure items are centered in their grid area */
     animation: fadeIn 1.5s ease-in-out;
 }
- 
-
 
 .features2 {
     display: grid;
@@ -224,7 +222,13 @@ a, .nav-link, .fancyLink {
     width: 100%; /* Ensure the feature takes up available width */
 }
 
-
+.feature img {
+    width: 80%;
+    height: auto; /* Maintain aspect ratio */
+    object-fit: cover;
+    border-radius: 8px; /* Ensure image corners are rounded */
+    margin-bottom: 20px; /* Space between image and text */
+}
 
 .feature h3 {
     text-align: center;
@@ -233,6 +237,12 @@ a, .nav-link, .fancyLink {
     padding: 10px; /* Adds some space around the text */
 }
 
+.feature p {
+    text-align: center;
+    width: 100%; /* Ensures the text occupies the full width of its container */
+    margin: 0; /* Removes any default margins */
+    padding: 10px; /* Adds some space around the text */
+}
 
 .feature:hover {
     transform: scale(1.05);
