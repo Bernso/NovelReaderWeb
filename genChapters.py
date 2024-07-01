@@ -147,36 +147,36 @@ def main(url, chapter_number, novel_title):
 # Function to iterate over all chapters and save them
 def yes(base_url):
     
-    def thread_target():
+    #def thread_target():
         
-        novel_title = get_novel_title(base_url)
-        categories = scrape_categories(base_url)
+    novel_title = get_novel_title(base_url)
+    categories = scrape_categories(base_url)
 
-        if categories:
-            folder_name = valid_dir_name(novel_title)
-            file_dir = f'templates/novels/{folder_name}-chapters'
-            os.makedirs(file_dir, exist_ok=True)
+    if categories:
+        folder_name = valid_dir_name(novel_title)
+        file_dir = f'templates/novels/{folder_name}-chapters'
+        os.makedirs(file_dir, exist_ok=True)
 
-            categories_path = os.path.join(file_dir, 'categories.txt')
+        categories_path = os.path.join(file_dir, 'categories.txt')
 
-            with open(categories_path, 'w') as f:
-                f.write('\n'.join(categories))
-                print(f"Categories saved to {categories_path}")
-        else:            print("Failed to scrape categories. Skipping...")
+        with open(categories_path, 'w') as f:
+            f.write('\n'.join(categories))
+            print(f"Categories saved to {categories_path}")
+    else:            print("Failed to scrape categories. Skipping...")
 
-        latest_chapter_number = get_latest_chapter_number(base_url)
-        if latest_chapter_number is None:
-            print("Failed to get the latest chapter number.")
-            return
+    latest_chapter_number = get_latest_chapter_number(base_url)
+    if latest_chapter_number is None:
+        print("Failed to get the latest chapter number.")
+        return
 
-        print(f"Latest chapter number: {latest_chapter_number}")
+    print(f"Latest chapter number: {latest_chapter_number}")
 
-        for i in range(1, int(latest_chapter_number) + 1):
-            main(url=f"{base_url}/chapter-{i}", chapter_number=i, novel_title=novel_title)
-        print(f"Finished scraping * {novel_title} *")
+    for i in range(1, int(latest_chapter_number) + 1):
+        main(url=f"{base_url}/chapter-{i}", chapter_number=i, novel_title=novel_title)
+    print(f"Finished scraping * {novel_title} *")
 
-    thread = threading.Thread(target=thread_target)
-    thread.start()
+    #thread = threading.Thread(target=thread_target)
+    #thread.start()
 
 # Example usage
 if __name__ == '__main__':
