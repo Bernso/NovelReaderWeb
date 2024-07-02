@@ -53,7 +53,7 @@
 
     <main style='min-width: 800px;'>
         <section class="hero">
-            <h2>
+            <h2 id='novelName'>
                 {{ novel_title2 }}
             </h2>
 
@@ -165,6 +165,23 @@
           document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
         }
     </script>
+    <script>
+        // Save the current chapter content for a specific novel to localStorage
+        function saveChapterContentForNovel(novelTitle, content) {
+            localStorage.setItem(`currentChapterContent_${novelTitle}`, content);
+        }
+
+        // Load the saved chapter content for a specific novel from localStorage
+        function loadChapterContentForNovel(novelTitle) {
+            return localStorage.getItem(`currentChapterContent_${novelTitle}`);
+        }
+
+        // Example of saving and loading chapter content for a specific novel
+        const novelTitle = document.getElementById('novelName');
+        const currentChapterContent = "This is the content of the current chapter.";
+        saveChapterContentForNovel(novelTitle, currentChapterContent);
+        const loadedChapterContent = loadChapterContentForNovel(novelTitle);
+        console.log(loadedChapterContent);
+    </script>
 </body>
 </html>
-
