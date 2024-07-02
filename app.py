@@ -8,7 +8,6 @@ try:
     import updateNovel
     import random
     import requests
-    import urllib
     import json
     from dotenv import load_dotenv
 except ImportError as e:
