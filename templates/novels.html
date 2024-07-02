@@ -8,13 +8,31 @@
     <title>Novels</title>
     <style>
         .features {
-            grid-template-columns: repeat(2, 1fr); /* Display 2 novels per row */
+            grid-template-columns: repeat(3, 1fr); /* Display 2 novels per row */
 
         }
         
+        #backToTopBtn {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 99;
+            background: linear-gradient(200deg, #111111, #a962ff);/*#673AB7;  Purple background color */
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            
+            transition: right 0.5s; /* Slide-in animation */
+        }
+
+        #backToTopBtn:hover {
+            background-color: #311B92; /* Darker purple on hover */
+        }
     </style>
 </head>
-<body>
+<body class='no-select'>
     <header class="header">
         <div class="logo">
             <h1><a href='/'>Novel Reader</a></h1>
@@ -70,6 +88,8 @@
             <p>Created by <a href="https://www.github.com/Bernso" target="_blank" style='text-decoration: none;'>Bernso</a></p>
         </section>
     </main>
+    <button onclick="topFunction()" id="backToTopBtn" title="Go to top">Top</button>
+
     <script src='/./static/script.js'></script>
     <script>
         function searchNovels() {
@@ -121,6 +141,27 @@
         document.querySelectorAll('.category-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', filterNovels);
         });
+
+        // Get the button
+        var mybutton = document.getElementById("backToTopBtn");
+
+        // When the user scrolls down 20px from the top of the document, show the button
+        window.onscroll = function() {scrollFunction()};
+
+        function scrollFunction() {
+          if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+            mybutton.style.display = "block";
+            mybutton.style.right = "20px"; // Slide-in effect
+          } else {
+            mybutton.style.right = "-100px"; // Slide-out effect
+          }
+        }
+
+        // When the user clicks on the button, scroll to the top of the document
+        function topFunction() {
+          document.body.scrollTop = 0; // For Safari
+          document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        }
     </script>
 </body>
 </html>
