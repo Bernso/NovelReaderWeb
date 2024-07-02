@@ -2,7 +2,6 @@ try:
     from flask import Flask, render_template, request, jsonify, session, send_file
     import os
     import genChapters
-    import getPics
     from getPics import withoutLink
     import re
     import updateNovel
@@ -71,7 +70,7 @@ def run_script():
         novel_link = request.json.get('novelLink')
         print(f"Novel link received: {novel_link}")  # Debugging statement
         result = genChapters.yes(base_url=novel_link)
-        getPics.main(novel_link)
+        withoutLink(novel_link)
         return jsonify({"result": result})
     except Exception as e:
         print(f"Error occurred: {str(e)}")  # Debugging statement
