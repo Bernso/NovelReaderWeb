@@ -336,7 +336,7 @@ def popular_novels():
 
 if __name__ == "__main__":
     try:
-        app.run(debug=True, host='0.0.0.0')
+        app.run(debug=True, host='0.0.0.0', port='1111')
     except Exception as e:
         input(f"Error running the app: {e}")
 
