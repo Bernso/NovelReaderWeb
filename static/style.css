@@ -17,12 +17,12 @@
     --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     --border-radius: 5px;
     --actual-background: #0d0d0d;
-    --m: #6200EE;
+    --m: #3b008d;
 }
 
 /* Body */
 body {
-    background-color: var(--actual-background);
+    background: var(--actual-background);
     color: var(--text-color);
     display: flex;
     flex-direction: column;
