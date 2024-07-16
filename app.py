@@ -16,6 +16,16 @@ except ImportError as e:
 
 
 def send_discord_message(message):
+    """
+    Send a message to a Discord channel using a webhook URL.
+
+    Parameters:
+    message (str): The message to be sent to the Discord channel.
+
+    Returns:
+    None. If the message is sent successfully, it prints "Message sent successfully!".
+    If the message fails to send, it prints the response status code and response body.
+    """
     load_dotenv()
     webhook_url = os.getenv("WEBHOOK_URL")
     data = {
@@ -46,11 +56,30 @@ currentPath = os.getcwd()
 
 @app.route('/test')
 def test_site():
+    """
+    This function is a route handler for the '/test' endpoint.
+    It renders the 'test.html' template when accessed.
+
+    Parameters:
+    None
+
+    Returns:
+    render_template: A rendered HTML template named 'test.html'.
+    """
     return render_template('test.html')
 
 
 @app.route('/')
 def home():
+    """
+    This function handles the root route ('/') and renders the 'home.html' template.
+
+    Parameters:
+    None
+
+    Returns:
+    render_template: A rendered HTML template named 'home.html'.
+    """
     return render_template('home.html')
 
 
@@ -58,6 +87,16 @@ def home():
 
 @app.errorhandler(404)
 def page_not_found(error):
+    """
+    This function handles the 404 error, which is returned when a requested resource is not found.
+    It renders a custom 404 error page.
+
+    Parameters:
+    error (Exception): The exception object that caused the 404 error.
+
+    Returns:
+    render_template: A rendered HTML template named '404.html' with a 404 status code.
+    """
     return render_template('404.html'), 404
 
 
@@ -65,6 +104,18 @@ def page_not_found(error):
 
 @app.route('/run_script', methods=['POST'])
 def run_script():
+    """
+    This function handles a POST request to the '/run_script' endpoint.
+    It receives a novel link from the request JSON data, runs a script to generate chapters,
+    and returns the result of the script execution.
+
+    Parameters:
+    None
+
+    Returns:
+    jsonify: A JSON response containing the result of the script execution.
+              If an exception occurs, it returns a JSON response with an error message.
+    """
     try:
         print("Received request to /run_script")  # Debugging statement
         novel_link = request.json.get('novelLink')
@@ -85,6 +136,18 @@ def run_script():
 
 @app.route('/novels/<novelTitle>/chapters/<int:chapter_number>')
 def show_chapter(novelTitle, chapter_number):   
+    """
+    Display a specific chapter of a novel.
+
+    Parameters:
+    novelTitle (str): The title of the novel.
+    chapter_number (int): The number of the chapter to be displayed.
+
+    Returns:
+    render_template: A rendered HTML template with the chapter content.
+                      If the chapter file is not found or an exception occurs, 
+                      it returns an appropriate error message and template.
+    """
     try:
         # Construct the path to the novel's subfolder
         subfolder_path = os.path.join(app.root_path, 'templates', 'novels', novelTitle)
@@ -147,6 +210,15 @@ def show_chapter(novelTitle, chapter_number):
 
 @app.route('/plans')
 def show_plans():
+    """
+    This function handles the '/plans' route and renders the 'plans.html' template.
+
+    Parameters:
+    None
+
+    Returns:
+    render_template: A rendered HTML template named 'plans.html'.
+    """
     return render_template('plans.html')
 
 
@@ -154,6 +226,15 @@ def show_plans():
 
 @app.route('/currentChapter')
 def currentChapter():
+    """
+    This function handles the '/currentChapter' route and renders the 'currentChapter.html' template.
+
+    Parameters:
+    None
+
+    Returns:
+    render_template: A rendered HTML template named 'currentChapter.html'.
+    """
     return render_template('currentChapter.html')
 
 
@@ -161,11 +242,23 @@ def currentChapter():
 
 @app.route('/novels/<novel_title>')
 def show_novel_chapters(novel_title):
+    """
+    Display the chapters of a novel.
+
+    Parameters:
+    novel_title (str): The title of the novel.
+
+    Returns:
+    render_template: A rendered HTML template with the novel's title, chapter numbers, and categories.
+                      If an exception occurs, it returns an error message and renders an error template.
+    """
     try:
         novel_folder_path = os.path.join(app.root_path, 'templates', 'novels', novel_title)
         
+        # List all chapter files in the novel's folder
         chapters = [file for file in os.listdir(novel_folder_path) if file.endswith('.txt')]
         
+        # Read the categories file if it exists
         categories_file = os.path.join(novel_folder_path, 'categories.txt')
         if os.path.exists(categories_file):
             with open(categories_file, 'r', encoding='utf-8') as f:
@@ -174,19 +267,26 @@ def show_novel_chapters(novel_title):
         else:
             categories_str = ""
 
+        # Filter out the categories file from the chapters list
         chapters = [file for file in chapters if not file.startswith('categories')]
 
+        # Extract the chapter numbers from the chapter files
         chapter_numbers = [int(file.split('-')[1].split('.')[0]) for file in chapters]
 
+        # Sort the chapter numbers
         chapter_numbers.sort()
 
+        # Clean the novel title by removing anything within brackets
         novel_title_clean = re.sub(r'\s*\(.*?\)', '', novel_title[:-9] if len(novel_title) >= 9 else novel_title)
 
+        # Prepare the categories string
         categories_string = f"{categories_str}" if categories_str else ""
 
+        # Render the novelsChapters.html template with the necessary data
         return render_template('novelsChapters.html', novel_title2=novel_title_clean, chapters=chapter_numbers, novel_title1=novel_title, categories=categories_string)
     
     except Exception as e:
+        # Handle any exceptions that occur during the execution of the function
         error_message = str(e)
         send_discord_message(error_message)
         return render_template('error.html'), 500
@@ -217,6 +317,20 @@ def transform_title(novel_title):
 
 @app.route('/novels')
 def list_novels():
+    """
+    List and display novels in the 'novels' directory.
+
+    This function retrieves all novels from the 'novels' directory, reads their categories, and prepares the data for display.
+    If a novel does not have a 'categories.txt' file, an empty string is assigned to its categories.
+    The novels are then sorted by their names and displayed in the 'novels.html' template.
+
+    Parameters:
+    None
+
+    Returns:
+    render_template: A rendered HTML template with the novels' data.
+                     If an exception occurs, it returns an error message and renders an error template.
+    """
     try:
         if not os.path.exists(f"{currentPath}/templates/novels"):
             os.makedirs(f"{currentPath}/templates/novels")
@@ -258,6 +372,22 @@ def list_novels():
 
 @app.route('/images/<novel_title>')
 def serve_image(novel_title):
+    """
+    Serves the cover image of a novel.
+
+    This function constructs the path to the cover image of a novel based on the provided novel title.
+    It then checks if the image file exists at the constructed path. If the image exists, it sends the image file
+    as a response with the appropriate MIME type. If the image does not exist, it returns a 404 status code with a message
+    indicating that the image was not found.
+
+    Parameters:
+    novel_title (str): The title of the novel for which the cover image is to be served. This parameter is extracted
+                        from the URL and passed to the function.
+
+    Returns:
+    send_file: If the image file exists, it returns a response with the image file and the appropriate MIME type.
+    str, int: If the image file does not exist, it returns a 404 status code with a message indicating that the image was not found.
+    """
     try:
         image_path = os.path.join(app.root_path, 'templates', 'novels', novel_title, 'cover_image.jpg')
         if os.path.exists(image_path):
@@ -274,12 +404,25 @@ def serve_image(novel_title):
 
 @app.route('/update_novel/<novel_title>', methods=['POST'])
 def update_novel(novel_title):
+    """
+    This function handles the POST request to update a novel. It fetches the novel title from the request JSON data,
+    validates it, and then calls the 'updateNovel.yes' and 'withoutLink' functions to update the novel.
+
+    Parameters:
+    novel_title (str): The title of the novel to be updated. This parameter is extracted from the URL and passed to the function.
+
+    Returns:
+    jsonify: A JSON response containing the status, message, and result of the update operation.
+              If the update is successful, the status will be 'success', the message will indicate the successful update,
+              and the result will be the output of the 'updateNovel.yes' function.
+              If an exception occurs during the update process, the status will be 'error', the message will contain the error message,
+              and the result will be None.
+    """
     try:
         novel_title2 = request.json.get('novelTitle2')  
 
         if novel_title2 is None:
             raise ValueError("novelTitle2 is missing or None.")
-        
         
         result = updateNovel.yes(novel_title2)
         withoutLink(novel_title2)
@@ -292,12 +435,37 @@ def update_novel(novel_title):
 
 @app.route('/update_novel/<novel_title>')
 def youShouldntBeHere(novel_title):
+    """
+    This function is a route handler for the '/update_novel/<novel_title>' endpoint.
+    It is intended to render a template named 'notHere.html' with a 'novel_title' variable.
+    This function is not meant to be accessed directly, and is used as a placeholder for a potential future feature.
+
+    Parameters:
+    novel_title (str): The title of the novel for which the update is requested.
+                       This parameter is extracted from the URL and passed to the function.
+
+    Returns:
+    render_template: A rendered HTML template with the 'novel_title' variable passed to it.
+    """
     return render_template('notHere.html', novel_title=novel_title)
 
 
 
 
 def fetch_popular_novels():
+    """
+    Fetch three popular novels from the 'novels' directory.
+
+    The function retrieves all novels from the 'novels' directory, selects three at random if there are at least three novels,
+    and returns the selected novels. If there are less than three novels, it returns all novels.
+
+    Parameters:
+    None
+
+    Returns:
+    list: A list of three randomly selected novels from the 'novels' directory.
+          If there are less than three novels, it returns all novels.
+    """
     novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
     all_novels = [novel for novel in os.listdir(novels_folder_path) if os.path.isdir(os.path.join(novels_folder_path, novel))]
     popular_novels = random.sample(all_novels, 3) if len(all_novels) >= 3 else all_novels
@@ -307,6 +475,19 @@ def fetch_popular_novels():
 
 @app.route('/popular-novels')
 def popular_novels():
+    """
+    Display a page with three randomly selected popular novels.
+
+    The function retrieves all novels from the 'novels' directory, selects three at random if there are at least three novels,
+    and retrieves the necessary data for each selected novel, such as categories and cover image.
+
+    Parameters:
+    None
+
+    Returns:
+    render_template: A rendered HTML template with the selected novels' data.
+    If an exception occurs, it returns an error message and renders an error template.
+    """
     try:
         novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
         all_novels = [novel for novel in os.listdir(novels_folder_path) if os.path.isdir(os.path.join(novels_folder_path, novel))]
