@@ -13,6 +13,7 @@ except ImportError as e:
     input(f"Module not found: {e}")
 
 
+# Everything documented here is done by tabnine AI (not me)
 
 
 def send_discord_message(message):
