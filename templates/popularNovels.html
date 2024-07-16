@@ -46,21 +46,23 @@
     </header>
     <main>
         <section style='margin-bottom: 0;' class="hero">
-            <h2>Welcome to the World of Novels</h2>
-            <p>Here are our most loved novels by you guys!</p>
+            <h2>Popular Novels</h2>
+            <p>Our most viewed novels<br>(At the moment it is just 3 random novels)</p>
         </section>
 
-            <section class="features">
-                {% for display_title, emoji, url_title in novel_emoji_pairs %}
-                <a href="/novels/{{ url_title }}">
-                    <div class="feature">
-                        <div class="icon">{{ emoji }}</div>
-                        <h3>{{ display_title }}</h3>
-                        <p>Read Now</p>
-                    </div>
-                </a>
-                {% endfor %}
-            </section>
+        <section class="features">
+            {% for original_novel, modified_novel, categories in novels %}
+                <div class="feature" data-categories="{{ categories }}">
+                    <a href='{{ url_for('show_novel_chapters', novel_title=original_novel) }}'>
+                        <img src="{{ url_for('serve_image', novel_title=original_novel) }}" alt="Cover Image">
+                        <div class="text">
+                            <h3>{{ modified_novel }}</h3>
+                            <p>{{ categories }}</p>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </section>
 
         <section class="community">
             <h2>Join Our Community</h2>

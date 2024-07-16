@@ -228,11 +228,11 @@ def list_novels():
         emojis = ["🌙", "📚", "✨", "🌟", "🔥", "🌹", "💫", "📖"]
 
         all_categories = set()
-
+        
         for novel in os.listdir(novels_folder_path):
             novel_path = os.path.join(novels_folder_path, novel)
             categories_file = os.path.join(novel_path, 'categories.txt')
-
+            print(novel)
             if os.path.exists(categories_file):
                 with open(categories_file, 'r', encoding='utf-8') as f:
                     categories = [line.strip() for line in f if line.strip()]
@@ -305,30 +305,45 @@ def fetch_popular_novels():
 
 
 
-
 @app.route('/popular-novels')
 def popular_novels():
     try:
         novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
         all_novels = [novel for novel in os.listdir(novels_folder_path) if os.path.isdir(os.path.join(novels_folder_path, novel))]
-        selected_novels = random.sample(all_novels, 3) if len(all_novels) >= 3 else all_novels
 
-        # Transform titles for URL usage
-        transformed_titles = [transform_title(novel) for novel in selected_novels]
+        if len(all_novels) < 3:
+            popular_novels = all_novels
+        else:
+            popular_novels = random.sample(all_novels, 3)
 
-        # Clean up the titles of the selected novels
-        cleaned_titles = [re.sub(r'\s*\(.*?\)', '', novel[:-9] if len(novel) >= 9 else novel) for novel in selected_novels]
+        novels_with_data = []
+        emojis = ["🌙", "📚", "✨", "🌟", "🔥", "🌹", "💫", "📖"]
 
-        # Prepare emoji pairs
-        emojis = ["📚", "📘", "📖", "📕", "📗", "📙", "📔", "📒", "📓", "📑"]
-        random_emojis = [random.choice(emojis) for _ in cleaned_titles]
-        novel_emoji_pairs = zip(cleaned_titles, random_emojis, transformed_titles)
+        all_categories = set()
 
-        return render_template('popularNovels.html', novel_emoji_pairs=novel_emoji_pairs)
+        for novel in popular_novels:
+            novel_path = os.path.join(novels_folder_path, novel)
+            categories_file = os.path.join(novel_path, 'categories.txt')
+            if os.path.exists(categories_file):
+                with open(categories_file, 'r', encoding='utf-8') as f:
+                    categories = [line.strip() for line in f if line.strip()]
+                    categories_str = ', '.join(categories)
+                    all_categories.update(categories)
+            else:
+                categories_str = ""
+
+            novel_name_clean = re.sub(r'\s*\(.*?\)', '', novel[:-9] if len(novel) >= 9 else novel)
+            novels_with_data.append((novel, novel_name_clean, categories_str))
+
+        # Sort the categories by words
+        sorted_categories = sorted(all_categories, key=lambda x: x.lower())
+
+        return render_template('popularNovels.html', novels=novels_with_data, emojis=emojis, all_categories=sorted_categories)
     except Exception as e:
         error_message = str(e)
         send_discord_message(error_message)
         return render_template('error.html'), 500
+
 
 
 
