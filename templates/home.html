@@ -11,7 +11,11 @@
 <style>
     /* Add your CSS styles here */
     html, body {
-        background: url();
+        background: url("{{ url_for('static', filename='body-bg.jpg') }}"); 
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        position: relative;
     }
 </style>
 <body class='no-select'>
