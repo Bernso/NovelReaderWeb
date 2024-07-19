@@ -1,0 +1,11 @@
+CLASSES
+
+BASE PAGE
+Novel Titel = 'page-title pt-2 mb-3'
+Number of Chapters = the <a> inside of 'pl-1 d-flex'         see test2.py for the code
+Image = 'manga-image flex-shrink-0' The src of the <img> inside of that
+
+CHAPTER
+Chapter Content = 'col-12 chapter-content' all the text inside of that
+
+Make sure to look at the link for the novels number and name formating as they do not re-direct you if you get it wrong.
