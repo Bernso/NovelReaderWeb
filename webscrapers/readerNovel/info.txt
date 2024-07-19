@@ -9,3 +9,5 @@ CHAPTER
 Chapter Content = 'col-12 chapter-content' all the text inside of that
 
 Make sure to look at the link for the novels number and name formating as they do not re-direct you if you get it wrong.
+
+LINK: https://www.readernovel.net/
