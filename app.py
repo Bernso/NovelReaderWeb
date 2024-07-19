@@ -3,6 +3,7 @@ try:
     import os
     import genChapters
     from getPics import withoutLink
+    from getPics import main
     import re
     import updateNovel
     import random
@@ -122,7 +123,7 @@ def run_script():
         novel_link = request.json.get('novelLink')
         print(f"Novel link received: {novel_link}")  # Debugging statement
         result = genChapters.yes(base_url=novel_link)
-        withoutLink(novel_link)
+        main(novel_link)
         return jsonify({"result": result})
     except Exception as e:
         print(f"Error occurred: {str(e)}")  # Debugging statement
@@ -347,7 +348,7 @@ def list_novels():
         for novel in os.listdir(novels_folder_path):
             novel_path = os.path.join(novels_folder_path, novel)
             categories_file = os.path.join(novel_path, 'categories.txt')
-            print(novel)
+            print(novel[:-9])
             if os.path.exists(categories_file):
                 with open(categories_file, 'r', encoding='utf-8') as f:
                     categories = [line.strip() for line in f if line.strip()]
