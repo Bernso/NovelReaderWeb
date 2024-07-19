@@ -56,19 +56,7 @@ app.secret_key = os.getenv("SECRET_KEY")
 currentPath = os.getcwd()
 
 
-@app.route('/test')
-def test_site():
-    """
-    This function is a route handler for the '/test' endpoint.
-    It renders the 'test.html' template when accessed.
 
-    Parameters:
-    None
-
-    Returns:
-    render_template: A rendered HTML template named 'test.html'.
-    """
-    return render_template('test.html')
 
 
 @app.route('/')
