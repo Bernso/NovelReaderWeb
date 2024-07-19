@@ -17,8 +17,8 @@
         <nav class="nav">
             <ul>
                 <li>
-                    <a class="start-reading" id="generateButton" onclick="showPrompt()" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
-                        Get Chapters
+                    <a class="start-reading" id="generateButton" href='/webscrapers' style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
+                        Webscrapers
                     </a>
                 </li>
 
@@ -49,20 +49,23 @@
 
     <main>
         <section class="hero">
-            <h2>Welcome to the World of Novels</h2>
-            <p>Seamlessly generate and read your favorite novels with a dark, majestic interface</p>
-            <p>View our popular novels <a href='/popular-novels'>here</a></p>
+            <h2>Webscrapers</h2>
+            <p>
+                The standard for our site is <a href='https://www.lightnovelpub.vip'>lightnovelpub.vip</a>
+                <br><br>
+                Seamlessly generate your favourite novels from many different sites.
+            </p>
         </section>
 
         <section class="features">
-            <div class="feature no-select">
-                <a onclick='x' style='cursor: pointer;'>
-                    <div class="icon">x</div>
-                    <h3>x</h3>
-                    <p>x</p>
-                </a>
-            </div>
-            
+            {% for webscraper in webscraperName %}
+                <div class="feature no-select">
+                    <a onclick="showPrompt{{ webscraper }}()" style="cursor: pointer;">
+                        <div class="icon">📁</div>
+                        <h3>{{ webscraper }}</h3>
+                    </a>
+                </div>
+            {% endfor %}
         </section>
 
         <section class="community">

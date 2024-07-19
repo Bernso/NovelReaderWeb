@@ -151,11 +151,11 @@ document.addEventListener('DOMContentLoaded', function () {
     loadSettings();
 });
 
-function showPrompt() {
+function showPromptlightNovelPubDotVip() {
     const novelLink = prompt("Enter the link for your novel:", "Link");
     if (novelLink) {
         alert("Processing...");
-        fetch('/run_script', {
+        fetch('/lightNovelPubDotVip', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

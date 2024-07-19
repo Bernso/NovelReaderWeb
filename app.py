@@ -1,15 +1,17 @@
 try:
     from flask import Flask, render_template, request, jsonify, session, send_file
     import os
-    import genChapters
-    from getPics import withoutLink
-    from getPics import main
-    import re
-    import updateNovel
+
+    import webscrapers.lightNovelPubDotVip.genChapters
+    from webscrapers.lightNovelPubDotVip.getPics import withoutLink
+    from webscrapers.lightNovelPubDotVip.getPics import main
+    import webscrapers.lightNovelPubDotVip.updateNovel
+
+    import re  # Importing re module for regex operations
     import random
     import requests
     import json
-    from dotenv import load_dotenv
+    from dotenv import load_dotenv  # Importing load_dotenv for environment variables
 except ImportError as e:
     input(f"Module not found: {e}")
 
@@ -92,10 +94,10 @@ def page_not_found(error):
 
 
 
-@app.route('/run_script', methods=['POST'])
+@app.route('/lightNovelPubDotVip', methods=['POST'])
 def run_script():
     """
-    This function handles a POST request to the '/run_script' endpoint.
+    This function handles a POST request to the '/lightNovelPubDotVip' endpoint.
     It receives a novel link from the request JSON data, runs a script to generate chapters,
     and returns the result of the script execution.
 
@@ -107,10 +109,10 @@ def run_script():
               If an exception occurs, it returns a JSON response with an error message.
     """
     try:
-        print("Received request to /run_script")  # Debugging statement
+        print("Received request to /lightNovelPubDotVip")  # Debugging statement
         novel_link = request.json.get('novelLink')
         print(f"Novel link received: {novel_link}")  # Debugging statement
-        result = genChapters.yes(base_url=novel_link)
+        result = webscrapers.lightNovelPubDotVip.genChapters.yes(base_url=novel_link)
         main(novel_link)
         return jsonify({"result": result})
     except Exception as e:
@@ -414,7 +416,7 @@ def update_novel(novel_title):
         if novel_title2 is None:
             raise ValueError("novelTitle2 is missing or None.")
         
-        result = updateNovel.yes(novel_title2)
+        result = webscrapers.lightNovelPubDotVip.updateNovel.yes(novel_title2)
         withoutLink(novel_title2)
         return jsonify({"status": "success", "message": f"{novel_title} updated successfully.", "result": result})
     except Exception as e:
@@ -518,8 +520,17 @@ def popular_novels():
 
 
 @app.route('/webscrapers')
-def webscrapers():
-    return render_template('webscrapers.html')
+def webscraperss():
+    path = os.path.join(os.getcwd(), 'webscrapers')
+    directory_names = []
+    
+    for root, dirs, files in os.walk(path):
+        for dir_name in dirs:
+            if dir_name != '__pycache__':
+                directory_names.append(dir_name)  # Just the directory name, not the full path
+    
+    return render_template('webscrapers.html', noOfWebscrapers=len(directory_names), webscraperName=directory_names)
+
 
 
 if __name__ == "__main__":
