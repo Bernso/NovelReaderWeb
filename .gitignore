@@ -7,3 +7,4 @@ templates/novels/
 .env
 pics/
 offlineChapters.py
+.idea

@@ -14,7 +14,7 @@ except ImportError as e:
     input(f"Module not found: {e}")
 
 
-# Everything documented here is done by tabnine AI (not me)
+# Everything documented here is done by tab nine AI (not me)
 
 
 def send_discord_message(message):
@@ -183,11 +183,11 @@ def show_chapter(novelTitle, chapter_number):
     except FileNotFoundError:
         print(f"FileNotFoundError: Chapter file for {novelTitle}, chapter {chapter_number} not found.")
         return render_template('chapterNotFound.html'), 404
-    except IndexError as e:
-        print(f"IndexError: {str(e)}")
+    except IndexError as beans:
+        print(f"IndexError: {str(beans)}")
         return render_template('chapterNotFound.html'), 404
-    except Exception as e:
-        error_message = str(e)
+    except Exception as beans:
+        error_message = str(beans)
         print(f"Exception: {error_message}")
         send_discord_message(error_message)
         return render_template('error.html'), 500
@@ -424,7 +424,7 @@ def update_novel(novel_title):
 
 
 @app.route('/update_novel/<novel_title>')
-def youShouldntBeHere(novel_title):
+def youShouldNotBeHere(novel_title):
     """
     This function is a route handler for the '/update_novel/<novel_title>' endpoint.
     It is intended to render a template named 'notHere.html' with a 'novel_title' variable.
@@ -517,7 +517,9 @@ def popular_novels():
 
 
 
-
+@app.route('/webscrapers')
+def webscrapers():
+    return render_template('webscrapers.html')
 
 
 if __name__ == "__main__":
