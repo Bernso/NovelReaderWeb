@@ -1,6 +1,3 @@
-import webscrapers.lightNovelPubDotVip.getPics
-
-
 try:
     from flask import Flask, render_template, request, jsonify, session, send_file
     import os
