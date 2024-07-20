@@ -166,3 +166,19 @@ function showPromptlightNovelPubDotVip() {
         alert("Prompt cancelled.");
     }
 }
+
+function showPromptreaderNovel() {
+    const novelLink = prompt("Enter the link for your novel:", "Link");
+    if (novelLink) {
+        alert("Processing...");
+        fetch('/readerNovel', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ novelLink: novelLink })
+        })
+    } else {
+        alert("Prompt cancelled.");
+    }
+}

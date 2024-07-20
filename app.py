@@ -1,11 +1,17 @@
+import webscrapers.lightNovelPubDotVip.getPics
+
+
 try:
     from flask import Flask, render_template, request, jsonify, session, send_file
     import os
 
     import webscrapers.lightNovelPubDotVip.genChapters
-    from webscrapers.lightNovelPubDotVip.getPics import withoutLink
-    from webscrapers.lightNovelPubDotVip.getPics import main
+    import webscrapers.lightNovelPubDotVip.getPics 
     import webscrapers.lightNovelPubDotVip.updateNovel
+    
+    import webscrapers.readerNovel.genChapters
+    import webscrapers.readerNovel.getPics 
+    import webscrapers.readerNovel.updateNovel
 
     import re  # Importing re module for regex operations
     import random
@@ -95,7 +101,7 @@ def page_not_found(error):
 
 
 @app.route('/lightNovelPubDotVip', methods=['POST'])
-def run_script():
+def run_scriptlightNovelPubDotVip():
     """
     This function handles a POST request to the '/lightNovelPubDotVip' endpoint.
     It receives a novel link from the request JSON data, runs a script to generate chapters,
@@ -113,12 +119,37 @@ def run_script():
         novel_link = request.json.get('novelLink')
         print(f"Novel link received: {novel_link}")  # Debugging statement
         result = webscrapers.lightNovelPubDotVip.genChapters.yes(base_url=novel_link)
-        main(novel_link)
+        webscrapers.lightNovelPubDotVip.getPics.main(base_url=novel_link) 
         return jsonify({"result": result})
     except Exception as e:
         print(f"Error occurred: {str(e)}")  # Debugging statement
         return jsonify({"error": str(e)}), 500
 
+
+@app.route('/readerNovel', methods=['POST'])
+def run_scriptreaderNovel():
+    """
+    This function handles a POST request to the '/readerNovel' endpoint.
+    It receives a novel link from the request JSON data, runs a script to generate chapters,
+    and returns the result of the script execution.
+
+    Parameters:
+    None
+
+    Returns:
+    jsonify: A JSON response containing the result of the script execution.
+              If an exception occurs, it returns a JSON response with an error message.
+    """
+    try:
+        print("Received request to /readerNovel")  # Debugging statement
+        novel_link = request.json.get('novelLink')
+        print(f"Novel link received: {novel_link}")  # Debugging statement
+        result = webscrapers.readerNovel.genChapters.yes(base_url=novel_link)
+        #main(novel_link)
+        return jsonify({"result": result})
+    except Exception as e:
+        print(f"Error occurred: {str(e)}")  # Debugging statement
+        return jsonify({"error": str(e)}), 500
 
 
 
@@ -260,7 +291,7 @@ def show_novel_chapters(novel_title):
             categories_str = ""
 
         # Filter out the categories file from the chapters list
-        chapters = [file for file in chapters if not file.startswith('categories')]
+        chapters = [file for file in chapters if not file.startswith(('categories', 'base_url_number'))]
 
         # Extract the chapter numbers from the chapter files
         chapter_numbers = [int(file.split('-')[1].split('.')[0]) for file in chapters]
@@ -417,7 +448,7 @@ def update_novel(novel_title):
             raise ValueError("novelTitle2 is missing or None.")
         
         result = webscrapers.lightNovelPubDotVip.updateNovel.yes(novel_title2)
-        withoutLink(novel_title2)
+        webscrapers.lightNovelPubDotVip.getPics.withoutLink(novel_title2)
         return jsonify({"status": "success", "message": f"{novel_title} updated successfully.", "result": result})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
