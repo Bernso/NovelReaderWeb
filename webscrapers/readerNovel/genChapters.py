@@ -155,8 +155,14 @@ def main(url, novel_title):
     chapterNumberTemp = url[-5:]
     chapterNumber = ''
     for number in chapterNumberTemp:
-        if number.isnumeric():
+        if number == '.':
+            chapterNumber += '-'
+        
+        elif number.isnumeric():
             chapterNumber += number
+        
+        else:
+            print("Hi there!")
 
     
     file_path = os.path.join(file_dir, f'chapter-{chapterNumber}.txt')
