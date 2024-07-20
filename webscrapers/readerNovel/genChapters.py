@@ -1,9 +1,12 @@
-import requests
-from bs4 import BeautifulSoup
-import os
-#import threading
-import urllib
-import re
+try:
+    import requests
+    from bs4 import BeautifulSoup
+    import os
+    #import threading
+    import urllib
+    import re
+except ImportError as e:
+    input(f"Module not found: {e}")
 
 # Define headers to mimic browser requests
 headers = {
@@ -11,12 +14,18 @@ headers = {
 }
 
 # Function to transform the novel title for URL
-def transform_title(novel_title):
+def transform_title(novel_title: str) -> str:
     """
     Transform the novel title for URL:
     1. Decode URL-encoded characters.
     2. Convert to lowercase.
     3. Replace special characters and spaces with hyphens.
+
+    Parameters:
+    novel_title (str): The original novel title.
+
+    Returns:
+    str: The transformed novel title suitable for URL.
     """
     decoded_title = urllib.parse.unquote(novel_title)
     transformed_title = decoded_title.lower()
@@ -29,10 +38,19 @@ def transform_title(novel_title):
 
 
 
-def valid_dir_name(novel_title):
-    novel_title = re.sub(r"[’'’]", "'", novel_title)
-    novel_title = novel_title.replace(":", "")
-    novel_title = novel_title.replace("/", "") 
+def valid_dir_name(novel_title: str) -> str:
+    """
+    Prepare a valid directory name by removing special characters and replacing spaces with hyphens.
+
+    Parameters:
+    novel_title (str): The original novel title.
+
+    Returns:
+    str: The transformed novel title suitable for creating a directory.
+    """
+    novel_title = re.sub(r"[’'’]", "'", novel_title)  # Replace special apostrophes with single quote
+    novel_title = novel_title.replace(":", "")  # Remove colons
+    novel_title = novel_title.replace("/", "")  # Remove slashes
     return novel_title
 
 
@@ -241,5 +259,5 @@ def yes(base_url):
 
 # Example usage
 if __name__ == '__main__':
-    base_url = 'https://www.readernovel.net/novel/godly-empress-doctor-546/'
+    base_url = 'https://www.readernovel.net/novel/deep-sea-embers-4055/'
     yes(base_url)
