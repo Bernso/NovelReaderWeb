@@ -123,7 +123,6 @@ def get_latest_chapter_number(base_url):
 
         print(f"There are {len(chapter_texts)} chapters")
         latestChapterNumber = len(chapter_texts)
-        print(f"Chapter Links: {chapter_links}")
         return latestChapterNumber, chapter_links
 
     except requests.exceptions.RequestException as e:
@@ -155,11 +154,9 @@ def main(url, novel_title):
     
     chapterNumberTemp = url[-5:]
     chapterNumber = ''
-    print(chapterNumberTemp)
     for number in chapterNumberTemp:
         if number.isnumeric():
             chapterNumber += number
-            print(chapterNumber)
 
     
     file_path = os.path.join(file_dir, f'chapter-{chapterNumber}.txt')

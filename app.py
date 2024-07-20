@@ -144,7 +144,7 @@ def run_scriptreaderNovel():
         novel_link = request.json.get('novelLink')
         print(f"Novel link received: {novel_link}")  # Debugging statement
         result = webscrapers.readerNovel.genChapters.yes(base_url=novel_link)
-        webscrapers.readerNovel.getPics.main(base_url=novel_link) 
+        webscrapers.readerNovel.getPics.main(url=novel_link) 
         return jsonify({"result": result})
     except Exception as e:
         print(f"Error occurred: {str(e)}")  # Debugging statement
