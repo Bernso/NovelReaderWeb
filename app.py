@@ -1,7 +1,5 @@
 try:
-    from flask import Flask, render_template, request, jsonify, session, send_file
-    import os
-
+    # Webscrapers
     import webscrapers.lightNovelPubDotVip.genChapters
     import webscrapers.lightNovelPubDotVip.getPics 
     import webscrapers.lightNovelPubDotVip.updateNovel
@@ -9,7 +7,11 @@ try:
     import webscrapers.readerNovel.genChapters
     import webscrapers.readerNovel.getPics 
     import webscrapers.readerNovel.updateNovel
-
+    
+    
+    # Normal
+    from flask import Flask, render_template, request, jsonify, session, send_file
+    import os
     import re  # Importing re module for regex operations
     import random
     import requests
