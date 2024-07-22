@@ -264,6 +264,7 @@ def yes(novel_title: str) -> None:
     """
     if not os.path.exists(f'templates/novels/{novel_title}-chapters/base_url_number.txt'): # Path for lightnovelpub.vip scraped novels
         if os.path.exists(f'templates/novels/{novel_title}-chapters'): # Just to make sure the novel exists
+            print("'Light Novel Pub' Novel found")
             if 'Death Is The Only Ending For The Villainess' in novel_title:
                 novel_title = novel_title[:-3]
                 
@@ -280,10 +281,11 @@ def yes(novel_title: str) -> None:
                 main(url=f"{base_url}/chapter-{i}", chapter_number=i, novel_title=novel_title_clean)
             print(f"Finished updating * {novel_title_clean} *")
             import webscrapers.lightNovelPubDotVip.getPics
-            webscrapers.lightNovelPubDotVip.getPics.main(url)
+            webscrapers.lightNovelPubDotVip.getPics.main(base_url)
 
     
     elif os.path.exists(f'templates/novels/{novel_title}-chapters/base_url_number.txt'): # path for reader-novel novels
+        print("'Reader Novel' Novel found")
         # Link creator
         with open(f'templates/novels/{novel_title}-chapters/base_url_number.txt', 'r') as file:
             urlNum = file.read()

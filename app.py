@@ -441,16 +441,20 @@ def update_novel(novel_title):
               and the result will be None.
     """
     try:
-        novel_title2 = request.json.get('novelTitle2')  
-        print(novel_title2)
+        print(f"Received request to update novel: {novel_title}")  # Debugging statement
+        novel_title2 = request.json.get('novelTitle2')
+        print(f"Received novelTitle2: {novel_title2}")  # Debugging statement
 
         if novel_title2 is None:
             raise ValueError("novelTitle2 is missing or None.")
         
+        print("Calling webscrapers.updateNovel.yes function...")  # Debugging statement
         result = webscrapers.updateNovel.yes(novel_title2)
+        print(f"Update result: {result}")  # Debugging statement
 
         return jsonify({"status": "success", "message": f"{novel_title} updated successfully.", "result": result})
     except Exception as e:
+        print(f"Exception occurred: {str(e)}")  # Debugging statement
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
