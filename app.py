@@ -63,24 +63,6 @@ app.secret_key = os.getenv("SECRET_KEY")
 currentPath = os.getcwd()
 
 
-#@app.route("/getRandomNovel", methods=["GET"])
-#def getRandomNovel():
-#    novels_folder_path = os.path.join(os.getcwd(), 'templates', 'novels')
-#    all_novels = [novel for novel in os.listdir(novels_folder_path) if os.path.isdir(os.path.join(novels_folder_path, novel))]
-#    popular_novel = random.choice(all_novels)
-#    print("random novel selected", popular_novel)
-#    return jsonify({"random_novel": popular_novel})
-#
-#
-#
-#def fetch_random_novel():
-#    # Fetch the random novel from the '/getRandomNovel' endpoint
-#    response = requests.get('http://127.0.0.1:5000/getRandomNovel')
-#    if response.status_code == 200:
-#        return response.json().get('random_novel', 'Error fetching novel')
-#    else:
-#        return 'Error fetching novel'
-
 
 
 @app.route('/random_directory')
