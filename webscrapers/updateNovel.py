@@ -15,6 +15,8 @@ headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36'
 }
 
+
+
 # Function to transform the novel title for URL
 def transform_title(novel_title: str) -> str:
     """
@@ -262,8 +264,8 @@ def yes(novel_title: str) -> None:
     Returns:
     None
     """
-    if not os.path.exists(f'templates/novels/{novel_title}-chapters/base_url_number.txt'): # Path for lightnovelpub.vip scraped novels
-        if os.path.exists(f'templates/novels/{novel_title}-chapters'): # Just to make sure the novel exists
+    if not os.path.exists(f'templates/novels/{valid_dir_name(novel_title)}-chapters/base_url_number.txt'): # Path for lightnovelpub.vip scraped novels
+        if os.path.exists(f'templates/novels/{valid_dir_name(novel_title)}-chapters'): # Just to make sure the novel exists
             print("'Light Novel Pub' Novel found")
             if 'Death Is The Only Ending For The Villainess' in novel_title:
                 novel_title = novel_title[:-3]
@@ -284,10 +286,10 @@ def yes(novel_title: str) -> None:
             webscrapers.lightNovelPubDotVip.getPics.main(base_url)
 
     
-    elif os.path.exists(f'templates/novels/{novel_title}-chapters/base_url_number.txt'): # path for reader-novel novels
+    elif os.path.exists(f'templates/novels/{valid_dir_name(novel_title)}-chapters/base_url_number.txt'): # path for reader-novel novels
         print("'Reader Novel' Novel found")
         # Link creator
-        with open(f'templates/novels/{novel_title}-chapters/base_url_number.txt', 'r') as file:
+        with open(f'templates/novels/{valid_dir_name(novel_title)}-chapters/base_url_number.txt', 'r') as file:
             urlNum = file.read()
             url = f"https://www.readernovel.net/novel/{transform_title(novel_title)}-{urlNum}/"
             print(f"URL made: {url}")
