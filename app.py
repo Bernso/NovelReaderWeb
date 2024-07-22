@@ -442,7 +442,7 @@ def update_novel(novel_title):
     """
     try:
         novel_title2 = request.json.get('novelTitle2')  
-        input(novel_title2)
+        print(novel_title2)
 
         if novel_title2 is None:
             raise ValueError("novelTitle2 is missing or None.")
