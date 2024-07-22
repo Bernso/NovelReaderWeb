@@ -4,6 +4,7 @@
 test.bat
 auto.bat
 templates/novels/
+templates/tbate-185.html
 .env
 pics/
 offlineChapters.py
