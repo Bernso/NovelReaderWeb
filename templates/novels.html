@@ -6,14 +6,6 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>Novels</title>
-    <style>
-        .features {
-            grid-template-columns: repeat(3, 1fr); /* Display 2 novels per row */
-
-        }
-        
-        
-    </style>
 </head>
 <body class='no-select'>
     <header class="header">
@@ -34,7 +26,12 @@
     <main style='min-width: 980px;'>
         <section class="hero">
             <h2>Novels</h2>
-            <p style="margin-bottom: 0;">Read all of your favourite novels in a dark, majestic interface</p>
+
+            <p style="margin-bottom: 0;">Read all of your favourite novels in a dark, majestic interface 
+                <br> <br>
+                 Browse though total of <strong style='color: #BB86FC;'>{{ total_novels }} novels</strong> 
+            </p>
+
             <section class="search" style="margin-top: 0;">
                 <input type="text" id="searchInput" onkeyup="searchNovels()" placeholder="Search for novels...">
             </section>

@@ -383,7 +383,10 @@ def list_novels():
         # Sort the categories by words
         sorted_categories = sorted(all_categories, key=lambda x: x.lower())
 
-        return render_template('novels.html', novels=novels_with_data, emojis=emojis, all_categories=sorted_categories)
+        # Calculate the total number of novels available
+        total_novels = len([novel for novel in os.listdir(novels_folder_path) if os.path.isdir(os.path.join(novels_folder_path, novel))])
+
+        return render_template('novels.html', novels=novels_with_data, emojis=emojis, all_categories=sorted_categories, total_novels=total_novels)
     except Exception as e:
         error_message = str(e)
         send_discord_message(error_message)
