@@ -167,30 +167,55 @@ def main(url, chapter_number, novel_title):
     except Exception as e:
         print(f"Error: {e}")
 
+
+
+
+
+
+
 # Function to iterate over all chapters and save them
 def yes(novel_title):
-    if 'Death Is The Only Ending For The Villainess' in novel_title:
-        novel_title = novel_title[:-3]
-    def thread_target():
-        base_url = get_base_url(novel_title)
-        latest_chapter_number = get_latest_chapter_number(base_url)
-        if not latest_chapter_number:
-            print("Failed to get the latest chapter number.")
-            return
+    if not os.path.exists(f'templates/novels/{novel_title}-chapters/base_url_number.txt'): # Path for lightnovelpub.vip scraped novels
+        if os.path.exists(f'templates/novels/{novel_title}-chapters'): # Just to make sure the novel exists
+            if 'Death Is The Only Ending For The Villainess' in novel_title:
+                novel_title = novel_title[:-3]
+                
+            base_url = get_base_url(novel_title)
+            latest_chapter_number = get_latest_chapter_number(base_url)
+            if not latest_chapter_number:
+                print("Failed to get the latest chapter number.")
+                return
 
-        novel_title_clean = get_novel_title(base_url)
-        print(f"Latest chapter number: {latest_chapter_number}")
+            novel_title_clean = get_novel_title(base_url)
+            print(f"Latest chapter number: {latest_chapter_number}")
 
-        for i in range(1, int(latest_chapter_number) + 1):
-            main(url=f"{base_url}/chapter-{i}", chapter_number=i, novel_title=novel_title_clean)
-        print(f"Finished updating * {novel_title_clean} *")
-
-    thread = threading.Thread(target=thread_target)
-    thread.start()
+            for i in range(1, int(latest_chapter_number) + 1):
+                main(url=f"{base_url}/chapter-{i}", chapter_number=i, novel_title=novel_title_clean)
+            print(f"Finished updating * {novel_title_clean} *")
+            import webscrapers.lightNovelPubDotVip.getPics
+            webscrapers.lightNovelPubDotVip.getPics.main(url)
     
+    
+    
+    elif os.path.exists(f'templates/novels/{novel_title}-chapters/base_url_number.txt'): # path for reader-novel novels
+        # Link creator
+        with open(f'templates/novels/{novel_title}-chapters/base_url_number.txt', 'r') as file:
+            urlNum = file.read()
+            url = f"https://www.readernovel.net/novel/{transform_title(novel_title)}-{urlNum}/"
+            print(f"URL made: {url}")
+            file.close()
+        import webscrapers.readerNovel.genChapters
+        import webscrapers.readerNovel.getPics
+        webscrapers.readerNovel.genChapters.yes(url) # Get chapters
+        webscrapers.readerNovel.getPics.main(url) # Get picture
+
+    # https://www.readernovel.net/novel/prodigiously-amazing-weaponsmith-652/
+    
+    else:
+        print("Novel not found")
     
     
 # Example usage
 if __name__ == '__main__':
-    yes("Atticus's Odyssey Reincarnated Into A Playground")
+    yes("Prodigiously Amazing Weaponsmith")
 

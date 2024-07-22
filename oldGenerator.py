@@ -5,7 +5,7 @@ import re
 import threading
 
 ############################### NOT USED ANYMORE #############################
-
+# Legacy lol 
 
 
 def get_latest_chapter_number(base_url):

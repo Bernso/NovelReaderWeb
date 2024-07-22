@@ -10,3 +10,4 @@ offlineChapters.py
 .idea
 webscrapers/lightNovelPubDotVip/__pycache__/
 webscrapers/readerNovel/__pycache__/
+webscrapers/__pycache__

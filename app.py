@@ -2,11 +2,11 @@ try:
     # Webscrapers
     import webscrapers.lightNovelPubDotVip.genChapters
     import webscrapers.lightNovelPubDotVip.getPics 
-    import webscrapers.lightNovelPubDotVip.updateNovel
     
     import webscrapers.readerNovel.genChapters
     import webscrapers.readerNovel.getPics 
-    import webscrapers.readerNovel.updateNovel
+    
+    import webscrapers.updateNovel
     
     
     # Normal
@@ -442,12 +442,13 @@ def update_novel(novel_title):
     """
     try:
         novel_title2 = request.json.get('novelTitle2')  
+        input(novel_title2)
 
         if novel_title2 is None:
             raise ValueError("novelTitle2 is missing or None.")
         
-        result = webscrapers.lightNovelPubDotVip.updateNovel.yes(novel_title2)
-        webscrapers.lightNovelPubDotVip.getPics.withoutLink(novel_title2)
+        result = webscrapers.updateNovel.yes(novel_title2)
+
         return jsonify({"status": "success", "message": f"{novel_title} updated successfully.", "result": result})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -551,6 +552,15 @@ def popular_novels():
 
 @app.route('/webscrapers')
 def webscraperss():
+    """
+    This function retrieves the names of all web scrapers in the 'webscrapers' directory.
+    
+    Parameters:
+    None
+    
+    Returns:
+    render_template: A rendered HTML template with the number of web scrapers and their names.
+    """
     path = os.path.join(os.getcwd(), 'webscrapers')
     directory_names = []
     

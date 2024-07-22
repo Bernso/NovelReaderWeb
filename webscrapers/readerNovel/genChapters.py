@@ -161,8 +161,7 @@ def main(url, novel_title):
         elif number.isnumeric():
             chapterNumber += number
         
-        else:
-            print("Hi there!")
+       
 
     
     file_path = os.path.join(file_dir, f'chapter-{chapterNumber}.txt')
