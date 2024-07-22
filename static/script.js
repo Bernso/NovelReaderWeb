@@ -182,3 +182,23 @@ function showPromptreaderNovel() {
         alert("Prompt cancelled.");
     }
 }
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const button = document.getElementById('randomDirButton');
+
+    button.addEventListener('click', () => {
+        fetch('/random_directory')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.directory);
+                if (data.directory !== 'No directories found') {
+                    const newHref = `/novels/${data.directory}`;
+                    window.location.href = newHref;
+                } else {
+                    alert('No directories found');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    });
+});
