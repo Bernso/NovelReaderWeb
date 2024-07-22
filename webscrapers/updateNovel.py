@@ -1,9 +1,11 @@
-import requests
-from bs4 import BeautifulSoup
-import os
-import re
-import urllib
-import threading
+try:
+    import requests
+    from bs4 import BeautifulSoup
+    import os
+    import re
+    import urllib
+except ImportError as e:
+    input(f"Import error: {e}")
 
 # Script needed to update the novels
 
@@ -14,7 +16,7 @@ headers = {
 }
 
 # Function to transform the novel title for URL
-def transform_title(novel_title):
+def transform_title(novel_title: str) -> str:
     """
     Transform the novel title for URL:
     1. Decode URL-encoded characters.
@@ -22,6 +24,12 @@ def transform_title(novel_title):
     3. Convert to lowercase.
     4. Replace special characters and spaces with hyphens.
     5. Remove trailing hyphens and spaces.
+
+    Parameters:
+    novel_title (str): The original novel title.
+
+    Returns:
+    str: The transformed novel title suitable for use in URLs.
     """
     # Remove anything within brackets and the brackets themselves
     novel_title_cleaned = re.sub(r'\(.*?\)', '', novel_title)
@@ -34,18 +42,32 @@ def transform_title(novel_title):
     transformed_title = re.sub(r'[^a-zA-Z0-9\s-]', '', transformed_title)  # Remove non-alphanumeric characters except hyphens
     return transformed_title
 
+
+
+
 # Function to sanitize novel title for use in directory names
-def valid_dir_name(novel_title):
+def valid_dir_name(novel_title: str) -> str:
     """
-    Sanitize novel title for use in directory names:
-    1. Remove special characters and spaces.
-    2. Replace certain characters like ':' and '/'.
+    Sanitize novel title for use in directory names.
+
+    This function takes a novel title as input and performs several operations to sanitize it for use in directory names.
+    It removes special characters and spaces, replaces certain characters like ':' and '/', and ensures that the resulting
+    string is valid for directory names.
+
+    Parameters:
+    novel_title (str): The original novel title.
+
+    Returns:
+    str: The sanitized novel title suitable for use in directory names.
     """
-    novel_title_clean = re.sub(r"[''']", "'", novel_title)
-    novel_title_clean = novel_title_clean.replace(":", "")
-    novel_title_clean = novel_title_clean.replace("/", "") 
-    novel_title_clean = novel_title_clean.replace("’", "'")
+    novel_title_clean = re.sub(r"[''']", "'", novel_title)  # Replace single quotes with apostrophes
+    novel_title_clean = novel_title_clean.replace(":", "")  # Remove colons
+    novel_title_clean = novel_title_clean.replace("/", "")  # Remove slashes
+    novel_title_clean = novel_title_clean.replace("’", "'")  # Replace right single quote with apostrophes
     return novel_title_clean
+
+
+
 
 # Function to get the base URL
 def get_base_url(novel_title):
@@ -55,8 +77,21 @@ def get_base_url(novel_title):
     base_url = f"https://lightnovelpub.vip/novel/{transform_title(novel_title)}"
     return base_url
 
+
+
+
 # Function to scrape categories and return them as a list
 def scrape_categories(url):
+    """
+    Scrape the categories of a novel from the given URL.
+
+    Parameters:
+    url (str): The URL of the novel's page.
+
+    Returns:
+    list: A list of categories extracted from the URL. If any error occurs during the scraping process,
+    an empty list is returned.
+    """
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
@@ -84,8 +119,21 @@ def scrape_categories(url):
         print(f"Error scraping categories: {e}")
         return []
 
-# Function to get the latest chapter number
-def get_latest_chapter_number(base_url):
+
+
+
+def get_latest_chapter_number(base_url: str) -> str:
+    """
+    This function retrieves the latest chapter number from the given base URL.
+    It sends a GET request to the URL, parses the HTML content using BeautifulSoup,
+    and extracts the chapter number from the 'div' with the class 'header-stats'.
+
+    Parameters:
+    base_url (str): The URL from which to retrieve the latest chapter number.
+
+    Returns:
+    str: The latest chapter number extracted from the URL. If the request fails or the chapter number is not found, returns None.
+    """
     try:
         response = requests.get(base_url, headers=headers)
         response.raise_for_status()
@@ -108,10 +156,24 @@ def get_latest_chapter_number(base_url):
 
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
-        return None
+        return None  
+
+
+
 
 # Function to get the novel title from the URL
-def get_novel_title(base_url):
+def get_novel_title(base_url: str) -> str:
+    """
+    This function retrieves the novel title from the given base URL.
+    It sends a GET request to the URL, parses the HTML content using BeautifulSoup,
+    and extracts the novel title from the 'h1' tag with the class 'novel-title text2row'.
+
+    Parameters:
+    base_url (str): The URL from which to retrieve the novel title.
+
+    Returns:
+    str: The novel title extracted from the URL. If the request fails or the title is not found, returns None.
+    """
     try:
         response = requests.get(base_url, headers=headers)
         response.raise_for_status()
@@ -124,8 +186,24 @@ def get_novel_title(base_url):
         print(f"Request failed: {e}")
         return None
 
+
+
+
 # Function to fetch and save chapter content
-def main(url, chapter_number, novel_title):
+def main(url: str, chapter_number: int, novel_title: str) -> None:
+    """
+    This function fetches and saves the chapter content of a novel from a given URL.
+    It also checks if the chapter file already exists and skips if it does.
+    Additionally, it scrapes and saves the categories of the novel if the categories file does not exist.
+
+    Parameters:
+    url (str): The URL of the novel chapter.
+    chapter_number (int): The number of the novel chapter.
+    novel_title (str): The title of the novel.
+
+    Returns:
+    None
+    """
     base_dir = f'templates/novels/{valid_dir_name(novel_title)}-chapters'
     os.makedirs(base_dir, exist_ok=True)
     file_path = os.path.join(base_dir, f'chapter-{chapter_number}.txt')
@@ -147,7 +225,6 @@ def main(url, chapter_number, novel_title):
                 print(f"Categories saved to {categories_path}")
             else:
                 print("Failed to scrape categories. Skipping...")
-        
         
         response = requests.get(url, headers=headers)
         response.raise_for_status()
@@ -174,7 +251,17 @@ def main(url, chapter_number, novel_title):
 
 
 # Function to iterate over all chapters and save them
-def yes(novel_title):
+def yes(novel_title: str) -> None:
+    """
+    This function is responsible for updating the novel chapters and images based on the given novel title.
+    It checks if the novel is scraped from lightnovelpub.vip or reader-novel.net and performs the necessary actions accordingly.
+
+    Parameters:
+    novel_title (str): The title of the novel to be updated.
+
+    Returns:
+    None
+    """
     if not os.path.exists(f'templates/novels/{novel_title}-chapters/base_url_number.txt'): # Path for lightnovelpub.vip scraped novels
         if os.path.exists(f'templates/novels/{novel_title}-chapters'): # Just to make sure the novel exists
             if 'Death Is The Only Ending For The Villainess' in novel_title:
@@ -194,8 +281,7 @@ def yes(novel_title):
             print(f"Finished updating * {novel_title_clean} *")
             import webscrapers.lightNovelPubDotVip.getPics
             webscrapers.lightNovelPubDotVip.getPics.main(url)
-    
-    
+
     
     elif os.path.exists(f'templates/novels/{novel_title}-chapters/base_url_number.txt'): # path for reader-novel novels
         # Link creator
