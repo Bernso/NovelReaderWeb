@@ -1,16 +1,19 @@
-import sys
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
-import base64
-import os
-import requests
-import re
-import urllib
+try:
+    import sys
+    from selenium import webdriver
+    from selenium.webdriver.chrome.service import Service
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    from webdriver_manager.chrome import ChromeDriverManager
+    from bs4 import BeautifulSoup
+    import base64
+    import os
+    import requests
+    import re
+    import urllib
+except ImportError as e:
+    input(f"Import error: {e}")
 
 def transform_title(novel_title):
     """
