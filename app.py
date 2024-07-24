@@ -12,13 +12,21 @@ try:
     # Normal
     from flask import Flask, render_template, request, jsonify, session, send_file
     import os
-    import re  # Importing re module for regex operations
+    import re  
     import random
     import requests
     import json
-    from dotenv import load_dotenv  # Importing load_dotenv for environment variables
+    from dotenv import load_dotenv  
 except ImportError as e:
     input(f"Module not found: {e}")
+
+
+# Port Number (Keep as string)
+port = "1111"
+
+# Debug True/Flase
+debug = True
+
 
 
 # Everything documented here is done by tabnine AI (not me)
@@ -592,7 +600,7 @@ def webscraperss():
 
 if __name__ == "__main__":
     try:
-        app.run(debug=True, host='0.0.0.0', port='1111')
+        app.run(debug=debug, host='0.0.0.0', port=port)
     except Exception as e:
         input(f"Error running the app: {e}")
 
