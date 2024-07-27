@@ -155,7 +155,7 @@ function showPromptlightNovelPubDotVip() {
     const novelLink = prompt("Enter the link for your novel:", "Link");
     if (novelLink) {
         alert("Processing...");
-        fetch('/lightNovelPubDotVip', {
+        fetch('/lightNovelPubDotVip', { // Bit to change
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -171,7 +171,7 @@ function showPromptreaderNovel() {
     const novelLink = prompt("Enter the link for your novel:", "Link");
     if (novelLink) {
         alert("Processing...");
-        fetch('/readerNovel', {
+        fetch('/readerNovel', { // Bit to change
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -187,7 +187,7 @@ function showPromptreadWebNovel() {
     const novelLink = prompt("Enter the link for your novel:", "Link");
     if (novelLink) {
         alert("Processing...");
-        fetch('/readWebNovel', {
+        fetch('/readWebNovel', { // Bit to change
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
