@@ -56,6 +56,12 @@ def valid_dir_name(novel_title: str) -> str:
 
 
 
+
+def capitalize_first_letter_of_each_word(input_string):
+    return ' '.join(word.capitalize() for word in input_string.split())
+
+
+
 # Function to scrape categories
 def scrape_categories(base_url):
     try:
@@ -64,20 +70,21 @@ def scrape_categories(base_url):
         
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        # Find the <span> element with the class 'detail-content'
-        detail_content_span = soup.find('span', class_='detail-content')
-        if detail_content_span is None:
-            print("No <span> with class 'detail-content' found.")
+        # Find the <div> element with the class 'm-tags'
+        detail_content_div = soup.find('div', class_='m-tags')
+        if detail_content_div is None:
+            print("No <div> with class 'm-tags' found.")
             return []
 
-        # Find all 'a' tags within the 'detail-content' span
-        a_tags = detail_content_span.find_all('a')
+        # Find all 'a' tags within the 'detail-content' div
+        a_tags = detail_content_div.find_all('a')
         if not a_tags:
-            print("No <a> tags found within the 'detail-content' span.")
+            print("No <a> tags found within the 'detail-content' div.")
             return []
 
-        categories = [a.get_text(strip=True) for a in a_tags]
-
+        # Extract, clean, and capitalize the categories
+        categories = [capitalize_first_letter_of_each_word(a.get_text(strip=True)[2:]) for a in a_tags]
+        
         return categories
 
     except requests.exceptions.RequestException as e:
@@ -197,7 +204,7 @@ def yes(base_url):
     
     categories = scrape_categories(base_url)
     print(categories)
-    
+    quit()
     if categories:
         folder_name = valid_dir_name(novel_title)
         file_dir = f'templates/novels/{folder_name}-chapters'
@@ -237,5 +244,5 @@ def yes(base_url):
 
 # Example usage
 if __name__ == '__main__':
-    base_url = 'https://www.webnovel.com/book/i-stayed-at-home-for-a-century-when-i-emerged-i-was-invincible_22969003505340005/catalog'
+    base_url = 'https://www.webnovel.com/book/i-stayed-at-home-for-a-century-when-i-emerged-i-was-invincible_22969003505340005'
     yes(base_url)
