@@ -264,31 +264,8 @@ def yes(novel_title: str) -> None:
     Returns:
     None
     """
-    if not os.path.exists(f'templates/novels/{valid_dir_name(novel_title)}-chapters/base_url_number.txt'): # Path for lightnovelpub.vip scraped novels
-        if os.path.exists(f'templates/novels/{valid_dir_name(novel_title)}-chapters'): # Just to make sure the novel exists
-            print("'Light Novel Pub' Novel found")
-            if 'Death Is The Only Ending For The Villainess' in novel_title:
-                novel_title = novel_title[:-3]
-                
-            base_url = get_base_url(novel_title)
-            latest_chapter_number = get_latest_chapter_number(base_url)
-            if not latest_chapter_number:
-                print("Failed to get the latest chapter number.")
-                return
-
-            novel_title_clean = get_novel_title(base_url)
-            print(f"Latest chapter number: {latest_chapter_number}")
-
-            for i in range(1, int(latest_chapter_number) + 1):
-                main(url=f"{base_url}/chapter-{i}", chapter_number=i, novel_title=novel_title_clean)
-            print(f"Finished updating * {novel_title_clean} *")
-            import webscrapers.lightNovelPubDotVip.getPics
-            webscrapers.lightNovelPubDotVip.getPics.main(base_url)
-
     
-    
-    
-    elif os.path.exists(f'templates/novels/{valid_dir_name(novel_title)}-chapters/base_url_number.txt'): # path for reader-novel novels
+    if os.path.exists(f'templates/novels/{valid_dir_name(novel_title)}-chapters/base_url_number.txt'): # path for reader-novel novels
         print("'Reader Novel' Novel found")
         # Link creator
         with open(f'templates/novels/{valid_dir_name(novel_title)}-chapters/base_url_number.txt', 'r') as file:
@@ -305,15 +282,34 @@ def yes(novel_title: str) -> None:
 
 
     elif os.path.exists(f'templates/novels/{valid_dir_name(novel_title)}-chapters/readWebNovel.txt'):
+        # URL creator
+        url = f"https://read-webnovel.com/novels/{transform_title(novel_title)}"
         import webscrapers.readWebNovel.genChapters
         import webscrapers.readWebNovel.getPics
         webscrapers.readWebNovel.genChapters.yes(url) # Get chapters
         webscrapers.readWebNovel.getPics.main(url) # Get picture
 
 
-    
     else:
-        print("Novel not found")
+        print("'Light Novel Pub' Novel found")
+        if 'Death Is The Only Ending For The Villainess' in novel_title:
+            novel_title = novel_title[:-3]
+            
+        base_url = get_base_url(novel_title)
+        latest_chapter_number = get_latest_chapter_number(base_url)
+        if not latest_chapter_number:
+            print("Failed to get the latest chapter number.")
+            return
+
+        novel_title_clean = get_novel_title(base_url)
+        print(f"Latest chapter number: {latest_chapter_number}")
+
+        for i in range(1, int(latest_chapter_number) + 1):
+            main(url=f"{base_url}/chapter-{i}", chapter_number=i, novel_title=novel_title_clean)
+        print(f"Finished updating * {novel_title_clean} *")
+        import webscrapers.lightNovelPubDotVip.getPics
+        webscrapers.lightNovelPubDotVip.getPics.main(base_url)
+
     
     
 # Example usage
