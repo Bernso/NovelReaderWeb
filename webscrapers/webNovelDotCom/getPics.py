@@ -56,22 +56,26 @@ def scrape_and_download_images(base_url, folder_path):
         os.makedirs(folder_path)
     
     
-    
+
     # Creating the URL for the pic scraper
     
     reversed_base_url = base_url[::-1]
 
     print(reversed_base_url)
 
-    novelCode = ''
-    for character in base_url:
+    reversedNovelCode = ''
+    for character in reversed_base_url:
         if character.isdigit():
-            novelCode += character
-            
-    image_url = f"https://book-pic.webnovel.com/bookcover/{novelCode}"
-    print(url)
+            reversedNovelCode += character
+        else:
+            break
     
-    download_image(image_url=image_url, folder_path)
+    novelCode = reversedNovelCode[::-1]
+    
+    image_url = f"https://book-pic.webnovel.com/bookcover/{novelCode}"
+    print(image_url)
+    
+    download_image(image_url=image_url, folder_path=folder_path)
 
 
 
@@ -82,16 +86,13 @@ def getTitle(url):
         print(f"Failed to retrieve the webpage: {url}")
         return
     
+    response = requests.get(base_url, headers=HEADERS)
     soup = BeautifulSoup(response.content, 'html.parser')
-    title_header = soup.find('h1', class_='product_title entry-title elementor-heading-title elementor-size-default')
-    
-    if title_header:
-        novel_title = title_header.get_text().strip()
-        print(f"Title: {novel_title}")
-        return novel_title
-    else:
-        print("Title not found")
-    
+    if response.status_code == 200:
+        title = soup.find('h1', class_='pt4 pb4 oh mb4 auto_height fs36 lh40 c_l').get_text().strip()
+        print(title)
+        return title
+    return None    
     
     
 
@@ -109,7 +110,7 @@ def main(url):
 
 # Example usage
 if __name__ == '__main__':
-    base_url = 'https://read-webnovel.com/novels/against-the-gods/'
+    base_url = 'https://www.webnovel.com/book/i-stayed-at-home-for-a-century-when-i-emerged-i-was-invincible_22969003505340005'
     main(base_url)
     #folder_path = os.getcwd()
     #scrape_and_download_images(base_url, folder_path=folder_path)
