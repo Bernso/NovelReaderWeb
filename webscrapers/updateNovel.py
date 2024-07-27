@@ -289,6 +289,16 @@ def yes(novel_title: str) -> None:
         webscrapers.readWebNovel.genChapters.yes(url) # Get chapters
         webscrapers.readWebNovel.getPics.main(url) # Get picture
 
+    elif os.path.exists(f'templates/novels/{valid_dir_name(novel_title)}-chapters/webNovelDotCom.txt'):
+        # URL creator
+        with open(f'templates/novels/{novel_title}0chapters/webNovelDotCom.txt', 'r') as f:
+            novel_code = f.read()
+            f.close()
+        url = f"https://www.webnovel.com/book/{transform_title(novel_title)}_{novel_code}"
+        import webscrapers.readWebNovel.genChapters
+        import webscrapers.readWebNovel.getPics
+        webscrapers.readWebNovel.genChapters.yes(url) # Get chapters
+        webscrapers.readWebNovel.getPics.main(url) # Get picture
 
     else:
         print("'Light Novel Pub' Novel found")

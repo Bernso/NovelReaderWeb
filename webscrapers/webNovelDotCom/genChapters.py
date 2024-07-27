@@ -99,25 +99,26 @@ def scrape_categories(base_url):
 # Function to get the latest chapter number
 def get_latest_chapter_number(base_url):
     try:
+        base_url = f"{base_url}/catalog"
         response = requests.get(base_url, headers=headers)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, 'html.parser')
-        listOfChapters = soup.find('section', class_='wp-show-posts-columns wp-show-posts')
+        listOfChapters = soup.find('div', class_='fs16 det-con-ol oh j_catalog_list')
 
         if listOfChapters is None:
-            print("No 'section' with class 'wp-show-posts-columns wp-show-posts' found.")
+            print("No 'div' with class 'fs16 det-con-ol oh j_catalog_list' found.")
             return None, []
 
-        # Find all <a> elements inside the <section>
+        # Find all <a> elements inside the <div>
         li_elements = listOfChapters.find_all('a')
         if not li_elements:
-            print("No 'a' elements found inside the 'section'.")
+            print("No 'a' elements found inside the 'div'.")
             return None, []
 
         # Extract the text and href from each <a> inside the <li> elements
         chapter_texts = [a.get_text(strip=True) for a in li_elements]
-        chapter_links = [a['href'] for a in li_elements]
+        chapter_links = [f"https://www.webnovel.com{a['href']}" for a in li_elements]
 
         print(f"There are {len(chapter_texts)} chapters")
         latestChapterNumber = len(chapter_texts)
@@ -150,37 +151,42 @@ def main(url, novel_title):
     file_dir = f'templates/novels/{folder_name}-chapters'
     os.makedirs(file_dir, exist_ok=True)
     
-    chapterNumberTemp = url[-5:]
-    chapterNumber = ''
-    for number in chapterNumberTemp:
-        if number == '.':
-            chapterNumber += '-'
-        
-        elif number.isnumeric():
-            chapterNumber += number
-        
-       
-
-    
-    file_path = os.path.join(file_dir, f'chapter-{chapterNumber}.txt')
-
-    # Check if the file already exists
-    if os.path.exists(file_path):
-        print(f"Chapter {chapterNumber} already downloaded. Skipping...")
-        return
+   
 
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, 'html.parser')
+        
+        chapterNumber = ""
+        chapterNumberTemp = soup.find('h1', class_='dib mb0 fw700 fs24 lh1.5').get_text().strip()
+        # Process characters from position 8 to 15
+        for number in chapterNumberTemp[8:15]:
+            if number.isnumeric():
+                chapterNumber += number
 
-        chapter_container = soup.find('div', class_='smart_content_wrapper')
+        # Validate the chapter number
+        if not chapterNumber:
+            print("Invalid chapter number")
+            return
+        
+        # Create the file path
+        file_path = os.path.join(file_dir, f'chapter-{chapterNumber}.txt')
+        
+
+        # Check if the file already exists
+        if os.path.exists(file_path):
+            print(f"Chapter {chapterNumber} already downloaded. Skipping...")
+            return        
+                
+        
+        chapter_container = soup.find('div', class_='cha-words')
         if chapter_container:
             chapter_text = chapter_container.get_text(separator='\n').strip()
 
             with open(file_path, 'w', encoding='utf-8') as file:
-                file.write(chapter_text.replace('\n', '<br><br>').replace('\\', ''))
+                file.write(chapter_text.replace('\n', '<br>'))
 
             print(f"TXT file created successfully for * {novel_title} * chapter * {chapterNumber} *")
 
@@ -233,7 +239,7 @@ def yes(base_url):
         return
 
     print(f"First chapter: {chapterLinks[0]}")
-
+    
 
     for Link in chapterLinks:
         main(url=Link, novel_title=novel_title)

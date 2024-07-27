@@ -199,6 +199,22 @@ function showPromptreadWebNovel() {
     }
 }
 
+function showPromptwebNovelDotCom() {
+    const novelLink = prompt("Enter the link for your novel:", "Link");
+    if (novelLink) {
+        alert("Processing...");
+        fetch('/webNovelDotCom', { // Bit to change
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ novelLink: novelLink })
+        })
+    } else {
+        alert("Prompt cancelled.");
+    }
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const button = document.getElementById('randomDirButton');

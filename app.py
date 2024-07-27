@@ -9,6 +9,9 @@ try:
     import webscrapers.readWebNovel.genChapters
     import webscrapers.readWebNovel.getPics
     
+    import webscrapers.webNovelDotCom.genChapters
+    import webscrapers.webNovelDotCom.getPics
+    
     import webscrapers.updateNovel
     
     
@@ -146,6 +149,8 @@ def run_scriptlightNovelPubDotVip():
         return jsonify({"error": str(e)}), 500
 
 
+
+
 @app.route('/readerNovel', methods=['POST'])
 def run_scriptreaderNovel():
     """
@@ -173,6 +178,7 @@ def run_scriptreaderNovel():
 
 
 
+
 @app.route('/readWebNovel', methods=['POST'])
 def run_scriptreadWebNovel():
     
@@ -182,6 +188,23 @@ def run_scriptreadWebNovel():
         print(f"Novel link received: {novel_link}")  # Debugging statement
         result = webscrapers.readWebNovel.genChapters.yes(base_url=novel_link)
         webscrapers.readWebNovel.getPics.main(url=novel_link) 
+        return jsonify({"result": result})
+    except Exception as e:
+        print(f"Error occurred: {str(e)}")  # Debugging statement
+        return jsonify({"error": str(e)}), 500
+    
+
+
+
+@app.route('/webNovelDotCom', methods=['POST'])
+def run_scriptwebNovelDotCom():
+    
+    try:
+        print("Received request to /webNovelDotCom")  # Debugging statement
+        novel_link = request.json.get('novelLink')
+        print(f"Novel link received: {novel_link}")  # Debugging statement
+        result = webscrapers.webNovelDotCom.genChapters.yes(base_url=novel_link)
+        webscrapers.webNovelDotCom.getPics.main(url=novel_link) 
         return jsonify({"result": result})
     except Exception as e:
         print(f"Error occurred: {str(e)}")  # Debugging statement

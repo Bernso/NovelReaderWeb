@@ -71,7 +71,11 @@ def scrape_and_download_images(base_url, folder_path):
             break
     
     novelCode = reversedNovelCode[::-1]
-    
+    fileName = "webNovelDotComCode.txt"
+    with open(os.path.join(folder_path, fileName), 'w') as file:
+        file.write(novelCode)
+        
+            
     image_url = f"https://book-pic.webnovel.com/bookcover/{novelCode}"
     print(image_url)
     
