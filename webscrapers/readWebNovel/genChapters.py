@@ -64,25 +64,19 @@ def scrape_categories(base_url):
         
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        # Find the <strong> element with the text "Genre(s)"
-        genre_strong = soup.find('strong', string='Genre(s) :')
-        if genre_strong is None:
-            print("No <strong> with text 'Genre(s)' found.")
+        # Find the <span> element with the class 'detail-content'
+        detail_content_span = soup.find('span', class_='detail-content')
+        if detail_content_span is None:
+            print("No <span> with class 'detail-content' found.")
             return []
 
-        # Find the parent or relevant container that holds the genres
-        categories_container = genre_strong.find_parent('li')
-        if categories_container is None:
-            print("No parent 'li' containing the genres found.")
+        # Find all 'a' tags within the 'detail-content' span
+        a_tags = detail_content_span.find_all('a')
+        if not a_tags:
+            print("No <a> tags found within the 'detail-content' span.")
             return []
 
-        # Find all 'a' tags within the container to extract the genre names
-        li = categories_container.find_all('a')
-        if not li:
-            print("No categories found within the container.")
-            return []
-
-        categories = [item.get_text(strip=True) for item in li]
+        categories = [a.get_text(strip=True) for a in a_tags]
 
         return categories
 
@@ -93,6 +87,8 @@ def scrape_categories(base_url):
         print(f"Error scraping categories: {e}")
         return []
 
+
+
 # Function to get the latest chapter number
 def get_latest_chapter_number(base_url):
     try:
@@ -100,26 +96,21 @@ def get_latest_chapter_number(base_url):
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, 'html.parser')
-        listOfChapters = soup.find('ul', class_='list-unstyled rounded-sketch-4')
+        listOfChapters = soup.find('section', class_='wp-show-posts-columns wp-show-posts')
 
         if listOfChapters is None:
-            print("No 'ul' with class 'list-unstyled rounded-sketch-4' found.")
-            return None
+            print("No 'section' with class 'wp-show-posts-columns wp-show-posts' found.")
+            return None, []
 
-        # Find all <li> elements inside the <ul>
-        li_elements = listOfChapters.find_all('li')
+        # Find all <a> elements inside the <section>
+        li_elements = listOfChapters.find_all('a')
         if not li_elements:
-            print("No 'li' elements found inside the 'ul'.")
-            return None
+            print("No 'a' elements found inside the 'section'.")
+            return None, []
 
         # Extract the text and href from each <a> inside the <li> elements
-        chapter_texts = []
-        chapter_links = []
-        for li in li_elements:
-            a_tag = li.find('a')
-            if a_tag:
-                chapter_texts.append(a_tag.get_text(strip=True))
-                chapter_links.append(f"https://www.readernovel.net{a_tag['href']}")
+        chapter_texts = [a.get_text(strip=True) for a in li_elements]
+        chapter_links = [a['href'] for a in li_elements]
 
         print(f"There are {len(chapter_texts)} chapters")
         latestChapterNumber = len(chapter_texts)
@@ -127,7 +118,7 @@ def get_latest_chapter_number(base_url):
 
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
-        return None
+        return None, []
 
 
 
@@ -138,7 +129,7 @@ def get_novel_title(base_url):
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, 'html.parser')
-        novel_title = soup.find('h1', class_='page-title pt-2 mb-3').get_text().strip()
+        novel_title = soup.find('h1', class_='product_title entry-title elementor-heading-title elementor-size-default').get_text().strip()
 
         return novel_title
 
@@ -177,12 +168,12 @@ def main(url, novel_title):
 
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        chapter_container = soup.find('div', id='chapter-container')
+        chapter_container = soup.find('div', class_='smart_content_wrapper')
         if chapter_container:
             chapter_text = chapter_container.get_text(separator='\n').strip()
 
             with open(file_path, 'w', encoding='utf-8') as file:
-                file.write(chapter_text.replace('\n', '<br>'))
+                file.write(chapter_text.replace('\n', '<br><br>').replace('\\', ''))
 
             print(f"TXT file created successfully for * {novel_title} * chapter * {chapterNumber} *")
 
@@ -199,25 +190,14 @@ def main(url, novel_title):
 # Function to iterate over all chapters and save them
 def yes(base_url):
     
-    base_url_temp = base_url[-5:]
-    print(base_url_temp)
-    base_url_number = ''
-    for number in base_url_temp:
-        if number.isdigit():
-            print(int(number))
-            base_url_number += number
-
-    print(base_url_number)    
     
-    
-    #def thread_target():
         
     novel_title = get_novel_title(base_url)
     print(novel_title)
     
     categories = scrape_categories(base_url)
     print(categories)
-
+    
     if categories:
         folder_name = valid_dir_name(novel_title)
         file_dir = f'templates/novels/{folder_name}-chapters'
@@ -228,38 +208,34 @@ def yes(base_url):
         with open(categories_path, 'w') as f:
             f.write('\n'.join(categories))
             print(f"Categories saved to {categories_path}")
+            
+        readWebNovel = os.path.join(file_dir, 'readWebNovel.txt')
+
+        with open(readWebNovel, 'w') as f:
+            f.write('readWebNovel')
+            print(f"Certification saved to {readWebNovel}")
     else:
         print("Failed to scrape categories. Skipping...")
     
-    if base_url_number:
-        os.makedirs(file_dir, exist_ok=True)
-        base_url_number_path = os.path.join(file_dir, 'base_url_number.txt')
-        
-        with open(base_url_number_path, 'w') as f:
-            f.write(base_url_number)
-            print(f"Base URL Number saved to {base_url_number_path}")
-    else:
-        print("Failed to get the base URL number. Skipping...")
+    
     
     
     latest_chapter_number, chapterLinks = get_latest_chapter_number(base_url)
     if latest_chapter_number is None:
         print("Failed to get the latest chapter number.")
         return
-    chapterLinksSorted = chapterLinks[::-1]
-    print(f"Latest chapter number: {latest_chapter_number}")
 
-    print(chapterLinksSorted[0])
+    print(f"First chapter: {chapterLinks[0]}")
 
 
-    for Link in chapterLinksSorted:
+    for Link in chapterLinks:
         main(url=Link, novel_title=novel_title)
     print(f"Finished scraping * {novel_title} *")
 
-    #thread = threading.Thread(target=thread_target)
-    #thread.start()
+
+
 
 # Example usage
 if __name__ == '__main__':
-    base_url = 'https://www.readernovel.net/novel/deep-sea-embers-4055/'
+    base_url = 'https://read-webnovel.com/novels/i-can-copy-and-evolve-talents/'
     yes(base_url)

@@ -22,7 +22,20 @@ HEADERS = {
 }
 
 
+def valid_dir_name(novel_title: str) -> str:
+    """
+    Prepare a valid directory name by removing special characters and replacing spaces with hyphens.
 
+    Parameters:
+    novel_title (str): The original novel title.
+
+    Returns:
+    str: The transformed novel title suitable for creating a directory.
+    """
+    novel_title = re.sub(r"[’'’]", "'", novel_title)  # Replace special apostrophes with single quote
+    novel_title = novel_title.replace(":", "")  # Remove colons
+    novel_title = novel_title.replace("/", "")  # Remove slashes
+    return novel_title
 
 def download_image(image_url, folder_path):
     response = requests.get(image_url, headers=HEADERS)
@@ -82,7 +95,7 @@ def main(url):
     logging.info("Web Scraper started")
     try:
         title = getTitle(url)
-        path = fr"{os.getcwd()}\templates\novels\{title}-chapters"
+        path = fr"{os.getcwd()}\templates\novels\{valid_dir_name(title)}-chapters"
         scrape_and_download_images(base_url=url, folder_path=path)
         print(path)
     except Exception as e:

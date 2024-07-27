@@ -183,6 +183,22 @@ function showPromptreaderNovel() {
     }
 }
 
+function showPromptreadWebNovel() {
+    const novelLink = prompt("Enter the link for your novel:", "Link");
+    if (novelLink) {
+        alert("Processing...");
+        fetch('/readWebNovel', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ novelLink: novelLink })
+        })
+    } else {
+        alert("Prompt cancelled.");
+    }
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const button = document.getElementById('randomDirButton');

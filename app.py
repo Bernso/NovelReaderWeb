@@ -6,6 +6,9 @@ try:
     import webscrapers.readerNovel.genChapters
     import webscrapers.readerNovel.getPics 
     
+    import webscrapers.readWebNovel.genChapters
+    import webscrapers.readWebNovel.getPics
+    
     import webscrapers.updateNovel
     
     
@@ -170,6 +173,19 @@ def run_scriptreaderNovel():
 
 
 
+@app.route('/readWebNovel', methods=['POST'])
+def run_scriptreadWebNovel():
+    
+    try:
+        print("Received request to /readerNovel")  # Debugging statement
+        novel_link = request.json.get('novelLink')
+        print(f"Novel link received: {novel_link}")  # Debugging statement
+        result = webscrapers.readWebNovel.genChapters.yes(base_url=novel_link)
+        webscrapers.readWebNovel.getPics.main(url=novel_link) 
+        return jsonify({"result": result})
+    except Exception as e:
+        print(f"Error occurred: {str(e)}")  # Debugging statement
+        return jsonify({"error": str(e)}), 500
 
 
 
@@ -308,7 +324,7 @@ def show_novel_chapters(novel_title):
             categories_str = ""
 
         # Filter out the categories file from the chapters list
-        chapters = [file for file in chapters if not file.startswith(('categories', 'base_url_number'))]
+        chapters = [file for file in chapters if not file.startswith((('categories', 'base_url_number', 'readWebNovel')))]
 
         # Extract the chapter numbers from the chapter files
         chapter_numbers = [int(file.split('-')[1].split('.')[0]) for file in chapters]
