@@ -204,7 +204,7 @@ def yes(base_url):
     
     categories = scrape_categories(base_url)
     print(categories)
-    quit()
+    
     if categories:
         folder_name = valid_dir_name(novel_title)
         file_dir = f'templates/novels/{folder_name}-chapters'
@@ -216,15 +216,15 @@ def yes(base_url):
             f.write('\n'.join(categories))
             print(f"Categories saved to {categories_path}")
             
-        readWebNovel = os.path.join(file_dir, 'readWebNovel.txt')
+        webNovelDotCom = os.path.join(file_dir, 'webNovelDotCom.txt')
 
-        with open(readWebNovel, 'w') as f:
-            f.write('readWebNovel')
-            print(f"Certification saved to {readWebNovel}")
+        with open(webNovelDotCom, 'w') as f:
+            f.write('webNovelDotCom')
+            print(f"Certification saved to {webNovelDotCom}")
     else:
         print("Failed to scrape categories. Skipping...")
     
-    
+    #
     
     
     latest_chapter_number, chapterLinks = get_latest_chapter_number(base_url)
