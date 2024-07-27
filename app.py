@@ -180,7 +180,7 @@ def run_scriptreadWebNovel():
         print("Received request to /readerNovel")  # Debugging statement
         novel_link = request.json.get('novelLink')
         print(f"Novel link received: {novel_link}")  # Debugging statement
-        result = webscrapers.readWebNovel.genChapters.yes(url=novel_link)
+        result = webscrapers.readWebNovel.genChapters.yes(base_url=novel_link)
         webscrapers.readWebNovel.getPics.main(url=novel_link) 
         return jsonify({"result": result})
     except Exception as e:
