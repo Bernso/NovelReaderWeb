@@ -600,7 +600,7 @@ def webscraperss():
 
 if __name__ == "__main__":
     try:
-        app.run(debug=debug, host='0.0.0.0', port=port)
+        app.run(debug=debug, host='127.0.0.1', port=port)
     except Exception as e:
         input(f"Error running the app: {e}")
 

@@ -286,6 +286,8 @@ def yes(novel_title: str) -> None:
             webscrapers.lightNovelPubDotVip.getPics.main(base_url)
 
     
+    
+    
     elif os.path.exists(f'templates/novels/{valid_dir_name(novel_title)}-chapters/base_url_number.txt'): # path for reader-novel novels
         print("'Reader Novel' Novel found")
         # Link creator
@@ -299,7 +301,16 @@ def yes(novel_title: str) -> None:
         webscrapers.readerNovel.genChapters.yes(url) # Get chapters
         webscrapers.readerNovel.getPics.main(url) # Get picture
 
-    # https://www.readernovel.net/novel/prodigiously-amazing-weaponsmith-652/
+
+
+
+    elif os.path.exists(f'templates/novels/{valid_dir_name(novel_title)}-chapters/readWebNovel.txt'):
+        import webscrapers.readWebNovel.genChapters
+        import webscrapers.readWebNovel.getPics
+        webscrapers.readWebNovel.genChapters.yes(url) # Get chapters
+        webscrapers.readWebNovel.getPics.main(url) # Get picture
+
+
     
     else:
         print("Novel not found")
