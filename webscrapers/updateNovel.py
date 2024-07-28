@@ -295,10 +295,10 @@ def yes(novel_title: str) -> None:
             novel_code = f.read()
             f.close()
         url = f"https://www.webnovel.com/book/{transform_title(novel_title)}_{novel_code}"
-        import webscrapers.readWebNovel.genChapters
-        import webscrapers.readWebNovel.getPics
-        webscrapers.readWebNovel.genChapters.yes(url) # Get chapters
-        webscrapers.readWebNovel.getPics.main(url) # Get picture
+        import webscrapers.webNovelDotCom.genChapters
+        import webscrapers.webNovelDotCom.getPics
+        webscrapers.webNovelDotCom.genChapters.yes(url) # Get chapters
+        webscrapers.webNovelDotCom.getPics.main(url=url) # Get picture
 
     else:
         print("'Light Novel Pub' Novel found")
