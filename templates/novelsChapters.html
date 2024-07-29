@@ -75,11 +75,9 @@
 
         <section class="features">
             {% for chapter in chapters %}
-            <div class="feature">
-                <a href="/novels/{{ novel_title1 }}/chapters/{{ chapter }}">
+                <a href="/novels/{{ novel_title1 }}/chapters/{{ chapter }}"  class="feature chapterLink">
                     <h2>Chapter {{ chapter }}</h2>
                 </a>
-            </div>
             {% endfor %}
         </section>
         
