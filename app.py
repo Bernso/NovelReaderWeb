@@ -510,7 +510,6 @@ def update_novel(novel_title):
         
         print("Calling webscrapers.updateNovel.yes function...")  # Debugging statement
         result = webscrapers.updateNovel.yes(novel_title2)
-        print(f"Update result: {result}")  # Debugging statement
 
         return jsonify({"status": "success", "message": f"{novel_title} updated successfully.", "result": result})
     except Exception as e:
