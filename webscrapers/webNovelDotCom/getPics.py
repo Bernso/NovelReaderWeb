@@ -7,6 +7,9 @@ try:
 except ImportError as e:
     input(f"Import Error: {e}")
 
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+}
 
 url = 'https://book-pic.webnovel.com/bookcover/'
 
@@ -85,18 +88,28 @@ def scrape_and_download_images(base_url, folder_path):
 
 
 def getTitle(url):
-    response = requests.get(url, headers=HEADERS)
-    if response.status_code != 200:
-        print(f"Failed to retrieve the webpage: {url}")
-        return
-    
-    response = requests.get(base_url, headers=HEADERS)
-    soup = BeautifulSoup(response.content, 'html.parser')
-    if response.status_code == 200:
-        title = soup.find('h1', class_='pt4 pb4 oh mb4 auto_height fs36 lh40 c_l').get_text().strip()
-        print(title)
-        return title
-    return None    
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+        paragraph = soup.find('p', class_='lh24 fs16 pt24 pb24 ell c_000')
+        
+        if paragraph:
+            spans = paragraph.find_all('span')
+            if spans:
+                last_span_text = spans[-1].get_text().strip()
+                return last_span_text
+            else:
+                print("No <span> elements found within the paragraph.")
+                return None
+        else:
+            print("Paragraph with specified class not found.")
+            return None
+
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+        return None  
     
     
 
@@ -114,7 +127,7 @@ def main(url):
 
 # Example usage
 if __name__ == '__main__':
-    base_url = 'https://www.webnovel.com/book/i-stayed-at-home-for-a-century-when-i-emerged-i-was-invincible_22969003505340005'
+    base_url = 'https://www.webnovel.com/book/world-online_23126079305076205'
     main(base_url)
     #folder_path = os.getcwd()
     #scrape_and_download_images(base_url, folder_path=folder_path)

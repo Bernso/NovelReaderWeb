@@ -137,13 +137,25 @@ def get_novel_title(base_url):
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, 'html.parser')
-        novel_title = soup.find('h1', class_='pt4 pb4 oh mb4 auto_height fs36 lh40 c_l').get_text().strip()
+        paragraph = soup.find('p', class_='lh24 fs16 pt24 pb24 ell c_000')
         
-        return novel_title
+        if paragraph:
+            spans = paragraph.find_all('span')
+            if spans:
+                last_span_text = spans[-1].get_text().strip()
+                return last_span_text
+            else:
+                print("No <span> elements found within the paragraph.")
+                return None
+        else:
+            print("Paragraph with specified class not found.")
+            return None
 
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
         return None
+    
+    # Change this script to get the last <span> in the <p> with class 'lh24 fs16 pt24 pb24 ell c_000'
 
 # Function to fetch and save chapter content
 def main(url, novel_title):
@@ -250,5 +262,5 @@ def yes(base_url):
 
 # Example usage
 if __name__ == '__main__':
-    base_url = 'https://www.webnovel.com/book/i-stayed-at-home-for-a-century-when-i-emerged-i-was-invincible_22969003505340005'
+    base_url = 'https://www.webnovel.com/book/world-online_23126079305076205'
     yes(base_url)

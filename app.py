@@ -347,7 +347,7 @@ def show_novel_chapters(novel_title):
             categories_str = ""
 
         # Filter out the categories file from the chapters list
-        chapters = [file for file in chapters if not file.startswith((('categories', 'base_url_number', 'readWebNovel')))]
+        chapters = [file for file in chapters if not file.startswith(('categories', 'base_url_number', 'readWebNovel', 'webNovelDotCom'))]
 
         # Extract the chapter numbers from the chapter files
         chapter_numbers = [int(file.split('-')[1].split('.')[0]) for file in chapters]
