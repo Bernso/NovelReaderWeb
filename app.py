@@ -72,7 +72,7 @@ def send_discord_message(message):
 
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY")
+app.secret_key = os.urandom(24)
 
 currentPath = os.getcwd()
 
