@@ -255,8 +255,9 @@ def main(url: str, chapter_number: int, novel_title: str) -> None:
 # Function to iterate over all chapters and save them
 def yes(novel_title: str) -> None:
     """
-    This function is responsible for updating the novel chapters and images based on the given novel title.
-    It checks if the novel is scraped from lightnovelpub.vip or reader-novel.net and performs the necessary actions accordingly.
+    This function is responsible for updating and scraping novel chapters and pictures from various websites.
+    It checks the type of novel (Reader Novel, Read Web Novel, Web Novel Dot Com, or Light Novel Pub) and performs
+    the necessary operations accordingly.
 
     Parameters:
     novel_title (str): The title of the novel to be updated.
@@ -264,7 +265,6 @@ def yes(novel_title: str) -> None:
     Returns:
     None
     """
-    
     if os.path.exists(f'templates/novels/{valid_dir_name(novel_title)}-chapters/base_url_number.txt'): # path for reader-novel novels
         print("'Reader Novel' Novel found")
         # Link creator
@@ -277,9 +277,6 @@ def yes(novel_title: str) -> None:
         import webscrapers.readerNovel.getPics
         webscrapers.readerNovel.genChapters.yes(url) # Get chapters
         webscrapers.readerNovel.getPics.main(url) # Get picture
-
-
-
 
     elif os.path.exists(f'templates/novels/{valid_dir_name(novel_title)}-chapters/readWebNovel.txt'):
         # URL creator
@@ -304,7 +301,7 @@ def yes(novel_title: str) -> None:
         print("'Light Novel Pub' Novel found")
         if 'Death Is The Only Ending For The Villainess' in novel_title:
             novel_title = novel_title[:-3]
-            
+
         base_url = get_base_url(novel_title)
         latest_chapter_number = get_latest_chapter_number(base_url)
         if not latest_chapter_number:
@@ -319,6 +316,7 @@ def yes(novel_title: str) -> None:
         print(f"Finished updating * {novel_title_clean} *")
         import webscrapers.lightNovelPubDotVip.getPics
         webscrapers.lightNovelPubDotVip.getPics.main(base_url)
+
 
     
     

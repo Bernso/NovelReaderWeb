@@ -1,0 +1,18 @@
+If you are getting the error: [WinError 193] %1 is not a valid Win32 application
+Follow these steps:
+
+1. Run this commmand in the vs code terminal: 'pip uninstall selenium webdriver-manager'
+
+2. Press 'Windows + R'
+
+3. Type in '%USERPROFILE%'
+
+4. Press 'Enter'
+
+5. Go To Folder '.wdm', then 'drivers', then 'chromedriver', then 'win-64'
+
+6. Now delete all folders inside of the folder
+
+7. Now run this command in the vs code terminal: 'pip install selenium webdriver-manager'
+
+The Problem should be fixed.

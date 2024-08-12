@@ -58,16 +58,35 @@ def valid_dir_name(novel_title: str) -> str:
 
 
 def capitalize_first_letter_of_each_word(input_string):
+    """
+    Capitalizes the first letter of each word in the input string.
+
+    Parameters:
+    input_string (str): The input string where each word's first letter needs to be capitalized.
+
+    Returns:
+    str: The input string with the first letter of each word capitalized.
+    """
     return ' '.join(word.capitalize() for word in input_string.split())
 
 
 
+
 # Function to scrape categories
-def scrape_categories(base_url):
+def scrape_categories(base_url: str) -> list:
+    """
+    Scrape the categories of a novel from the given base URL.
+
+    Parameters:
+    base_url (str): The URL of the novel's main page.
+
+    Returns:
+    list: A list of categories extracted from the webpage. If any error occurs during scraping, an empty list is returned.
+    """
     try:
         response = requests.get(base_url, headers=headers)
         response.raise_for_status()
-        
+
         soup = BeautifulSoup(response.content, 'html.parser')
 
         # Find the <div> element with the class 'm-tags'
@@ -84,7 +103,7 @@ def scrape_categories(base_url):
 
         # Extract, clean, and capitalize the categories
         categories = [capitalize_first_letter_of_each_word(a.get_text(strip=True)[2:]) for a in a_tags]
-        
+
         return categories
 
     except requests.exceptions.RequestException as e:
@@ -96,8 +115,20 @@ def scrape_categories(base_url):
 
 
 
+
 # Function to get the latest chapter number
-def get_latest_chapter_number(base_url):
+def get_latest_chapter_number(base_url: str) -> tuple:
+    """
+    This function retrieves the latest chapter number and a list of chapter links from a given base URL.
+
+    Parameters:
+    base_url (str): The base URL of the novel's main page.
+
+    Returns:
+    tuple: A tuple containing two elements:
+        1. latestChapterNumber (int): The latest chapter number. If the 'div' with class 'fs16 det-con-ol oh j_catalog_list' is not found or if no 'a' elements are found inside the 'div', this value will be None.
+        2. chapterLinks (list): A list of chapter links. If the 'div' with class 'fs16 det-con-ol oh j_catalog_list' is not found or if no 'a' elements are found inside the 'div', this list will be empty.
+    """
     try:
         base_url = f"{base_url}/catalog"
         response = requests.get(base_url, headers=headers)
@@ -130,15 +161,25 @@ def get_latest_chapter_number(base_url):
 
 
 
+
 # Function to get the novel title
-def get_novel_title(base_url):
+def get_novel_title(base_url: str) -> str:
+    """
+    This function retrieves the novel title from the given base URL.
+
+    Parameters:
+    base_url (str): The base URL of the novel's main page.
+
+    Returns:
+    str: The novel title extracted from the webpage. If the required HTML elements are not found, this function will print an error message and return None.
+    """
     try:
         response = requests.get(base_url, headers=headers)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, 'html.parser')
         paragraph = soup.find('p', class_='lh24 fs16 pt24 pb24 ell c_000')
-        
+
         if paragraph:
             spans = paragraph.find_all('span')
             if spans:
@@ -154,23 +195,32 @@ def get_novel_title(base_url):
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
         return None
+
     
     # Change this script to get the last <span> in the <p> with class 'lh24 fs16 pt24 pb24 ell c_000'
 
 # Function to fetch and save chapter content
-def main(url, novel_title):
+def main(url: str, novel_title: str) -> None:
+    """
+    This function fetches and saves the chapter content from a given URL and novel title.
+
+    Parameters:
+    url (str): The URL of the novel chapter.
+    novel_title (str): The title of the novel.
+
+    Returns:
+    None: This function does not return any value. It prints messages to the console and saves chapter content to a file.
+    """
     folder_name = valid_dir_name(novel_title)
     file_dir = f'templates/novels/{folder_name}-chapters'
     os.makedirs(file_dir, exist_ok=True)
-    
-   
 
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, 'html.parser')
-        
+
         chapterNumber = ""
         chapterNumberTemp = soup.find('h1', class_='dib mb0 fw700 fs24 lh1.5').get_text().strip()
         # Process characters from position 8 to 15
@@ -182,17 +232,15 @@ def main(url, novel_title):
         if not chapterNumber:
             print("Invalid chapter number")
             return
-        
+
         # Create the file path
         file_path = os.path.join(file_dir, f'chapter-{chapterNumber}.txt')
-        
 
         # Check if the file already exists
         if os.path.exists(file_path):
             print(f"Chapter {chapterNumber} already downloaded. Skipping...")
             return        
-                
-        
+
         chapter_container = soup.find('div', class_='cha-words')
         if chapter_container:
             chapter_text = chapter_container.get_text(separator='\n').strip()
@@ -212,17 +260,26 @@ def main(url, novel_title):
 
 
 
+
 # Function to iterate over all chapters and save them
-def yes(base_url):
-    
-    
-        
+def yes(base_url: str) -> None:
+    """
+    This function is the main entry point for the web novel scraper. It retrieves the novel title,
+    scrapes categories, saves them to a file, fetches and saves chapter content from the given base URL.
+
+    Parameters:
+    base_url (str): The base URL of the novel's main page.
+
+    Returns:
+    None: This function does not return any value. It prints messages to the console and saves data to files.
+    """
+
     novel_title = get_novel_title(base_url)
     print(novel_title)
-    
+
     categories = scrape_categories(base_url)
     print(categories)
-    
+
     if categories:
         folder_name = valid_dir_name(novel_title)
         file_dir = f'templates/novels/{folder_name}-chapters'
@@ -233,7 +290,7 @@ def yes(base_url):
         with open(categories_path, 'w') as f:
             f.write('\n'.join(categories))
             print(f"Categories saved to {categories_path}")
-            
+
         webNovelDotCom = os.path.join(file_dir, 'webNovelDotCom.txt')
 
         with open(webNovelDotCom, 'w') as f:
@@ -241,21 +298,21 @@ def yes(base_url):
             print(f"Certification saved to {webNovelDotCom}")
     else:
         print("Failed to scrape categories. Skipping...")
-    
+
     #
-    
-    
+
     latest_chapter_number, chapterLinks = get_latest_chapter_number(base_url)
     if latest_chapter_number is None:
         print("Failed to get the latest chapter number.")
         return
 
     print(f"First chapter: {chapterLinks[0]}")
-    
+
 
     for Link in chapterLinks:
         main(url=Link, novel_title=novel_title)
     print(f"Finished scraping * {novel_title} *")
+
 
 
 

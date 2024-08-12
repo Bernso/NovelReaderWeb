@@ -53,17 +53,25 @@ def download_image(image_url, folder_path):
 
 
 
-def scrape_and_download_images(base_url, folder_path):
+def scrape_and_download_images(base_url: str, folder_path: str) -> None:
+    """
+    This function scrapes the webnovel.com website for a novel's cover image and downloads it to a specified folder.
+    If the folder does not exist, it is created. The novel's unique code is extracted from the base_url and used to construct
+    the image URL. The image is then downloaded and saved with the name 'cover_image.jpg' in the specified folder.
+
+    Parameters:
+    base_url (str): The URL of the novel's webnovel.com page. It is used to extract the novel's unique code.
+    folder_path (str): The path of the directory where the cover image will be saved.
+
+    Returns:
+    None. However, it prints the reversed base_url, the constructed image_url, and logs any errors that occur during the process.
+    """
     # Create the folder if it doesn't exist
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
-    
-    
 
     # Creating the URL for the pic scraper
-    
     reversed_base_url = base_url[::-1]
-
     print(reversed_base_url)
 
     reversedNovelCode = ''
@@ -72,29 +80,38 @@ def scrape_and_download_images(base_url, folder_path):
             reversedNovelCode += character
         else:
             break
-    
+
     novelCode = reversedNovelCode[::-1]
     fileName = "webNovelDotComCode.txt"
     with open(os.path.join(folder_path, fileName), 'w') as file:
         file.write(novelCode)
-        
-            
+
     image_url = f"https://book-pic.webnovel.com/bookcover/{novelCode}"
     print(image_url)
-    
+
     download_image(image_url=image_url, folder_path=folder_path)
 
 
 
 
+
 def getTitle(url):
+    """
+    This function retrieves the title of a novel from its webnovel.com URL.
+
+    Parameters:
+    url (str): The URL of the novel's webnovel.com page.
+
+    Returns:
+    str: The title of the novel if successfully retrieved, otherwise None.
+    """
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, 'html.parser')
         paragraph = soup.find('p', class_='lh24 fs16 pt24 pb24 ell c_000')
-        
+
         if paragraph:
             spans = paragraph.find_all('span')
             if spans:
@@ -109,11 +126,23 @@ def getTitle(url):
 
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
-        return None  
+        return None
+
     
     
 
 def main(url):
+    """
+    This function is the main entry point for the web scraper. It initiates the scraping process by
+    retrieving the novel's title from the provided URL, creating a directory for the novel, and downloading
+    the cover image.
+
+    Parameters:
+    url (str): The URL of the novel's webnovel.com page.
+
+    Returns:
+    None. However, it prints the path of the created directory and logs any errors that occur during the process.
+    """
     logging.info("Web Scraper started")
     try:
         title = getTitle(url)
@@ -123,6 +152,7 @@ def main(url):
     except Exception as e:
         logging.error(f"An error occurred: {e}")
         print("An error occurred. Please try again.")
+
 
 
 # Example usage

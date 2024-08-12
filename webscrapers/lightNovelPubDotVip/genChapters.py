@@ -11,12 +11,16 @@ headers = {
 }
 
 # Function to transform the novel title for URL
-def transform_title(novel_title):
+def transform_title(novel_title: str) -> str:
     """
-    Transform the novel title for URL:
-    1. Decode URL-encoded characters.
-    2. Convert to lowercase.
-    3. Replace special characters and spaces with hyphens.
+    This function transforms a novel title into a valid filename by decoding it, converting it to lowercase,
+    removing special apostrophes, non-alphanumeric characters, spaces, colons, and slashes.
+
+    Parameters:
+    novel_title (str): The original novel title.
+
+    Returns:
+    str: The transformed novel title suitable for use as a filename.
     """
     decoded_title = urllib.parse.unquote(novel_title)
     transformed_title = decoded_title.lower()
@@ -29,21 +33,45 @@ def transform_title(novel_title):
 
 
 
-def valid_dir_name(novel_title):
-    novel_title = re.sub(r"[’'’]", "'", novel_title)
-    novel_title = novel_title.replace(":", "")
-    novel_title = novel_title.replace("/", "") 
+
+def valid_dir_name(novel_title: str) -> str:
+    """
+    This function is used to transform a novel title into a valid directory name by removing special characters,
+    colons, and slashes.
+
+    Parameters:
+    novel_title (str): The original novel title.
+
+    Returns:
+    str: The transformed novel title suitable for use as a directory name.
+    """
+    novel_title = re.sub(r"[’'’]", "'", novel_title)  # Replace special apostrophes with single quote
+    novel_title = novel_title.replace(":", "")  # Remove colons
+    novel_title = novel_title.replace("/", "")  # Remove slashes
     return novel_title
 
 
 
 
+
+
 # Function to scrape categories
-def scrape_categories(base_url):
+def scrape_categories(base_url: str) -> list:
+    """
+    This function scrapes the categories from a given base URL. It sends a GET request to the URL,
+    parses the HTML content using BeautifulSoup, and extracts the categories from the 'div' with class 'categories'.
+
+    Parameters:
+    base_url (str): The base URL of the website from which to scrape the categories.
+
+    Returns:
+    list: A list of categories extracted from the website. If the 'div' with class 'categories' or 'ul' inside it is not found,
+    or if any exceptions occur during the request or parsing, an empty list is returned.
+    """
     try:
         response = requests.get(base_url, headers=headers)
         response.raise_for_status()
-        
+
         soup = BeautifulSoup(response.content, 'html.parser')
 
         categories_div = soup.find('div', class_='categories')
@@ -68,8 +96,20 @@ def scrape_categories(base_url):
         print(f"Error scraping categories: {e}")
         return []
 
+
 # Function to get the latest chapter number
-def get_latest_chapter_number(base_url):
+def get_latest_chapter_number(base_url: str) -> str:
+    """
+    This function retrieves the latest chapter number from a given base URL.
+    It sends a GET request to the URL, parses the HTML content using BeautifulSoup,
+    and extracts the latest chapter number from the 'div' with class 'header-stats'.
+
+    Parameters:
+    base_url (str): The base URL of the novel's website.
+
+    Returns:
+    str: The latest chapter number as a string. If the request fails or the latest chapter number is not found, returns None.
+    """
     try:
         response = requests.get(base_url, headers=headers)
         response.raise_for_status()
@@ -94,8 +134,20 @@ def get_latest_chapter_number(base_url):
         print(f"Request failed: {e}")
         return None
 
+
 # Function to get the novel title
-def get_novel_title(base_url):
+def get_novel_title(base_url: str) -> str:
+    """
+    This function retrieves the novel title from the given base URL.
+    It sends a GET request to the URL, parses the HTML content using BeautifulSoup,
+    and extracts the novel title from the 'h1' tag with the class 'novel-title text2row'.
+
+    Parameters:
+    base_url (str): The base URL of the novel's website.
+
+    Returns:
+    str: The novel title. If the request fails or the title is not found, returns None.
+    """
     try:
         response = requests.get(base_url, headers=headers)
         response.raise_for_status()
@@ -109,8 +161,22 @@ def get_novel_title(base_url):
         print(f"Request failed: {e}")
         return None
 
+
 # Function to fetch and save chapter content
-def main(url, chapter_number, novel_title):
+def main(url: str, chapter_number: int, novel_title: str) -> None:
+    """
+    This function fetches and saves a novel chapter content from a given URL.
+    It creates a directory for the novel if it doesn't exist, checks if the chapter has already been downloaded,
+    and saves the chapter content into a text file.
+
+    Parameters:
+    url (str): The URL of the novel chapter.
+    chapter_number (int): The number of the novel chapter.
+    novel_title (str): The title of the novel.
+
+    Returns:
+    None
+    """
     folder_name = valid_dir_name(novel_title)
     file_dir = f'templates/novels/{folder_name}-chapters'
     os.makedirs(file_dir, exist_ok=True)
@@ -144,11 +210,22 @@ def main(url, chapter_number, novel_title):
     except Exception as e:
         print(f"Error: {e}")
 
+
 # Function to iterate over all chapters and save them
-def yes(base_url):
-    
+def yes(base_url: str) -> None:
+    """
+    This function is responsible for scraping a novel's information and chapters from a given base URL.
+    It retrieves the novel's title, categories, and the latest chapter number.
+    Then, it iterates over all chapters and saves them into separate text files.
+
+    Parameters:
+    base_url (str): The base URL of the novel's website.
+
+    Returns:
+    None
+    """
     #def thread_target():
-        
+
     novel_title = get_novel_title(base_url)
     categories = scrape_categories(base_url)
 
@@ -174,6 +251,7 @@ def yes(base_url):
     for i in range(1, int(latest_chapter_number) + 1):
         main(url=f"{base_url}/chapter-{i}", chapter_number=i, novel_title=novel_title)
     print(f"Finished scraping * {novel_title} *")
+
 
     #thread = threading.Thread(target=thread_target)
     #thread.start()

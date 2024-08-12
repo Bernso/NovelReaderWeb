@@ -57,11 +57,22 @@ def valid_dir_name(novel_title: str) -> str:
 
 
 # Function to scrape categories
-def scrape_categories(base_url):
+def scrape_categories(base_url: str):
+    """
+    This function scrapes a given URL to extract the novel's categories.
+    It uses BeautifulSoup to parse the HTML content and find the relevant elements.
+
+    Parameters:
+    base_url (str): The URL of the novel's main page.
+
+    Returns:
+    List[str]: A list of the novel's categories. If any errors occur during the scraping process,
+    an empty list is returned.
+    """
     try:
         response = requests.get(base_url, headers=headers)
         response.raise_for_status()
-        
+
         soup = BeautifulSoup(response.content, 'html.parser')
 
         # Find the <strong> element with the text "Genre(s)"
@@ -93,8 +104,21 @@ def scrape_categories(base_url):
         print(f"Error scraping categories: {e}")
         return []
 
+
 # Function to get the latest chapter number
-def get_latest_chapter_number(base_url):
+def get_latest_chapter_number(base_url: str):
+    """
+    This function retrieves the latest chapter number and chapter links from a given URL.
+    It sends a GET request to the provided URL, parses the HTML content using BeautifulSoup,
+    and extracts the chapter number and links from the appropriate HTML elements.
+
+    Parameters:
+    base_url (str): The URL of the novel's main page.
+
+    Returns:
+    Union[Tuple[int, List[str]], None]: A tuple containing the latest chapter number and a list of chapter links.
+    If the request fails or the chapter number or links are not found, returns None.
+    """
     try:
         response = requests.get(base_url, headers=headers)
         response.raise_for_status()
@@ -131,8 +155,20 @@ def get_latest_chapter_number(base_url):
 
 
 
+
 # Function to get the novel title
-def get_novel_title(base_url):
+def get_novel_title(base_url: str) -> str:
+    """
+    This function retrieves the novel title from the given URL.
+    It sends a GET request to the provided URL, parses the HTML content using BeautifulSoup,
+    and extracts the novel title from the appropriate HTML element.
+
+    Parameters:
+    base_url (str): The URL of the novel's main page.
+
+    Returns:
+    str: The title of the novel. If the request fails or the title is not found, returns None.
+    """
     try:
         response = requests.get(base_url, headers=headers)
         response.raise_for_status()
@@ -146,24 +182,37 @@ def get_novel_title(base_url):
         print(f"Request failed: {e}")
         return None
 
+
 # Function to fetch and save chapter content
-def main(url, novel_title):
+def main(url: str, novel_title: str) -> None:
+    """
+    This function fetches and saves a novel chapter content from a given URL.
+    It creates a directory for the novel if it doesn't exist, and saves the chapter content as a TXT file.
+    If the chapter file already exists, it skips the download.
+
+    Parameters:
+    url (str): The URL of the novel chapter page.
+    novel_title (str): The title of the novel.
+
+    Returns:
+    None
+    """
     folder_name = valid_dir_name(novel_title)
     file_dir = f'templates/novels/{folder_name}-chapters'
     os.makedirs(file_dir, exist_ok=True)
-    
+
     chapterNumberTemp = url[-5:]
     chapterNumber = ''
     for number in chapterNumberTemp:
         if number == '.':
             chapterNumber += '-'
-        
+
         elif number.isnumeric():
             chapterNumber += number
-        
-       
 
-    
+
+
+
     file_path = os.path.join(file_dir, f'chapter-{chapterNumber}.txt')
 
     # Check if the file already exists
@@ -196,9 +245,19 @@ def main(url, novel_title):
 
 
 
+
 # Function to iterate over all chapters and save them
-def yes(base_url):
-    
+def yes(base_url: str) -> None:
+    """
+    This function is responsible for scraping a novel website to download all chapters and save them as TXT files.
+    It also extracts the novel title, categories, and the latest chapter number.
+
+    Parameters:
+    base_url (str): The URL of the novel's main page.
+
+    Returns:
+    None
+    """
     base_url_temp = base_url[-5:]
     print(base_url_temp)
     base_url_number = ''
@@ -208,13 +267,12 @@ def yes(base_url):
             base_url_number += number
 
     print(base_url_number)    
-    
-    
+
     #def thread_target():
-        
+
     novel_title = get_novel_title(base_url)
     print(novel_title)
-    
+
     categories = scrape_categories(base_url)
     print(categories)
 
@@ -230,18 +288,18 @@ def yes(base_url):
             print(f"Categories saved to {categories_path}")
     else:
         print("Failed to scrape categories. Skipping...")
-    
+
     if base_url_number:
         os.makedirs(file_dir, exist_ok=True)
         base_url_number_path = os.path.join(file_dir, 'base_url_number.txt')
-        
+
         with open(base_url_number_path, 'w') as f:
             f.write(base_url_number)
             print(f"Base URL Number saved to {base_url_number_path}")
     else:
         print("Failed to get the base URL number. Skipping...")
-    
-    
+
+
     latest_chapter_number, chapterLinks = get_latest_chapter_number(base_url)
     if latest_chapter_number is None:
         print("Failed to get the latest chapter number.")
@@ -255,6 +313,7 @@ def yes(base_url):
     for Link in chapterLinksSorted:
         main(url=Link, novel_title=novel_title)
     print(f"Finished scraping * {novel_title} *")
+
 
     #thread = threading.Thread(target=thread_target)
     #thread.start()

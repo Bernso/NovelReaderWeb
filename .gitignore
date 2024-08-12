@@ -7,7 +7,6 @@ templates/novels/
 templates/tbate-185.html
 .env
 pics/
-offlineChapters.py
 .idea
 webscrapers/lightNovelPubDotVip/__pycache__/
 webscrapers/readerNovel/__pycache__/

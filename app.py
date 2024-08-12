@@ -31,7 +31,7 @@ except ImportError as e:
 port = "1111"
 
 # Debug True/Flase
-debug = True
+debug = False
 
 
 
@@ -81,12 +81,23 @@ currentPath = os.getcwd()
 
 @app.route('/random_directory')
 def random_directory():
+    """
+    This function selects a random directory from the 'novels' directory and returns its name.
+
+    Parameters:
+    None
+
+    Returns:
+    jsonify: A JSON response containing the name of the chosen directory.
+              If no directories are found, it returns a JSON response indicating that no directories were found.
+    """
     folder_path = os.path.join('templates', 'novels')  # Path to the 'novels' directory
     directories = [d for d in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, d))]
     if directories:
         chosen_directory = random.choice(directories)
         return jsonify({'directory': chosen_directory})
     return jsonify({'directory': 'No directories found'})
+
 
 
 
@@ -181,7 +192,19 @@ def run_scriptreaderNovel():
 
 @app.route('/readWebNovel', methods=['POST'])
 def run_scriptreadWebNovel():
-    
+    """
+    This function handles the POST request to run the 'readWebNovel' web scraper.
+    It receives a novel link from the request JSON data, runs the 'yes' function from the 'genChapters' module of the 'readWebNovel' web scraper,
+    and then runs the 'main' function from the 'getPics' module of the 'readWebNovel' web scraper.
+    If any exception occurs during the execution, it returns an error response with the error message.
+
+    Parameters:
+    None
+
+    Returns:
+    jsonify: A JSON response containing the result of the web scraper execution.
+              If an error occurs, it returns a JSON response with the error message and a status code of 500.
+    """
     try:
         print("Received request to /readerNovel")  # Debugging statement
         novel_link = request.json.get('novelLink')
@@ -192,13 +215,26 @@ def run_scriptreadWebNovel():
     except Exception as e:
         print(f"Error occurred: {str(e)}")  # Debugging statement
         return jsonify({"error": str(e)}), 500
+
     
 
 
 
 @app.route('/webNovelDotCom', methods=['POST'])
 def run_scriptwebNovelDotCom():
-    
+    """
+    This function is responsible for handling a POST request to the '/webNovelDotCom' endpoint.
+    It retrieves a novel link from the request JSON data, runs the 'yes' function from the 'genChapters' module of the 'webNovelDotCom' web scraper,
+    and then runs the 'main' function from the 'getPics' module of the 'webNovelDotCom' web scraper.
+    If any exceptions occur during the execution, it returns an error response with the exception message.
+
+    Parameters:
+    None
+
+    Returns:
+    jsonify: A JSON response containing the result of the 'yes' function from the 'genChapters' module if the execution is successful.
+              If an exception occurs, it returns a JSON response containing the error message with a 500 status code.
+    """
     try:
         print("Received request to /webNovelDotCom")  # Debugging statement
         novel_link = request.json.get('novelLink')
@@ -209,6 +245,7 @@ def run_scriptwebNovelDotCom():
     except Exception as e:
         print(f"Error occurred: {str(e)}")  # Debugging statement
         return jsonify({"error": str(e)}), 500
+
 
 
 
