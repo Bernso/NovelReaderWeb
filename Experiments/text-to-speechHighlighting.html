@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Speech with Word Highlighting</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #content {
+            font-size: 20px;
+            line-height: 1.6;
+        }
+
+        .highlight {
+            background-color: yellow;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="content">
+        This is a simple example of text-to-speech with word highlighting. The text will be read aloud, and each word will be highlighted as it is spoken.
+    </div>
+
+    <button onclick="speakText()">Speak</button>
+
+    <script>
+        function speakText() {
+            const contentElement = document.getElementById('content');
+            const text = contentElement.innerText;
+            const words = text.split(' ');
+
+            let wordIndex = 0;
+
+            const utterance = new SpeechSynthesisUtterance(text);
+
+            utterance.onboundary = function(event) {
+                if (event.name === 'word') {
+                    // Remove previous highlight
+                    contentElement.innerHTML = text;
+
+                    // Highlight current word
+                    const before = words.slice(0, wordIndex).join(' ');
+                    const word = words[wordIndex];
+                    const after = words.slice(wordIndex + 1).join(' ');
+
+                    contentElement.innerHTML = `${before} <span class="highlight">${word}</span> ${after}`;
+
+                    wordIndex++;
+                }
+            };
+
+            utterance.onend = function() {
+                // Reset the text when finished
+                contentElement.innerHTML = text;
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+    </script>
+</body>
+</html>

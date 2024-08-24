@@ -46,6 +46,11 @@
             transition: width 250ms ease-out;
         }
 
+        /* TTS Highlight */
+        .highlight {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
     </style>
 </head>
 <body class='no-select'>
@@ -217,6 +222,109 @@
             const scrollPercentage = (scrollTop / scrollHeight) * 100;
             progressBar.style.width = `${scrollPercentage}%`;
         });
+
+        // TTS and Word Highlighting
+        const textToRead = document.getElementById('textToRead');
+        const startSpeechButton = document.getElementById('start-speech');
+        const pauseSpeechButton = document.getElementById('pause-speech');
+        const stopSpeechButton = document.getElementById('stop-speech');
+        const voiceSelector = document.getElementById('voice-selector');
+        const utterance = new SpeechSynthesisUtterance();
+        let currentWordIndex = 0;
+        let isSpeaking = false;
+        let wordsArray = [];
+
+        // Populate available voices
+        function populateVoices() {
+            const voices = window.speechSynthesis.getVoices();
+            voiceSelector.innerHTML = voices.map(voice => `<option value="${voice.name}">${voice.name} (${voice.lang})</option>`).join('');
+            if (voices.length > 0) {
+                utterance.voice = voices[0];
+            }
+        }
+
+        populateVoices();
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = populateVoices;
+        }
+
+        voiceSelector.addEventListener('change', () => {
+            const selectedVoice = voiceSelector.value;
+            utterance.voice = speechSynthesis.getVoices().find(voice => voice.name === selectedVoice);
+        });
+
+        // Splitting text into an array of words, preserving HTML structure
+        function splitTextIntoWords(element) {
+            const textContent = element.innerHTML;
+            return textContent.split(/\s+/).map(word => word + ' ');
+        }
+
+        // Function to update the HTML with highlighted word
+        function updateTextWithHighlight(wordIndex) {
+            let updatedText = '';
+            for (let i = 0; i < wordsArray.length; i++) {
+                if (i === wordIndex) {
+                    updatedText += `<span class="highlight">${wordsArray[i]}</span>`;
+                } else {
+                    updatedText += wordsArray[i];
+                }
+            }
+            textToRead.innerHTML = updatedText;
+        }
+
+
+        utterance.addEventListener('boundary', event => {
+            if (isSpeaking) {
+                // Check if it's a word boundary
+                if (event.name === 'word') {
+                    updateTextWithHighlight(currentWordIndex);
+                    currentWordIndex++;
+                } else if (event.name === 'sentence' || event.name === 'paragraph') {
+                    // Adjust the word index for punctuation and sentence boundaries
+                    updateTextWithHighlight(currentWordIndex);
+                }
+            }
+        });
+  
+
+        startSpeechButton.addEventListener('click', () => {
+            if (!isSpeaking) {
+                wordsArray = splitTextIntoWords(textToRead);
+                currentWordIndex = 0; // Reset word index
+                isSpeaking = true;
+                utterance.text = textToRead.innerText;
+                utterance.rate = 0.95; // Adjust rate for better synchronization
+                utterance.pitch = 1;   // Standard pitch
+                speechSynthesis.speak(utterance);
+            } else {
+                speechSynthesis.resume();
+            }
+        });
+
+        pauseSpeechButton.addEventListener('click', () => {
+            speechSynthesis.pause();
+        });
+
+        stopSpeechButton.addEventListener('click', () => {
+            speechSynthesis.cancel();
+            isSpeaking = false;
+            textToRead.innerHTML = wordsArray.join(''); // Reset text to original state
+        });
+
+        // Reset highlight after speech ends
+        utterance.addEventListener('end', () => {
+            isSpeaking = false;
+            textToRead.innerHTML = wordsArray.join(''); // Reset text after speech ends
+        });
+
+        // Handle speech start
+        utterance.addEventListener('start', () => {
+            if (isSpeaking) {
+                updateTextWithHighlight(currentWordIndex);
+            }
+        });
+
+    
     </script>
     <script src="{{ url_for('static', filename='main.js') }}"></script>
     <script src="/./static/script.js"></script>
