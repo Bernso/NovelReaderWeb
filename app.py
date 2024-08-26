@@ -31,7 +31,7 @@ except ImportError as e:
 port = "1111"
 
 # Debug True/Flase
-debug = False
+debug = True
 
 
 
