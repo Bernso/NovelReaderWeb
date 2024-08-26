@@ -222,7 +222,7 @@ def withoutLink(novel_title: str) -> None:
 
 if __name__ == "__main__":
     try:
-        main("https://lightnovelpub.vip/novel/the-beginning-after-the-end-web-novel-11110049")
+        main(base_url="https://lightnovelpub.vip/novel/the-beginning-after-the-end-web-novel-11110049")
     except Exception as e:
         print(f"Failed to run the script: {e}")
         sys.exit()  # Terminate the script after execution
