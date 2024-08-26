@@ -57,7 +57,7 @@ def main(number_of_novels: int) -> None:
             # Print the href attribute which is the URL of the novel
             print("Selected Novel URL:", random_novel['href'])
             
-            full_url = f"https://lightnovelpub.vip/{random_novel['href']}"
+            full_url = f"https://lightnovelpub.vip{random_novel['href']}"
             
             
             webscrapers.lightNovelPubDotVip.genChapters.yes(base_url=full_url)
