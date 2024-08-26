@@ -11,6 +11,7 @@ try:
     import base64
     import os
     import requests
+    import logging
     import re
     import urllib
 except ImportError as e:
@@ -57,19 +58,20 @@ def get_base_url(novel_title):
     return base_url
 
 # Function to set up the web driver and fetch page source
-def get_page_source(url: str) -> str:
+def get_page_source(url: str, wait_for_element: tuple = (By.CLASS_NAME, "fixed-img"), timeout: int = 10) -> str:
     """
     This function sets up a ChromeDriver, navigates to the given URL, waits for the presence of a specific element,
     and then retrieves the page source. The ChromeDriver is automatically managed and closed after the page source is fetched.
 
     Parameters:
     url (str): The URL of the webpage to fetch the page source from.
+    wait_for_element (tuple): A tuple specifying the method to locate the element and the value (e.g., (By.CLASS_NAME, "class-name")).
+    timeout (int): Maximum time to wait for the element to appear.
 
     Returns:
     str: The page source of the given URL.
     """
     # Automatically match the ChromeDriver version to your installed Chrome version
-
     service = Service(ChromeDriverManager().install())
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
@@ -84,8 +86,11 @@ def get_page_source(url: str) -> str:
 
     try:
         driver.get(url)
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "fixed-img")))
+        WebDriverWait(driver, timeout).until(EC.presence_of_element_located(wait_for_element))
         page_source = driver.page_source
+    except Exception as e:
+        logging.error(f"An error occurred while fetching the page source: {e}")
+        page_source = ""
     finally:
         driver.quit()
 
@@ -222,7 +227,7 @@ def withoutLink(novel_title: str) -> None:
 
 if __name__ == "__main__":
     try:
-        main(base_url="https://lightnovelpub.vip/novel/the-beginning-after-the-end-web-novel-11110049")
+        main(base_url="https://lightnovelpub.vip/novel/the-beginning-after-the-end")
     except Exception as e:
         print(f"Failed to run the script: {e}")
         sys.exit()  # Terminate the script after execution
