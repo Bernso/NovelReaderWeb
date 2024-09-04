@@ -31,7 +31,7 @@ except ImportError as e:
 port = "1111"
 
 # Debug True/Flase
-debug = False
+debug = True
 
 
 
@@ -53,7 +53,7 @@ def send_discord_message(message):
     webhook_url = os.getenv("WEBHOOK_URL")
     data = {
         "content": message,
-        "username": "WebhookBot"
+        "username": "Novel Reader Website"
     }
 
     headers = {
