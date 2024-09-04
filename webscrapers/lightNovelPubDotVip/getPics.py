@@ -117,11 +117,15 @@ def find_image_url_and_title(page_source: str) -> tuple:
     if not figure:
         raise ValueError("No 'figure' inside 'fixed-img' div found.")
 
-    img_tag = figure.find('img')
-    if not img_tag or 'src' not in img_tag.attrs:
-        raise ValueError("No 'img' tag with 'src' found inside 'figure'.")
+    try:
+        img_tag = figure.find('img')
+        if not img_tag or 'src' not in img_tag.attrs:
+            raise ValueError("No 'img' tag with 'src' found inside 'figure'.")
 
-    image_url = img_tag['src']
+        image_url = img_tag['src']
+    except  Exception as e:
+        print(f"Error: {e}")
+
 
     # Extract novel title
     main_head_div = soup.find('div', class_='main-head')
