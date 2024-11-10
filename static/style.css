@@ -189,7 +189,7 @@ a, .nav-link, .fancyLink {
     text-decoration: none;
     background: none;
     box-shadow: none;
-    transition: color 0.3s ease;
+    transform: 0.3s ease;
 }
 
 .nav a:hover {
