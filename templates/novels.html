@@ -58,7 +58,7 @@
     </main>
     <button onclick="topFunction()" id="backToTopBtn" title="Go to top">Top</button>
 
-    <script src='/./static/script.js'></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script>
         function searchNovels() {
             var input, filter, features, feature, h3, i, txtValue;
