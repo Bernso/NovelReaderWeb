@@ -17,7 +17,7 @@
 
 
 
-    <main style='min-width: 800px;'>
+    <main style='max-width: 100vw;'>
         <section class="hero" style='max-width: 1000px;'>
             <h2 id='novelName'>
                 {{ novel_title2 }}
@@ -27,17 +27,19 @@
                 {{ categories }}
             </p>
 
-            <a class='novelsChaptersButtons' href="/novels/{{ novel_title1 }}/chapters/{{ chapters[0] }}">
-                Start Reading
-            </a>
-
-            <a class='novelsChaptersButtons' href="/novels/{{ novel_title1 }}/chapters/{{ session.get('last_read_' + novel_title1, 1) }}">
-                Continue Reading
-            </a>
-            
-            <a class='novelsChaptersButtons' onclick='updateNovel("{{ novel_title1 }}", "{{ novel_title2 }}")'>
-                Update Novel
-            </a>
+            <div class="button-container">
+                <a class='novelsChaptersButtons' href="/novels/{{ novel_title1 }}/chapters/{{ chapters[0] }}">
+                    Start Reading
+                </a>
+        
+                <a class='novelsChaptersButtons' href="/novels/{{ novel_title1 }}/chapters/{{ session.get('last_read_' + novel_title1, 1) }}">
+                    Continue Reading
+                </a>
+                
+                <a class='novelsChaptersButtons' onclick='updateNovel("{{ novel_title1 }}", "{{ novel_title2 }}")'>
+                    Update Novel
+                </a>
+            </div>
             
             <section class="search">
                 <input type="text" id="searchInput" onkeyup="searchChapters()" placeholder="Search for chapters...">
@@ -47,7 +49,7 @@
 
         <section class="features">
             {% for chapter in chapters %}
-                <a href="/novels/{{ novel_title1 }}/chapters/{{ chapter }}"  class="feature chapterLink">
+                <a href="/novels/{{ novel_title1 }}/chapters/{{ chapter }}"  class="feature">
                     <h2>Chapter {{ chapter }}</h2>
                 </a>
             {% endfor %}
