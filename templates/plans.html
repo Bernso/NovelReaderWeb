@@ -9,36 +9,7 @@
     <meta name="description" content="Come and read all your favourite novels for free in the best UI now!">
 </head>
 <body>
-    <header class="header">
-        <div class="logo">
-            <h1><a href='/'>Novel Reader</a></h1>
-        </div>
-        <nav class="nav">
-            <ul>
-                <li>
-                    <a class="start-reading" id="generateButton" href="/webscrapers" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
-                        Webscrapers
-                    </a>
-                </li>
-                <li>
-                    <a class="start-reading" href="/novels" aria-label="Browse Novels" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
-                        Novels
-                    </a>
-                </li>
-                <li>
-                    <a class="start-reading" href="/plans" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
-                        Plans
-                    </a>
-                </li>
-                <li>
-                    <a class="start-reading" id="randomDirButton" href="#" style='color: #BB86FC; border: none; background-color: #1a1a1a; box-shadow: 0px 0px 0px;'>
-                        Random Novel
-                    </a>
-                </li> 
-                <li>&nbsp;&nbsp;</li>
-            </ul>
-        </nav>
-    </header>
+    {% include 'header.html' %}
 
     <main>
         <section class="hero">

@@ -234,3 +234,36 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(error => console.error('Error:', error));
     });
 });
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileMenuButton = document.querySelector('.mobile-menu-button');
+    const nav = document.querySelector('.nav');
+    
+    mobileMenuButton.addEventListener('click', function() {
+        nav.classList.toggle('active');
+        
+        // Toggle aria-expanded
+        const isExpanded = nav.classList.contains('active');
+        this.setAttribute('aria-expanded', isExpanded);
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(event) {
+        const isClickInsideNav = nav.contains(event.target);
+        const isClickOnButton = mobileMenuButton.contains(event.target);
+        
+        if (!isClickInsideNav && !isClickOnButton && nav.classList.contains('active')) {
+            nav.classList.remove('active');
+            mobileMenuButton.setAttribute('aria-expanded', 'false');
+        }
+    });
+
+    // Close menu when window is resized above mobile breakpoint
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768 && nav.classList.contains('active')) {
+            nav.classList.remove('active');
+            mobileMenuButton.setAttribute('aria-expanded', 'false');
+        }
+    });
+});

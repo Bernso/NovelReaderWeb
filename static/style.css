@@ -8,9 +8,7 @@
 
 /* CSS Variables */
 :root {
-    --primary-color: #BB86FC;
     --hover-color: #8725ff;
-    --background-dark: #1a1a1a;
     --background-light: #111111;
     --text-color: #e0e0e0;
     --text-muted: #ccccccbd;
@@ -18,6 +16,10 @@
     --border-radius: 5px;
     --actual-background: #0d0d0d;
     --m: #3b008d;
+    --primary-color: #BB86FC;
+    --primary-hover: #9965e3;
+    --background-dark: #1a1a1a;
+    --transition-speed: 0.3s;
 }
 
 /* Body */
@@ -48,7 +50,6 @@ a, .nav-link, .fancyLink {
     padding: 25px 20px; /* Add some padding for better visual spacing */
     text-decoration: none; /* Remove underline from links */
     border-radius: 5px; /* Add rounded corners */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add subtle shadow for depth */
     transition: transform 0.5s; /* Smooth transition for hover effects */
 }
 
@@ -133,15 +134,101 @@ a, .nav-link, .fancyLink {
     font-size: 1.5em;
     color: var(--primary-color);
     padding: 20px;
+    margin: 0;
 }
 
 .logo a {
     padding: 20px;
+    text-decoration: none;
+    color: #BB86FC;
 }
 
 .nav ul {
     display: flex;
     gap: 20px;
+    list-style: none;
+    margin: 0;
+    padding: 0 20px;
+}
+
+
+
+.mobile-menu-button {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 21px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 20px;
+}
+
+.mobile-menu-button span {
+    width: 100%;
+    height: 3px;
+    background-color: #BB86FC;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .mobile-menu-button {
+        display: flex;
+    }
+
+    .nav {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: #1a1a1a;
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+
+    .nav.active {
+        max-height: 300px;
+        border-top: 1px solid rgba(187, 134, 252, 0.1);
+    }
+
+    .nav ul {
+        flex-direction: column;
+        padding: 20px;
+        gap: 15px;
+    }
+
+    .nav li {
+        width: 100%;
+    }
+
+    .start-reading {
+        display: block;
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .logo h1 {
+        padding: 10px;
+    }
+
+    .logo a {
+        padding: 10px;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+    }
+    to {
+        transform: translateY(0);
+    }
 }
 
 
