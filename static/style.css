@@ -165,8 +165,8 @@ a, .nav-link, .fancyLink {
 .logo h1 {
     font-size: 1.2em;
     color: var(--primary-color);
-    padding: 10px;
-    margin: 0;
+    padding: 20px;
+    margin: 10px;
 }
 
 .logo a {
