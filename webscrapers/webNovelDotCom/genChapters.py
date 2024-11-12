@@ -319,5 +319,5 @@ def yes(base_url: str) -> None:
 
 # Example usage
 if __name__ == '__main__':
-    base_url = 'https://www.webnovel.com/book/world-online_23126079305076205'
+    base_url = input("Enter the url: ")
     yes(base_url)

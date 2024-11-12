@@ -258,5 +258,5 @@ def yes(base_url: str) -> None:
 
 # Example usage
 if __name__ == '__main__':
-    base_url = 'https://lightnovelpub.vip/novel/atticuss-odyssey-reincarnated-into-a-playground'
+    base_url = input("Enter the URL: ")
     yes(base_url)
