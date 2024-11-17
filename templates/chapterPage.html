@@ -146,47 +146,59 @@
     <section id="settings-menu" class="settings-menu">
         <div class="settings-header">
             <h1>Settings</h1>
-            <button id="close-settings">✖</button>
+            <button id="close-settings">×</button>
         </div>
         <div class="settings-content">
-            <h4><br>Text Size</h4>
-            <input type="range" id="text-size-slider" min="10" max="30" value="16" style="background-color: #333; width: 100%; height: 10px; cursor: pointer; border-radius: 5px;">
-            <p>Current Size: <span id="current-size">16</span>px</p>
-            <p>&nbsp;</p>
+            <div class="settings-section">
+                <h4>Text Size</h4>
+                <input type="range" 
+                       id="text-size-slider" 
+                       class="settings-slider"
+                       min="10" 
+                       max="30" 
+                       value="16">
+                <div class="settings-value">
+                    Size: <span id="current-size">16</span>px
+                </div>
+            </div>
 
-            <h4>Font</h4>
-            <select id="font-selector">
-                <option value="sans-serif">Sans-Serif</option>
-                <option value="serif">Serif</option>
-                <option value="monospace">Monospace</option>
-                <option value="Arial">Arial</option>
-                <option value="Verdana">Verdana</option>
-                <option value="Helvetica">Helvetica</option>
-                <option value="Times New Roman">Times New Roman</option>
-                <option value="Courier New">Courier New</option>
-                <option value="Lucida Console">Lucida Console</option>
-                <option value="Tahoma">Tahoma</option>
-                <option value="Trebuchet MS">Trebuchet MS</option>
-                <option value="Georgia">Georgia</option>
-                <option value="Palatino">Palatino</option>
-                <option value="Garamond">Garamond</option>
-                <option value="Comic Sans MS">Comic Sans MS</option>
-                <option value="Arial Black">Arial Black</option>
-                <option value="Impact">Impact</option>
-            </select>
-            <p>&nbsp;</p>
+            <div class="settings-section">
+                <h4>Font Family</h4>
+                <select id="font-selector" class="settings-select">
+                    <option value="sans-serif">Sans-Serif</option>
+                    <option value="serif">Serif</option>
+                    <option value="monospace">Monospace</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Verdana">Verdana</option>
+                    <option value="Helvetica">Helvetica</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Palatino">Palatino</option>
+                </select>
+            </div>
 
-            <h4><br>Text Opacity</h4>
-            <input type="range" id="opacity-slider" min="0.1" max="1" step="0.1" value="1" style="background-color: #333; width: 100%; height: 10px; cursor: pointer; border-radius: 5px;">
-            <p>Current Opacity: <span id="current-opacity">1</span></p>
-            <p>&nbsp;</p>
+            <div class="settings-section">
+                <h4>Text Opacity</h4>
+                <input type="range" 
+                       id="opacity-slider" 
+                       class="settings-slider"
+                       min="0.1" 
+                       max="1" 
+                       step="0.1" 
+                       value="1">
+                <div class="settings-value">
+                    Opacity: <span id="current-opacity">100</span>
+                </div>
+            </div>
 
-            <h4><br>Text to Speech</h4>
-            <select id="voice-selector"></select>
-            <div class="tts-buttons">
-                <button id="start-speech">Start</button>
-                <button id="pause-speech">Pause</button>
-                <button id="stop-speech">Stop</button>
+            <div class="settings-section">
+                <h4>Text to Speech</h4>
+                <select id="voice-selector" class="settings-select"></select>
+                <div class="tts-buttons">
+                    <button id="start-speech" class="tts-button">Start</button>
+                    <button id="pause-speech" class="tts-button">Pause</button>
+                    <button id="stop-speech" class="tts-button">Stop</button>
+                </div>
             </div>
         </div>
     </section>

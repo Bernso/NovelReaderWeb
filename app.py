@@ -104,15 +104,52 @@ def random_directory():
 @app.route('/')
 def home():
     """
-    This function handles the root route ('/') and renders the 'home.html' template.
+    This function handles the root route ('/') and renders the 'home.html' template
+    with statistics about the novels, chapters, and categories.
 
     Parameters:
     None
 
     Returns:
-    render_template: A rendered HTML template named 'home.html'.
+    render_template: A rendered HTML template named 'home.html' with statistics.
     """
-    return render_template('home.html')
+    try:
+        # Get total number of novels
+        novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
+        total_novels = len([novel for novel in os.listdir(novels_folder_path) 
+                          if os.path.isdir(os.path.join(novels_folder_path, novel))])
+
+        # Get total number of chapters
+        total_chapters = 0
+        all_categories = set()
+
+        # Iterate through each novel directory
+        for novel in os.listdir(novels_folder_path):
+            novel_path = os.path.join(novels_folder_path, novel)
+            if os.path.isdir(novel_path):
+                # Count chapters
+                chapters = [file for file in os.listdir(novel_path) 
+                          if file.endswith('.txt') and file.startswith('chapter-')]
+                total_chapters += len(chapters)
+
+                # Get categories
+                categories_file = os.path.join(novel_path, 'categories.txt')
+                if os.path.exists(categories_file):
+                    with open(categories_file, 'r', encoding='utf-8') as f:
+                        categories = [line.strip() for line in f if line.strip()]
+                        all_categories.update(categories)
+
+        # Get total number of unique categories
+        total_categories = len(all_categories)
+
+        return render_template('home.html', 
+                             total_novels=total_novels,
+                             total_chapters=total_chapters,
+                             total_categories=total_categories)
+    except Exception as e:
+        error_message = str(e)
+        send_discord_message(error_message)
+        return render_template('error.html'), 500
 
 
 

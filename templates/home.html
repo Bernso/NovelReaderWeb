@@ -13,11 +13,12 @@
     {% include 'header.html' %}
 
     <main>
-        <section class="hero">
+        <section class="hero" style='border-radius: 20px'>
             <h2>Welcome to the World of Novels</h2>
             <p>Seamlessly generate and read your favorite novels with a dark, majestic interface</p>
             <p>View our popular novels <a href='/popular-novels'>here</a></p>
         </section>
+        
 
         <section class="features">
             <div class="feature no-select">
@@ -41,7 +42,35 @@
             </div>
         </section>
 
-        <section class="community">
+        <section class='hero' style='border-radius: 20px'>
+            <h2>Our Stats</h2>
+        </section>
+
+        <section class="features">
+            <div class="feature no-select">
+                <a href='/novels'>
+                    <div class="icon">📖</div>
+                    <h3>Total Chapters</h3>
+                    <p><strong style='color: #BB86FC;'>{{ total_chapters }}</strong> chapters to read</p>
+                </a>
+            </div>
+            <div class="feature no-select">
+                <a href='/novels'>
+                    <div class="icon">📘</div>
+                    <h3>Total Novels</h3>
+                    <p><strong style='color: #BB86FC;'>{{ total_novels }}</strong> novels available</p>
+                </a>
+            </div>
+            <div class="feature no-select">
+                <a href='/novels'>
+                    <div class="icon">✨</div>
+                    <h3>Categories</h3>
+                    <p><strong style='color: #BB86FC;'>{{ total_categories }}</strong> different genres</p>
+                </a>
+            </div>
+        </section>
+
+        <section class="community" style='border-radius: 20px'>
             <h2>Join Our Community</h2>
             <p>Connect with other readers on our <a href="https://www.discord.gg/k5HBFXqtCB" target="_blank" style='text-decoration: none;'>Discord Server</a>.</p>
             <p>Created by <a href="https://www.github.com/Bernso" target="_blank" style='text-decoration: none;'>Bernso</a></p>
