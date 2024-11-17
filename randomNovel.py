@@ -22,7 +22,7 @@ def main(number_of_novels: int) -> None:
         else:
             print("Invalid choice. Please enter a number between 1 and 3.")
             main(number_of_novels=number_of_novels)
-            return
+            
 
         
         response = requests.get(base_url, headers=headers)
