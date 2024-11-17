@@ -36,15 +36,16 @@
             position: fixed;
             top: 0;
             width: 100%;
-            background: #222;
+            background: var(--background-light);
             z-index: 1000;
         }
 
         .progress-bar {
             height: 5px;
-            background: linear-gradient(90deg, #BB86FC 0%, #6200EE 100%);
+            background: linear-gradient(90deg, var(--background-light) 0%, #6200EE 100%);
             width: 0%;
             transition: width 250ms ease-out;
+            border-radius: 3px;
         }
 
         /* TTS Highlight */
