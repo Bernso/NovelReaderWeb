@@ -1,4 +1,33 @@
 <!-- Header template -->
+<head>
+    meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Read your favorite novels online for free with Novel Reader. Enjoy a dark mode interface, fast chapter loading, and a vast collection of web novels.">
+    <meta name="keywords" content="novel reader, web novels, light novels, online reading, dark mode reader, free novels">
+    <meta name="author" content="Bernso">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph Meta Tags for Social Media -->
+    <meta property="og:title" content="Novel Reader - Read Web Novels Online">
+    <meta property="og:description" content="Read your favorite novels online for free with Novel Reader. Enjoy a dark mode interface, fast chapter loading, and a vast collection of web novels.">
+    <meta property="og:image" content="{{ url_for('static', filename='MAINICON-20240501-rounded.png', _external=True) }}">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Novel Reader - Read Web Novels Online">
+    <meta name="twitter:description" content="Read your favorite novels online for free with Novel Reader. Enjoy a dark mode interface, fast chapter loading, and a vast collection of web novels.">
+    <meta name="twitter:image" content="{{ url_for('static', filename='MAINICON-20240501-rounded.png', _external=True) }}">
+    
+    <!-- Additional SEO Meta Tags -->
+    <meta name="theme-color" content="#121212">
+    <link rel="canonical" href="{{ request.url }}">
+    
+    <!-- Your existing header content -->
+    <title>Novel Reader</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
+</head>
 <header class="header">
     <div class="logo">
         <h1><a href='/'>Novel Reader</a></h1>
