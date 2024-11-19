@@ -70,10 +70,14 @@
         </section>
         <section class="features2">
             <div class="feature">
-                <a href="/novels/{{novel_title_encoded}}/chapters/{{chapter_number - 1}}">
+                {% if prev_chapter is not none %}
+                <a href="/novels/{{novel_title_encoded}}/chapters/{{prev_chapter}}">
+                {% else %}
+                <a href="#" class="disabled">
+                {% endif %}
                     <div class="icon">📚</div>
                     <h3>Previous Chapter</h3>
-                    <p>Access a vast collection of novels with a single click.</p>
+                    <p>Enjoy reading in dark mode.</p>
                 </a>
             </div>
             <div class="feature">
@@ -91,10 +95,14 @@
                 </a>
             </div>
             <div class="feature">
-                <a href="/novels/{{novel_title_encoded}}/chapters/{{chapter_number + 1}}">
+                {% if next_chapter is not none %}
+                <a href="/novels/{{novel_title_encoded}}/chapters/{{next_chapter}}">
+                {% else %}
+                <a href="#" class="disabled">
+                {% endif %}
                     <div class="icon">📚</div>
                     <h3>Next Chapter</h3>
-                    <p>Enjoy reading with an eye-friendly dark mode.</p>
+                    <p>Enjoy reading in dark mode.</p>
                 </a>
             </div>
         </section>
@@ -109,10 +117,14 @@
         
         <section class="features2">
             <div class="feature">
-                <a href="/novels/{{novel_title_encoded}}/chapters/{{chapter_number - 1}}">
+                {% if prev_chapter is not none %}
+                <a href="/novels/{{novel_title_encoded}}/chapters/{{prev_chapter}}">
+                {% else %}
+                <a href="#" class="disabled">
+                {% endif %}
                     <div class="icon">📚</div>
                     <h3>Previous Chapter</h3>
-                    <p>Access a vast collection of novels with a single click.</p>
+                    <p>Go to previous chapter</p>
                 </a>
             </div>
             <div class="feature">
@@ -130,7 +142,11 @@
                 </a>
             </div>
             <div class="feature">
-                <a href="/novels/{{novel_title_encoded}}/chapters/{{chapter_number + 1}}">
+                {% if next_chapter is not none %}
+                <a href="/novels/{{novel_title_encoded}}/chapters/{{next_chapter}}">
+                {% else %}
+                <a href="#" class="disabled">
+                {% endif %}
                     <div class="icon">🌙</div>
                     <h3>Next Chapter</h3>
                     <p>Enjoy reading with an eye-friendly dark mode.</p>

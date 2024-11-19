@@ -287,70 +287,137 @@ def run_scriptwebNovelDotCom():
 
 
 
-@app.route('/novels/<novelTitle>/chapters/<int:chapter_number>')
-def show_chapter(novelTitle, chapter_number):   
-    """
-    Display a specific chapter of a novel.
-
-    Parameters:
-    novelTitle (str): The title of the novel.
-    chapter_number (int): The number of the chapter to be displayed.
-
-    Returns:
-    render_template: A rendered HTML template with the chapter content.
-                      If the chapter file is not found or an exception occurs, 
-                      it returns an appropriate error message and template.
-    """
+@app.route('/novels/<novelTitle>/chapters/<int:chapter_number>')  # For whole numbers
+def show_whole_chapter(novelTitle, chapter_number):   
     try:
-        # Construct the path to the novel's subfolder
         subfolder_path = os.path.join(app.root_path, 'templates', 'novels', novelTitle)
+        
+        # Get all chapter numbers
+        chapters = []
+        for file in os.listdir(subfolder_path):
+            if file.startswith('chapter-') and file.endswith('.txt'):
+                match = re.search(r'chapter-(.+?)\.txt', file)
+                if match:
+                    chapter_num = match.group(1)
+                    try:
+                        if '-' in chapter_num:
+                            num = float(chapter_num.replace('-', '.'))
+                        else:
+                            num = float(chapter_num)
+                        chapters.append(num)
+                    except ValueError:
+                        continue
+        
+        chapters.sort()
+        
+        # Find next and previous chapters
+        next_chapter = None
+        prev_chapter = None
+        for i, num in enumerate(chapters):
+            if num == chapter_number:
+                if i > 0:
+                    prev_chapter = chapters[i-1]
+                if i < len(chapters)-1:
+                    next_chapter = chapters[i+1]
+                break
 
-        # Check if the directory exists
-        if not os.path.exists(subfolder_path):
-            print(f"Directory not found: {subfolder_path}")
-            return render_template('chapterNotFound.html'), 404
-
-        # List and sort text files in the subfolder
-        text_files = [file for file in os.listdir(subfolder_path) if file.endswith('.txt')]
-        valid_files = sorted([file for file in text_files if re.match(r'chapter-(\d+)\.txt', file)],
-                             key=lambda x: int(re.match(r'chapter-(\d+)\.txt', x).group(1)))
-
-        # Check if the chapter number is within the valid range
-        if not valid_files or chapter_number < 1 or chapter_number > int(re.match(r'chapter-(\d+)\.txt', valid_files[-1]).group(1)):
-            print(f"Chapter number {chapter_number} is out of range or no valid chapters found.")
-            return render_template('chapterNotFound.html'), 404
-
-        # Access the correct chapter file
+        # Rest of your existing code...
         chapter_file = f'chapter-{chapter_number}.txt'
-        if chapter_file not in valid_files:
-            print(f"Chapter file {chapter_file} not found in valid files.")
+        chapter_path = os.path.join(subfolder_path, chapter_file)
+        
+        if not os.path.exists(chapter_path):
             return render_template('chapterNotFound.html'), 404
 
-        # Read the chapter content
-        chapter_path = os.path.join(subfolder_path, chapter_file)
         with open(chapter_path, 'r', encoding='utf-8') as f:
             chapter_text = f.read()
 
-        # Clean and encode the novel title for display and URL
         novel_title_clean = re.sub(r'\s*\(.*?\)', '', novelTitle[:-9] if len(novelTitle) >= 9 else novelTitle)
         novel_title_encoded = novelTitle.replace(' ', '%20')
 
         session[f'last_read_{novelTitle}'] = chapter_number
 
         return render_template('chapterPage.html',
-                               novel_title_clean=novel_title_clean,
-                               novel_title_encoded=novel_title_encoded,
-                               chapter_number=chapter_number,
-                               chapter_text=chapter_text)
+                           novel_title_clean=novel_title_clean,
+                           novel_title_encoded=novel_title_encoded,
+                           chapter_number=chapter_number,
+                           chapter_text=chapter_text,
+                           next_chapter=next_chapter,
+                           prev_chapter=prev_chapter)
 
-    except FileNotFoundError:
-        print(f"FileNotFoundError: Chapter file for {novelTitle}, chapter {chapter_number} not found.")
-        return render_template('chapterNotFound.html'), 404
-    except IndexError as beans:
-        print(f"IndexError: {str(beans)}")
-        return render_template('chapterNotFound.html'), 404
-    except Exception as beans:
-        error_message = str(beans)
+    except Exception as e:
+        error_message = str(e)
+        print(f"Exception: {error_message}")
+        send_discord_message(error_message)
+        return render_template('error.html'), 500
+
+
+@app.route('/novels/<novelTitle>/chapters/<float:chapter_number>')  # Changed to float to handle all cases
+def show_chapter(novelTitle, chapter_number):   
+    try:
+        subfolder_path = os.path.join(app.root_path, 'templates', 'novels', novelTitle)
+        
+        # Get all chapter numbers
+        chapters = []
+        for file in os.listdir(subfolder_path):
+            if file.startswith('chapter-') and file.endswith('.txt'):
+                match = re.search(r'chapter-(.+?)\.txt', file)
+                if match:
+                    chapter_num = match.group(1)
+                    try:
+                        if '-' in chapter_num:
+                            # Convert "12-1" to 12.1
+                            whole, decimal = chapter_num.split('-')
+                            num = float(f"{whole}.{decimal}")
+                        else:
+                            num = float(chapter_num)
+                        chapters.append(num)
+                    except ValueError:
+                        continue
+        
+        chapters.sort()
+        
+        # Find next and previous chapters
+        next_chapter = None
+        prev_chapter = None
+        for i, num in enumerate(chapters):
+            if abs(num - chapter_number) < 0.0001:  # Using small epsilon for float comparison
+                if i > 0:
+                    prev_chapter = chapters[i-1]
+                if i < len(chapters)-1:
+                    next_chapter = chapters[i+1]
+                break
+
+        # Determine the correct file name format
+        if chapter_number.is_integer():
+            chapter_file = f'chapter-{int(chapter_number)}.txt'
+        else:
+            whole = int(chapter_number)
+            decimal = str(chapter_number).split('.')[1]
+            chapter_file = f'chapter-{whole}-{decimal}.txt'
+        
+        chapter_path = os.path.join(subfolder_path, chapter_file)
+        
+        if not os.path.exists(chapter_path):
+            return render_template('chapterNotFound.html'), 404
+
+        with open(chapter_path, 'r', encoding='utf-8') as f:
+            chapter_text = f.read()
+
+        novel_title_clean = re.sub(r'\s*\(.*?\)', '', novelTitle[:-9] if len(novelTitle) >= 9 else novelTitle)
+        novel_title_encoded = novelTitle.replace(' ', '%20')
+
+        session[f'last_read_{novelTitle}'] = chapter_number
+
+        return render_template('chapterPage.html',
+                           novel_title_clean=novel_title_clean,
+                           novel_title_encoded=novel_title_encoded,
+                           chapter_number=chapter_number,
+                           chapter_text=chapter_text,
+                           next_chapter=next_chapter,
+                           prev_chapter=prev_chapter)
+
+    except Exception as e:
+        error_message = str(e)
         print(f"Exception: {error_message}")
         send_discord_message(error_message)
         return render_template('error.html'), 500
@@ -423,8 +490,20 @@ def show_novel_chapters(novel_title):
         # Filter out the categories file from the chapters list
         chapters = [file for file in chapters if not file.startswith(('categories', 'base_url_number', 'readWebNovel', 'webNovelDotCom'))]
 
-        # Extract the chapter numbers from the chapter files
-        chapter_numbers = [int(file.split('-')[1].split('.')[0]) for file in chapters]
+        # Extract the chapter numbers from the chapter files, handling decimal chapters
+        chapter_numbers = []
+        for file in chapters:
+            # Extract everything between 'chapter-' and '.txt'
+            match = re.search(r'chapter-(.+?)\.txt', file)
+            if match:
+                chapter_num = match.group(1)
+                try:
+                    # Handle cases like "12-1" by converting to "12.1"
+                    num = float(chapter_num.replace('-', '.'))
+                    # Convert to int if it's a whole number
+                    chapter_numbers.append(int(num) if num.is_integer() else num)
+                except ValueError:
+                    continue
 
         # Sort the chapter numbers
         chapter_numbers.sort()

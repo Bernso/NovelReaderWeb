@@ -224,7 +224,7 @@ def yes(base_url: str) -> None:
     Returns:
     None
     """
-    #def thread_target():
+    #def myThread():
 
     novel_title = get_novel_title(base_url)
     categories = scrape_categories(base_url)
@@ -239,7 +239,8 @@ def yes(base_url: str) -> None:
         with open(categories_path, 'w') as f:
             f.write('\n'.join(categories))
             print(f"Categories saved to {categories_path}")
-    else:            print("Failed to scrape categories. Skipping...")
+    else:            
+        print("Failed to scrape categories. Skipping...")
 
     latest_chapter_number = get_latest_chapter_number(base_url)
     if latest_chapter_number is None:
@@ -253,7 +254,7 @@ def yes(base_url: str) -> None:
     print(f"Finished scraping * {novel_title} *")
 
 
-    #thread = threading.Thread(target=thread_target)
+    #thread = threading.Thread(target=myThread)
     #thread.start()
 
 # Example usage
