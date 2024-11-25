@@ -14,24 +14,36 @@ try:
     
     import webscrapers.updateNovel
     
-    
-    # Normal
+    # Flask and standard libraries
     from flask import Flask, render_template, request, jsonify, session, send_file
     import os
     import re  
     import random
     import requests
     import json
-    from dotenv import load_dotenv  
+    import logging
+    import logging.config
+    
+    # Project-specific imports
+    from config import Config
+    from dotenv import load_dotenv
 except ImportError as e:
     input(f"Module not found: {e}")
 
+# Configure logging
+logging.config.dictConfig(Config.LOGGING_CONFIG)
+logger = logging.getLogger(__name__)
+
+# Initialize Flask app
+app = Flask(__name__)
+app.config.from_object(Config)
+app.secret_key = Config.SECRET_KEY
 
 # Port Number (Keep as string)
-port = "1111"
+port = Config.PORT
 
 # Debug True/Flase
-debug = True
+debug = Config.DEBUG
 
 
 
@@ -46,33 +58,31 @@ def send_discord_message(message):
     message (str): The message to be sent to the Discord channel.
 
     Returns:
-    None. If the message is sent successfully, it prints "Message sent successfully!".
-    If the message fails to send, it prints the response status code and response body.
+    None. Logs the result of sending the message.
     """
-    load_dotenv()
-    webhook_url = os.getenv("WEBHOOK_URL")
-    data = {
-        "content": message,
-        "username": "Novel Reader Website"
-    }
+    try:
+        webhook_url = Config.DISCORD_WEBHOOK_URL
+        data = {
+            "content": message,
+            "username": "Novel Reader Website"
+        }
 
-    headers = {
-        "Content-Type": "application/json"
-    }
+        headers = {
+            "Content-Type": "application/json"
+        }
 
-    response = requests.post(webhook_url, data=json.dumps(data), headers=headers)
+        response = requests.post(webhook_url, data=json.dumps(data), headers=headers)
 
-    if response.status_code == 204:
-        print("Message sent successfully!")
-    else:
-        print(f"Failed to send message. Response status code: {response.status_code}")
-        print(f"Response body: {response.text}")
+        if response.status_code == 204:
+            logger.info("Discord message sent successfully!")
+        else:
+            logger.error(f"Failed to send Discord message. Status code: {response.status_code}")
+            logger.error(f"Response body: {response.text}")
+    except Exception as e:
+        logger.error(f"Error sending Discord message: {e}")
 
 
 
-
-app = Flask(__name__)
-app.secret_key = os.urandom(24)
 
 currentPath = os.getcwd()
 
@@ -791,8 +801,12 @@ def webscraperss():
 
 if __name__ == "__main__":
     try:
-        app.run(debug=debug, host='127.0.0.1', port=port)
+        logger.info(f"Starting Flask application on {Config.HOST}:{Config.PORT}")
+        app.run(
+            debug=Config.DEBUG, 
+            host=Config.HOST, 
+            port=Config.PORT
+        )
     except Exception as e:
-        input(f"Error running the app: {e}")
-
-
+        logger.critical(f"Error running the app: {e}")
+        input(f"Critical error: {e}")

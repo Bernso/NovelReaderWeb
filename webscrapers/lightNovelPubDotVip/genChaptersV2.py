@@ -77,14 +77,37 @@ class genChapters:
     
     def __getTotalPages(self, thesoup):
         try:
+            # First try to find the last page link
             aLink = thesoup.find('li', class_='PagedList-skipToLast')
-            if aLink:
+            if aLink and aLink.find('a'):
                 fullLink = f'https://lightnovelpub.vip{aLink.find('a')['href']}'
                 page_number = fullLink.split('=')[-1]
                 return int(page_number)
-            return None
+            
+            # If no "skip to last" link, try to find the last numbered page
+            pagination = thesoup.find('div', class_='pagination')
+            if pagination:
+                page_links = pagination.find_all('li')
+                max_page = 1
+                for link in page_links:
+                    try:
+                        page_num = int(link.get_text(strip=True))
+                        max_page = max(max_page, page_num)
+                    except (ValueError, TypeError):
+                        continue
+                return max_page
+            
+            # If no pagination found, check if there's at least one page of chapters
+            chapter_list = thesoup.find('ul', class_='chapter-list')
+            if chapter_list and chapter_list.find_all('li'):
+                return 1
+                
+            print("No chapters found on the page")
+            return 0
+            
         except Exception as e:
-            input(e)
+            print(f"Error getting total pages: {e}")
+            return 0
     
     def __scrapeChapter(self, link, num):
         try:
