@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 console.log(data.directory);
                 if (data.directory !== 'No directories found') {
-                    const newHref = `/novels/${data.directory}`;
+                    const newHref = `/novels_chapters?n=${data.directory}`;
                     window.location.href = newHref;
                 } else {
                     alert('No directories found');

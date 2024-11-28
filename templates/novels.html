@@ -39,7 +39,7 @@
         <section class="features">
             {% for original_novel, modified_novel, categories in novels %}
                 <div class="feature" data-categories="{{ categories }}">
-                    <a href='{{ url_for('show_novel_chapters', novel_title=original_novel) }}'>
+                    <a href='/novels_chapters?n={{ original_novel }}'>
                         <img src="{{ url_for('serve_image', novel_title=original_novel) }}" alt="Cover Image">
                         <div class="text">
                             <h3>{{ modified_novel }}</h3>

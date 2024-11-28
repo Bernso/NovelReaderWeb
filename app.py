@@ -23,6 +23,7 @@ try:
     import json
     import logging
     import logging.config
+    import urllib.parse  # Add this import for URL decoding
     
     # Project-specific imports
     from config import Config
@@ -101,7 +102,7 @@ def random_directory():
     jsonify: A JSON response containing the name of the chosen directory.
               If no directories are found, it returns a JSON response indicating that no directories were found.
     """
-    folder_path = os.path.join('templates', 'novels')  # Path to the 'novels' directory
+    folder_path = os.path.join(app.root_path, 'templates', 'novels')  # Path to the 'novels' directory
     directories = [d for d in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, d))]
     if directories:
         chosen_directory = random.choice(directories)
@@ -124,41 +125,35 @@ def home():
     render_template: A rendered HTML template named 'home.html' with statistics.
     """
     try:
-        # Get total number of novels
         novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
-        total_novels = len([novel for novel in os.listdir(novels_folder_path) 
-                          if os.path.isdir(os.path.join(novels_folder_path, novel))])
-
-        # Get total number of chapters
+        total_novels = 0
         total_chapters = 0
         all_categories = set()
 
-        # Iterate through each novel directory
         for novel in os.listdir(novels_folder_path):
             novel_path = os.path.join(novels_folder_path, novel)
             if os.path.isdir(novel_path):
-                # Count chapters
-                chapters = [file for file in os.listdir(novel_path) 
-                          if file.endswith('.txt') and file.startswith('chapter-')]
-                total_chapters += len(chapters)
+                total_novels += 1
 
-                # Get categories
+                json_path = os.path.join(novel_path, 'chapters.json')
+                if os.path.exists(json_path):
+                    with open(json_path, 'r', encoding='utf-8') as f:
+                        total_chapters += len(json.load(f))
+                else:
+                    chapters = [file for file in os.listdir(novel_path) if file.endswith('.txt') and file.startswith('chapter-')]
+                    total_chapters += len(chapters)
+
                 categories_file = os.path.join(novel_path, 'categories.txt')
                 if os.path.exists(categories_file):
                     with open(categories_file, 'r', encoding='utf-8') as f:
-                        categories = [line.strip() for line in f if line.strip()]
-                        all_categories.update(categories)
+                        all_categories.update(line.strip() for line in f if line.strip())
 
-        # Get total number of unique categories
-        total_categories = len(all_categories)
-
-        return render_template('home.html', 
-                             total_novels=total_novels,
-                             total_chapters=total_chapters,
-                             total_categories=total_categories)
+        return render_template('home.html',
+                               total_novels=total_novels,
+                               total_chapters=total_chapters,
+                               total_categories=len(all_categories))   
     except Exception as e:
-        error_message = str(e)
-        send_discord_message(error_message)
+        send_discord_message(str(e))
         return render_template('error.html'), 500
 
 
@@ -294,149 +289,143 @@ def run_scriptwebNovelDotCom():
         return jsonify({"error": str(e)}), 500
 
 
-
-
-
-@app.route('/novels/<novelTitle>/chapters/<int:chapter_number>')  # For whole numbers
-def show_whole_chapter(novelTitle, chapter_number):   
-    try:
-        subfolder_path = os.path.join(app.root_path, 'templates', 'novels', novelTitle)
+def fetch_chapters_for_novel(novel_name):
+    # URL decode and transform novel name if needed
+    novel_name = urllib.parse.unquote(novel_name)
+    if not novel_name.endswith('-chapters'):
+        novel_name = novel_name + '-chapters'
+    
+    print(f"Fetching chapters for novel: {novel_name}")
+    
+    path = os.path.join(app.root_path, 'templates', 'novels', novel_name)
+    print(f"Looking in path: {path}")
+    
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Novel directory not found: {path}")
         
-        # Get all chapter numbers
-        chapters = []
-        for file in os.listdir(subfolder_path):
-            if file.startswith('chapter-') and file.endswith('.txt'):
-                match = re.search(r'chapter-(.+?)\.txt', file)
-                if match:
-                    chapter_num = match.group(1)
-                    try:
-                        if '-' in chapter_num:
-                            num = float(chapter_num.replace('-', '.'))
-                        else:
-                            num = float(chapter_num)
-                        chapters.append(num)
-                    except ValueError:
-                        continue
+    chapters = [f for f in os.listdir(path) if f.startswith('chapter-') and f.endswith('.txt')]
+    if not chapters:
+        raise ValueError(f"No chapters found for novel: {novel_name}")
         
-        chapters.sort()
+    print(f"Found {len(chapters)} chapters")
+    
+    chapterContent = {}
+    for chapter in chapters:
+        # Split the chapter filename and handle both integer and decimal chapter numbers
+        parts = chapter.split('-')
+        if len(parts) == 3:  # For decimal chapters like chapter-3-2.txt
+            chapter_number = float(f"{parts[1]}.{parts[2].split('.')[0]}")
+        else:  # For integer chapters like chapter-3.txt
+            chapter_number = int(parts[1].split('.')[0])
         
-        # Find next and previous chapters
-        next_chapter = None
-        prev_chapter = None
-        for i, num in enumerate(chapters):
-            if num == chapter_number:
-                if i > 0:
-                    prev_chapter = chapters[i-1]
-                if i < len(chapters)-1:
-                    next_chapter = chapters[i+1]
-                break
-
-        # Rest of your existing code...
-        chapter_file = f'chapter-{chapter_number}.txt'
-        chapter_path = os.path.join(subfolder_path, chapter_file)
-        
-        if not os.path.exists(chapter_path):
-            return render_template('chapterNotFound.html'), 404
-
+        chapter_path = os.path.join(path, chapter)
         with open(chapter_path, 'r', encoding='utf-8') as f:
-            chapter_text = f.read()
+            content = f.read()
+            content = content.replace('<br>', "\n")
+            chapterContent[chapter_number] = content
+            
+    return chapterContent
 
-        novel_title_clean = re.sub(r'\s*\(.*?\)', '', novelTitle[:-9] if len(novelTitle) >= 9 else novelTitle)
-        novel_title_encoded = novelTitle.replace(' ', '%20')
+def fetch_chapters_around_chapter_for_novel(novel_name, chapter_number):
+    path = os.path.join(app.root_path,'templates', 'novels', novel_name)
+    
+    chapter_dict = {}
+    for f in os.listdir(path):
+        if f.startswith('chapter-') and f.endswith('.txt'):
+            # Split the chapter filename and handle both integer and decimal chapter numbers
+            parts = f.split('-')
+            if len(parts) == 3:  # For decimal chapters like chapter-3-2.txt
+                chapter_number = float(f"{parts[1]}.{parts[2].split('.')[0]}")
+            else:  # For integer chapters like chapter-3.txt
+                chapter_number = int(parts[1].split('.')[0])
+            
+            with open(os.path.join(app.root_path, path, f), 'r', encoding='utf-8') as file:
+                content = file.read()
+                content = content.replace('<br>', "\n")
+                chapter_dict[chapter_number] = content
+    return chapter_dict
 
-        session[f'last_read_{novelTitle}'] = chapter_number
+def create_chapters_json(novel_name):
+    novel_name = urllib.parse.unquote(novel_name).replace('%27', "'")
+    novel_path = os.path.join(app.root_path, 'templates', 'novels', novel_name)
+    
+    chapters = [f for f in os.listdir(novel_path) if f.startswith('chapter-') and f.endswith('.txt')]
+    chapter_content = {}
 
-        return render_template('chapterPage.html',
-                           novel_title_clean=novel_title_clean,
-                           novel_title_encoded=novel_title_encoded,
-                           chapter_number=chapter_number,
-                           chapter_text=chapter_text,
-                           next_chapter=next_chapter,
-                           prev_chapter=prev_chapter)
-
-    except Exception as e:
-        error_message = str(e)
-        print(f"Exception: {error_message}")
-        send_discord_message(error_message)
-        return render_template('error.html'), 500
-
-
-@app.route('/novels/<novelTitle>/chapters/<float:chapter_number>')  # Changed to float to handle all cases
-def show_chapter(novelTitle, chapter_number):   
-    try:
-        subfolder_path = os.path.join(app.root_path, 'templates', 'novels', novelTitle)
-        
-        # Get all chapter numbers
-        chapters = []
-        for file in os.listdir(subfolder_path):
-            if file.startswith('chapter-') and file.endswith('.txt'):
-                match = re.search(r'chapter-(.+?)\.txt', file)
-                if match:
-                    chapter_num = match.group(1)
-                    try:
-                        if '-' in chapter_num:
-                            # Convert "12-1" to 12.1
-                            whole, decimal = chapter_num.split('-')
-                            num = float(f"{whole}.{decimal}")
-                        else:
-                            num = float(chapter_num)
-                        chapters.append(num)
-                    except ValueError:
-                        continue
-        
-        chapters.sort()
-        
-        # Find next and previous chapters
-        next_chapter = None
-        prev_chapter = None
-        for i, num in enumerate(chapters):
-            if abs(num - chapter_number) < 0.0001:  # Using small epsilon for float comparison
-                if i > 0:
-                    prev_chapter = chapters[i-1]
-                if i < len(chapters)-1:
-                    next_chapter = chapters[i+1]
-                break
-
-        # Determine the correct file name format
-        if chapter_number.is_integer():
-            chapter_file = f'chapter-{int(chapter_number)}.txt'
+    for chapter in chapters:
+        parts = chapter.split('-')
+        if len(parts) == 3:
+            chapter_number = float(f"{parts[1]}.{parts[2].split('.')[0]}")
         else:
-            whole = int(chapter_number)
-            decimal = str(chapter_number).split('.')[1]
-            chapter_file = f'chapter-{whole}-{decimal}.txt'
+            chapter_number = int(parts[1].split('.')[0])
         
-        chapter_path = os.path.join(subfolder_path, chapter_file)
-        
-        if not os.path.exists(chapter_path):
-            return render_template('chapterNotFound.html'), 404
+        with open(os.path.join(novel_path, chapter), 'r', encoding='utf-8') as f:
+            content = f.read()
+            content = content.replace('<br>', "\n")
+            chapter_content[chapter_number] = content
 
-        with open(chapter_path, 'r', encoding='utf-8') as f:
-            chapter_text = f.read()
+    json_path = os.path.join(novel_path, 'chapters.json')
+    with open(json_path, 'w', encoding='utf-8') as json_file:
+        json.dump(chapter_content, json_file, ensure_ascii=False, indent=4)
 
-        novel_title_clean = re.sub(r'\s*\(.*?\)', '', novelTitle[:-9] if len(novelTitle) >= 9 else novelTitle)
-        novel_title_encoded = novelTitle.replace(' ', '%20')
+    print(f"Chapters JSON file created for {novel_name}")
 
-        session[f'last_read_{novelTitle}'] = chapter_number
 
-        return render_template('chapterPage.html',
-                           novel_title_clean=novel_title_clean,
-                           novel_title_encoded=novel_title_encoded,
-                           chapter_number=chapter_number,
-                           chapter_text=chapter_text,
-                           next_chapter=next_chapter,
-                           prev_chapter=prev_chapter)
 
+@app.route('/api/chapters', methods=['GET'])
+def get_chapters():
+    novel_name = request.args.get('n', '')
+    
+    # URL decode the novel name and replace + with spaces
+    novel_name = urllib.parse.unquote(novel_name).replace('+', ' ')
+    print(f"Received novel name: {novel_name}")
+    
+    # Ensure '-chapters' suffix
+    if not novel_name.endswith('-chapters'):
+        novel_name = novel_name + '-chapters'
+    print(f"Processed novel name: {novel_name}")
+    
+    json_path = os.path.join(app.root_path, 'templates', 'novels', novel_name, 'chapters.json')
+    print(f"Looking for JSON at: {json_path}")
+    
+    try:
+        if os.path.exists(json_path):
+            with open(json_path, 'r', encoding='utf-8') as json_file:
+                return json.load(json_file)
+        else:
+            chapters = fetch_chapters_for_novel(novel_name)
+            create_chapters_json(novel_name)
+            return chapters
     except Exception as e:
-        error_message = str(e)
-        print(f"Exception: {error_message}")
-        send_discord_message(error_message)
-        return render_template('error.html'), 500
+        print(f"Error in get_chapters: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
+@app.route('/read', methods=['GET'])
+def read_chapter():
+    novel_name = request.args.get('n')
+    chapter_number = request.args.get('c')
 
-
+    if not novel_name or not chapter_number:
+        return render_template('error.html'), 400
+    print(novel_name)
+    print(chapter_number)
+    novel_name = urllib.parse.unquote(novel_name).replace(' ', ' ').replace("'", "%27") #.replace('-', '%2D')
+    
+    # Convert chapter_number to float if it contains a decimal
+    chapter_number = float(chapter_number) if '.' in str(chapter_number) else int(chapter_number)
+    
+    # Fetch chapters from API
+    json_path = os.path.join(app.root_path, 'templates', 'novels', novel_name.replace("%27", "'"), 'chapters.json')        
+    if not os.path.exists(json_path):
+        create_chapters_json(novel_name.replace("%27", "'"))
+        
     
 
+    
+    return render_template('chapterPage.html', novel_title=novel_name, chapter_number=chapter_number, novel_title_clean=novel_name[:-9].replace("%27", "'"))
 
+    
+    
 
 @app.route('/plans')
 def show_plans():
@@ -545,14 +534,22 @@ def transform_title(novel_title):
     4. Replace special characters and spaces with hyphens.
     5. Remove trailing hyphens and spaces.
     """
-    transformed_title = re.sub(r"[''']", "", novel_title)  # Remove special apostrophes
-    transformed_title = re.sub(r'[^a-zA-Z0-9\s]', '', transformed_title)  # Remove non-alphanumeric characters
-    transformed_title = transformed_title.replace(" ", "%20")
-    transformed_title = transformed_title.rstrip('- ')  # Remove trailing hyphens and spaces
-    transformed_title = transformed_title[:-8]
+    # First decode any URL-encoded characters
+    novel_title = urllib.parse.unquote(novel_title)
+    
+    # Handle the -chapters suffix
+    if novel_title.endswith('-chapters'):
+        novel_title = novel_title[:-9]
+    
+    # Keep apostrophes and spaces, but remove other special characters
+    transformed_title = novel_title.replace('+', ' ')  # Replace + with space
+    transformed_title = transformed_title.strip()  # Remove leading/trailing whitespace
+    
+    # Add -chapters suffix
     transformed_title += '-chapters'
+    
+    print(f"Transformed title: {transformed_title}")
     return transformed_title
-
 
 
 
@@ -565,6 +562,7 @@ def list_novels():
     This function retrieves all novels from the 'novels' directory, reads their categories, and prepares the data for display.
     If a novel does not have a 'categories.txt' file, an empty string is assigned to its categories.
     The novels are then sorted by their names and displayed in the 'novels.html' template.
+    Novels with the title "The%20Beginning%20After%20The%20End-chapters" are ignored.
 
     Parameters:
     None
@@ -586,6 +584,8 @@ def list_novels():
         all_categories = set()
         
         for novel in os.listdir(novels_folder_path):
+            if novel == "The%20Beginning%20After%20The%20End-chapters":
+                continue
             novel_path = os.path.join(novels_folder_path, novel)
             categories_file = os.path.join(novel_path, 'categories.txt')
             print(novel[:-9])
@@ -600,11 +600,9 @@ def list_novels():
             novel_name_clean = re.sub(r'\s*\(.*?\)', '', novel[:-9] if len(novel) >= 9 else novel)
             novels_with_data.append((novel, novel_name_clean, categories_str))
 
-        # Sort the categories by words
         sorted_categories = sorted(all_categories, key=lambda x: x.lower())
 
-        # Calculate the total number of novels available
-        total_novels = len([novel for novel in os.listdir(novels_folder_path) if os.path.isdir(os.path.join(novels_folder_path, novel))])
+        total_novels = len([novel for novel in os.listdir(novels_folder_path) if os.path.isdir(os.path.join(novels_folder_path, novel)) and novel != "The%20Beginning%20After%20The%20End-chapters"])
 
         return render_template('novels.html', novels=novels_with_data, emojis=emojis, all_categories=sorted_categories, total_novels=total_novels)
     except Exception as e:
@@ -787,7 +785,7 @@ def webscraperss():
     Returns:
     render_template: A rendered HTML template with the number of web scrapers and their names.
     """
-    path = os.path.join(os.getcwd(), 'webscrapers')
+    path = os.path.join(app.root_path, 'webscrapers')
     directory_names = []
     
     for root, dirs, files in os.walk(path):
@@ -796,6 +794,104 @@ def webscraperss():
                 directory_names.append(dir_name)  # Just the directory name, not the full path
     
     return render_template('webscrapers.html', noOfWebscrapers=len(directory_names), webscraperName=directory_names)
+
+
+
+def get_chapter_keys(novel_name):
+    """
+    Retrieve chapter keys from JSON file or generate from text files.
+    
+    Args:
+        novel_name (str): Name of the novel
+    
+    Returns:
+        list: Sorted list of chapter keys
+    """
+    novel_path = os.path.join(app.root_path, 'templates', 'novels', novel_name)
+    json_path = os.path.join(novel_path, 'chapters.json')
+    
+    def parse_chapter_number(num):
+        return int(num) if num.is_integer() else num
+
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            chapters = json.load(f)
+        
+        chapter_keys = sorted(parse_chapter_number(float(k)) for k in chapters.keys())
+        return chapter_keys
+    
+    except (FileNotFoundError, json.JSONDecodeError):
+        chapters = [f for f in os.listdir(novel_path) if f.startswith('chapter-') and f.endswith('.txt')]
+        
+        chapter_keys = []
+        for chapter in chapters:
+            parts = chapter.split('-')
+            if len(parts) == 3:
+                chapter_number = float(f"{parts[1]}.{parts[2].split('.')[0]}")
+            else:
+                chapter_number = int(parts[1].split('.')[0])
+            chapter_keys.append(parse_chapter_number(chapter_number))
+        
+        return sorted(chapter_keys)
+def get_novel_categories(novel_name):
+    """
+    Retrieve categories for a given novel.
+    
+    Args:
+        novel_name (str): Name of the novel
+    
+    Returns:
+        str: Comma-separated list of categories, or empty string if not found
+    """
+    novel_path = os.path.join(app.root_path, 'templates', 'novels', novel_name)
+    categories_file = os.path.join(novel_path, 'categories.txt')
+    
+    if os.path.exists(categories_file):
+        with open(categories_file, 'r', encoding='utf-8') as f:
+            categories = [line.strip() for line in f if line.strip()]
+        return ', '.join(categories)
+    else:
+        return ""
+
+@app.route('/novels_chapters')
+def novels_chapters():
+    """
+    Route to display list of chapters for a novel.
+    
+    Returns:
+        Rendered template with chapter keys
+    """
+    novel_name = request.args.get('n')
+    if not novel_name:
+        return "No novel specified", 400
+    
+    try:
+        novel_path = os.path.join(app.root_path, 'templates', 'novels', novel_name)
+        json_path = os.path.join(novel_path, 'chapters.json')
+        
+        if os.path.exists(json_path):
+            chapter_keys = get_chapter_keys(novel_name)
+        else:
+            chapters = [f for f in os.listdir(novel_path) if f.startswith('chapter-') and f.endswith('.txt')]
+            chapter_keys = []
+            for chapter in chapters:
+                parts = chapter.split('-')
+                if len(parts) == 3:
+                    chapter_number = float(f"{parts[1]}.{parts[2].split('.')[0]}")
+                else:
+                    chapter_number = int(parts[1].split('.')[0])
+                chapter_keys.append(chapter_number)
+            chapter_keys.sort(key=lambda x: (int(x) if isinstance(x, int) else int(x.split('.')[0]), x))
+        
+        return render_template('novelsChapters.html', 
+                               chapters=chapter_keys, 
+                               novel_title=novel_name,
+                               categories=get_novel_categories(novel_name),
+                               novel_title_clean=novel_name[:-9])
+    except Exception as e:
+        error_message = str(e)
+        send_discord_message(error_message)
+        return render_template('error.html'), 500
 
 
 
