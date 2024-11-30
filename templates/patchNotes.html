@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
+    <meta name="description" content="Stay updated with the latest changes and improvements.">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Patch Notes - Novel Reader</title>
+</head>
+<style>
+    a {
+        color: var(--primary-color) !important;
+        display: inline !important;
+    }
+    .hero {
+        border-radius: 15px 150px 15px 100px;
+    }
+    .community {
+        border-radius: 25px 25px 0 0 ;
+    }
+</style>
+<body class='no-select'>
+    {% include 'header.html' %}
+
+    <main style='max-width: 100vw'>
+        <section class="hero">
+            <h2>Patch Notes 30/11/2024</h2>
+            <p>First record</p>
+        </section>
+
+        <section class="features">
+            <div class="feature">
+                <h3>Continue Reading Feature</h3>
+                <p>Added the ability to continue from your last read chapter for each novel.</p>
+            </div>
+            <div class="feature">
+                <h3>Chapter Navigation</h3>
+                <p>Improved chapter navigation with previous/next buttons and progress tracking.</p>
+            </div>
+            <div class="feature">
+                <h3>Dark Mode Interface</h3>
+                <p>Enhanced reading experience with a dark, eye-friendly interface.</p>
+            </div>
+            <div class="feature">
+                <h3>Novel Search</h3>
+                <p>Enhanced search functionality with auto-suggestions and real-time search results.</p>
+            </div>
+            
+            <div class='feature'>
+                <h3>Pre Loading</h3>
+                <p>Our site allows its users to load all of the chapters at once, meaning if you dissconnect from internet you can still read all your favourite novels.</p>
+            </div>
+
+            <div class='feature'>
+                <h3>Random Novel</h3>
+                <p>Yes this feature does actually work now. This will send you to a random novel in our library.</p>
+            </div>
+
+            <div class='feature'>
+                <h3>Text To Speech</h3>
+                <p>Allowing our users to not only read but also listen to our novels.</p>
+            </div>
+
+            <div class='feature'>
+                <h3>Font Customisation</h3>
+                <p>Read all of your favourite novels in whatever <strong style='font-family: "Helvetica Neue";'>Font</strong> you would like.</p>
+            </div>
+
+            <div class='feature'>
+                <h3>Text Opacity</h3>
+                <p>Since we are a website in full dark mode, it should be expected to have a setting to adjust brightness of the text.</p>
+            </div>
+
+            <div class='feature'>
+                <h3>Text Size</h3>
+                <p>We are giving you the ability to change the size of the font to whatever you see fit. Helping all types of users.</p>
+            </div>
+
+            <div class='feature'>
+                <h3>Category Filters</h3>
+                <p>We provide an easy search mechanism via the 'Categories' button on our <a href='/novels'>novels page</a>, allowing you to find a brand new novel just to your liking.</p>
+            </div>
+
+            <div class='feature'>
+                <h3>Stats</h3>
+                <p>You can view all of our stats on our <a href="/">home-page</a>, this will include: Number of chapters, Number of novels and number of categories.</p>
+            </div>
+
+        </section>
+
+        <section class="community">
+            <h2>Join Our Community</h2>
+            <p>Connect with other readers on our <a href="https://www.discord.gg/k5HBFXqtCB" target="_blank" style='text-decoration: none;'>Discord Server</a></p>
+            <p>Created by <a href="https://www.github.com/Bernso" target="_blank" style='text-decoration: none;'>Bernso</a></p>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

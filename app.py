@@ -496,7 +496,11 @@ def read_chapter():
     return render_template('chapterPage.html', novel_title=novel_name, chapter_number=chapter_number, novel_title_clean=novel_name[:-9].replace("%27", "'"))
 
     
-    
+@app.route('/p-notes')
+def patchNotes():
+    return render_template("patchNotes.html")
+
+
 
 @app.route('/plans')
 def show_plans():
