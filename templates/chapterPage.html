@@ -232,10 +232,31 @@
         let currentChapterIndex = "{{ chapter_number }}";
         let novel_title = "{{ novel_title }}"
         let totalChapters = 0
-         ////////////////////////////////////////////////////////////// replace the %27 with '
+        
       
-        async function loadChapters(novelName) {
+        async function loadChapters(novelName, initialChapter) {
             try {
+                // Disable navigation buttons during loading
+                const prevButtons = document.querySelectorAll('.feature:first-child a');
+                const nextButtons = document.querySelectorAll('.feature:last-child a');
+                
+                prevButtons.forEach(btn => {
+                    btn.classList.add('disabled');
+                    btn.removeAttribute('onclick');
+                });
+                nextButtons.forEach(btn => {
+                    btn.classList.add('disabled');
+                    btn.removeAttribute('onclick');
+                });
+
+                // First, fetch just the requested chapter
+                const singleChapterResponse = await fetch(`api/chapters?n=${novelName}&c=${initialChapter}`);
+                const singleChapterData = await singleChapterResponse.json();
+                
+                // Display the initial chapter immediately
+                document.getElementById('textToRead').innerText = singleChapterData[initialChapter];
+                
+                // Then fetch all chapters in the background
                 const response = await fetch(`api/chapters?n=${novelName}`);
                 const data = await response.json();
 
@@ -243,7 +264,7 @@
                 let sortedChapters = Object.keys(chapters).map(Number).sort((a, b) => a - b);
                 totalChapters = sortedChapters.length;
 
-                let initialChapterNumber = parseFloat(window.location.search.split('c=')[1]) || {{ chapter_number }};
+                let initialChapterNumber = initialChapter || {{ chapter_number }};
                 let initialChapterIndex = sortedChapters.findIndex(chapter => chapter === initialChapterNumber) + 1;
                 
                 if (initialChapterIndex === 0) {
@@ -252,11 +273,11 @@
                 }
 
                 currentChapterIndex = initialChapterIndex;
-                displayChapter(currentChapterIndex);
-
                 updateNavigationButtons(sortedChapters, initialChapterIndex);
             } catch(error) {
                 console.error(`Error loading chapters: ${error}`);
+                // Re-enable buttons in case of error
+                updateNavigationButtons([], 1);
             }
         }
       
@@ -306,33 +327,36 @@
         }
 
         function updateNavigationButtons(sortedChapters, currentIndex) {
-            const previousButton = document.querySelector('.feature:first-child a');
-            const nextButton = document.querySelector('.feature:last-child a');
+            const previousButtons = document.querySelectorAll('.feature:first-child a');
+            const nextButtons = document.querySelectorAll('.feature:last-child a');
 
+            // Enable/disable previous buttons
+            previousButtons.forEach(button => {
+                if (currentIndex <= 1) {
+                    button.classList.add('disabled');
+                    button.removeAttribute('onclick');
+                } else {
+                    button.classList.remove('disabled');
+                    button.setAttribute('onclick', 'previousChapter()');
+                }
+            });
 
-            // Enable/disable previous button
-            if (currentIndex <= 1) {
-                previousButton.classList.add('disabled');
-                previousButton.removeAttribute('onclick');
-            } else {
-                previousButton.classList.remove('disabled');
-                previousButton.setAttribute('onclick', 'previousChapter()');
-            }
-
-            // Enable/disable next button
-            if (currentIndex >= sortedChapters.length) {
-                nextButton.classList.add('disabled');
-                nextButton.removeAttribute('onclick');
-            } else {
-                nextButton.classList.remove('disabled');
-                nextButton.setAttribute('onclick', 'nextChapter()');
-            }
+            // Enable/disable next buttons
+            nextButtons.forEach(button => {
+                if (currentIndex >= sortedChapters.length) {
+                    button.classList.add('disabled');
+                    button.removeAttribute('onclick');
+                } else {
+                    button.classList.remove('disabled');
+                    button.setAttribute('onclick', 'nextChapter()');
+                }
+            });
         }
 
     
 
 
-        loadChapters(novel_title)
+        loadChapters(novel_title, {{ chapter_number }})
         
       
 
