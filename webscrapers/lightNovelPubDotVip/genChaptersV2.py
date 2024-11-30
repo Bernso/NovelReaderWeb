@@ -6,7 +6,7 @@ import urllib
 import re
 from functools import lru_cache
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
+from requests.packages.urllib3.util.retry import Retry # This may be flagged as not imported by it will work dw
 import json
 import threading
 
@@ -331,5 +331,5 @@ class genChapters:
             print(f"Error in getChapters: {e}")
 
 if __name__ == '__main__':
-    scraper = genChapters("https://lightnovelpub.vip/novel/the-world-after-the-fall-16091325")
+    scraper = genChapters("https://lightnovelpub.vip/novel/shadow-slave-05122222")
     scraper.getChapters()

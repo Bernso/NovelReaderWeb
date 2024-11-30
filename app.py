@@ -368,10 +368,29 @@ def create_chapters_json(novel_name):
     with open(json_path, 'w', encoding='utf-8') as json_file:
         json.dump(chapter_content, json_file, ensure_ascii=False, indent=4)
 
-    print(f"Chapters JSON file created for {novel_name}")
+    # Delete chapter text files after creating JSON
+    for chapter in chapters:
+        chapter_path = os.path.join(novel_path, chapter)
+        try:
+            os.remove(chapter_path)
+        except Exception as e:
+            logger.error(f"Error deleting chapter file {chapter}: {e}")
+
+    print(f"Chapters JSON file created and text files deleted for {novel_name}")
 
 
-
+def cleanup_chapter_files(novel_name):
+    """Remove individual chapter text files if chapters.json exists"""
+    novel_path = os.path.join(app.root_path, 'templates', 'novels', novel_name)
+    json_path = os.path.join(novel_path, 'chapters.json')
+    
+    if os.path.exists(json_path):
+        for file in os.listdir(novel_path):
+            if file.startswith('chapter-') and file.endswith('.txt'):
+                try:
+                    os.remove(os.path.join(novel_path, file))
+                except Exception as e:
+                    logger.error(f"Error deleting {file}: {e}")
 
 @app.route('/api/chapters', methods=['GET'])
 def get_chapters():
@@ -382,6 +401,13 @@ def get_chapters():
     try:
         novel_name = request.args.get('n', '')
         chapter_number = request.args.get('c', '')
+        
+        # Clean up any text files if JSON exists
+        if novel_name:
+            decoded_name = urllib.parse.unquote(novel_name).replace('+', ' ')
+            if not decoded_name.endswith('-chapters'):
+                decoded_name = decoded_name + '-chapters'
+            cleanup_chapter_files(decoded_name)
         
         # Handle single chapter request
         if chapter_number:
@@ -940,6 +966,7 @@ def novels_chapters():
 
 
 
+
 if __name__ == "__main__":
     try:
         logger.info(f"Starting Flask application on {Config.HOST}:{Config.PORT}")
@@ -951,3 +978,4 @@ if __name__ == "__main__":
     except Exception as e:
         logger.critical(f"Error running the app: {e}")
         input(f"Critical error: {e}")
+
