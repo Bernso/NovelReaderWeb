@@ -114,49 +114,36 @@ def random_directory():
 
 @app.route('/')
 def home():
-    """
-    This function handles the root route ('/') and renders the 'home.html' template
-    with statistics about the novels, chapters, and categories.
+    return render_template('home.html')   
+    
 
-    Parameters:
-    None
+@app.route('/get-stats', methods=['GET'])
+def get_stats():
+    novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
+    total_novels = 0
+    total_chapters = 0
+    all_categories = set()
 
-    Returns:
-    render_template: A rendered HTML template named 'home.html' with statistics.
-    """
-    try:
-        novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
-        total_novels = 0
-        total_chapters = 0
-        all_categories = set()
+    for novel in os.listdir(novels_folder_path):
+        novel_path = os.path.join(novels_folder_path, novel)
+        if os.path.isdir(novel_path):
+            total_novels += 1
 
-        for novel in os.listdir(novels_folder_path):
-            novel_path = os.path.join(novels_folder_path, novel)
-            if os.path.isdir(novel_path):
-                total_novels += 1
+            json_path = os.path.join(novel_path, 'chapters.json')
+            if os.path.exists(json_path):
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    total_chapters += len(json.load(f))
+            else:
+                chapters = [file for file in os.listdir(novel_path) if file.endswith('.txt') and file.startswith('chapter-')]
+                total_chapters += len(chapters)
 
-                json_path = os.path.join(novel_path, 'chapters.json')
-                if os.path.exists(json_path):
-                    with open(json_path, 'r', encoding='utf-8') as f:
-                        total_chapters += len(json.load(f))
-                else:
-                    chapters = [file for file in os.listdir(novel_path) if file.endswith('.txt') and file.startswith('chapter-')]
-                    total_chapters += len(chapters)
-
-                categories_file = os.path.join(novel_path, 'categories.txt')
-                if os.path.exists(categories_file):
-                    with open(categories_file, 'r', encoding='utf-8') as f:
-                        all_categories.update(line.strip() for line in f if line.strip())
-
-        return render_template('home.html',
-                               total_novels=total_novels,
-                               total_chapters=total_chapters,
-                               total_categories=len(all_categories))   
-    except Exception as e:
-        send_discord_message(str(e))
-        return render_template('error.html'), 500
-
-
+            categories_file = os.path.join(novel_path, 'categories.txt')
+            if os.path.exists(categories_file):
+                with open(categories_file, 'r', encoding='utf-8') as f:
+                    all_categories.update(line.strip() for line in f if line.strip())
+    
+    return jsonify({"total_novels": total_novels, "total_chapters": total_chapters, "total_categories": len(all_categories)})
+    
 
 
 @app.errorhandler(404)
