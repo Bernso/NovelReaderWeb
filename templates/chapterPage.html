@@ -301,6 +301,9 @@
 
             if (currentChapterIndex < sortedChapters.length) {
                 currentChapterIndex++;
+                
+                // Save current chapter to localStorage
+                localStorage.setItem('lastRead_' + novel_title, sortedChapters[currentChapterIndex-1]);
 
                 // Update URL with full chapter number
                 const newURL = `/read?n=${novel_title}&c=${sortedChapters[currentChapterIndex-1]}`
@@ -316,6 +319,9 @@
 
             if (currentChapterIndex > 1) {
                 currentChapterIndex--;
+                
+                // Save current chapter to localStorage
+                localStorage.setItem('lastRead_' + novel_title, sortedChapters[currentChapterIndex-1]);
 
                 // Update URL with full chapter number
                 const newURL = `/read?n=${novel_title}&c=${sortedChapters[currentChapterIndex-1]}`

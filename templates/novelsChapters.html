@@ -30,7 +30,7 @@
                     Start Reading
                 </a>
         
-                <a class='novelsChaptersButtons' href="/read?n={{ novel_title }}&c={{ session.get('last_read_' + novel_title, 1) }}">
+                <a class='novelsChaptersButtons' id="continueReadingBtn" onclick="continueReading()">
                     Continue Reading
                 </a>
                 
@@ -93,8 +93,7 @@
                 alert('Network error. Please try again later.');
             });
         }        
-    </script>
-    <script>
+    
         function searchChapters() {
             const searchInput = document.getElementById('searchInput').value.toLowerCase();
             const chapterList = document.getElementById('chapterList');
@@ -130,8 +129,7 @@
             chapterList.innerHTML = '';
             chapters.forEach(chapter => chapterList.appendChild(chapter));
         }
-    </script>
-    <script>
+    
         // Save the current chapter content for a specific novel to localStorage
         function saveChapterContentForNovel(novelTitle, content) {
             localStorage.setItem(`currentChapterContent_${novelTitle}`, content);
@@ -148,6 +146,12 @@
         saveChapterContentForNovel(novelTitle, currentChapterContent);
         const loadedChapterContent = loadChapterContentForNovel(novelTitle);
         console.log(loadedChapterContent);
+    
+        function continueReading() {
+            const novelTitle = "{{ novel_title }}";
+            const lastRead = localStorage.getItem('lastRead_' + novelTitle) || 1;
+            window.location.href = `/read?n=${novelTitle}&c=${lastRead}`;
+        }
     </script>
 </body>
 </html>
