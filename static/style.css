@@ -501,10 +501,11 @@ a, .nav-link, .fancyLink {
     overflow: hidden;
     transition: all 0.3s ease;
     border: 1px solid rgba(187, 134, 252, 0.1);
-    height: fit-content;
     padding: 15px;
     width: 100%;
-    max-width: 280px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .feature a {
@@ -512,14 +513,14 @@ a, .nav-link, .fancyLink {
     flex-direction: column;
     text-decoration: none;
     color: inherit;
+    height: 100%;
 }
 
 .feature img {
-    width: 260px;
-    height: 400px;
+    width: 100%;
+    aspect-ratio: 2/3;
     object-fit: cover;
     border-radius: 8px;
-    margin: 0 auto; /* Centers the image */
 }
 
 .text {
@@ -581,9 +582,14 @@ a, .nav-link, .fancyLink {
 
 @media (max-width: 480px) {
     .features, .features2 {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
         gap: 15px;
         padding: 20px 10px;
+    }
+    
+    .feature {
+        width: 100%;
+        max-width: none;
     }
 }
 
@@ -884,13 +890,20 @@ footer {
         padding: 80px 20px 40px;
     }
 
+    
     .features {
-        padding: 40px 20px;
+        grid-template-columns: repeat(2, 1fr); /* Two columns on mobile */
+        gap: 15px;
+        padding: 20px 10px;
     }
-
+    
     .feature {
         width: 100%;
+        max-width: none;
     }
+    
+
+    
 
     .community {
         padding: 40px 20px;
