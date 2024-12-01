@@ -15,7 +15,7 @@ try:
     import webscrapers.updateNovel
     
     # Flask and standard libraries
-    from flask import Flask, render_template, request, jsonify, session, send_file
+    from flask import Flask, render_template, request, jsonify, session, send_file, redirect, url_for
     import os
     import re  
     import random
@@ -482,6 +482,17 @@ def read_chapter():
     
     return render_template('chapterPage.html', novel_title=novel_name, chapter_number=chapter_number, novel_title_clean=novel_name[:-9].replace("%27", "'"))
 
+
+@app.route('/novels/<novel>/chapters/<chapter_number>')
+def goToNewRouteChapters(novel, chapter_number):
+    return redirect(url_for('read_chapter', n=novel, c=chapter_number))
+
+@app.route('/novels/<novel>')
+def goToNewRouteNovels(novel):
+    return redirect(url_for('novels_chapters', n=novel))
+
+
+
     
 @app.route('/p-notes')
 def patchNotes():
@@ -926,6 +937,11 @@ def novels_chapters():
     novel_name = request.args.get('n')
     if not novel_name:
         return "No novel specified", 400
+    
+    chapterNumber = request.args.get('c')
+    if chapterNumber:
+        
+        return redirect(url_for('read_chapter', n=novel_name, c=chapterNumber))
     
     try:
         novel_path = os.path.join(app.root_path, 'templates', 'novels', novel_name)
