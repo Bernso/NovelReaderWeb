@@ -9,6 +9,7 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry # This may be flagged as not imported by it will work dw
 import json
 import threading
+import time
 
 class genChapters:
     def __init__(self, url='https://lightnovelpub.vip/novel/shadow-slave-05122222'):
@@ -128,6 +129,18 @@ class genChapters:
             print(f"Error getting total pages: {e}")
             return 0
     
+    def __validate_chapter_number(self, chapter_num: str) -> bool:
+        """
+        Validate if a chapter number can be converted to float.
+        Returns True if valid, False otherwise.
+        """
+        try:
+            float(chapter_num)
+            return True
+        except ValueError:
+            print(f"Warning: Invalid chapter number format: {chapter_num}")
+            return False
+
     def __process_chapter(self, args):
         """Process a single chapter in parallel"""
         link, num = args
@@ -227,6 +240,11 @@ class genChapters:
                 chapter_part = chapter_part.replace('chapter-', '')
                 chapterLinkNum = chapter_part.replace('-', '.')
                 
+                # Validate chapter number format
+                if not self.__validate_chapter_number(chapterLinkNum):
+                    print(f"Skipping chapter with invalid number format: {chapterLinkNum}")
+                    continue
+
                 # Skip if chapter already exists
                 if chapterLinkNum in existing_chapters:
                     print(f"Chapter {chapterLinkNum} already exists, skipping...")
@@ -331,5 +349,29 @@ class genChapters:
             print(f"Error in getChapters: {e}")
 
 if __name__ == '__main__':
-    scraper = genChapters("https://lightnovelpub.vip/novel/shadow-slave-05122222")
-    scraper.getChapters()
+    start = time.time()
+    links = [
+            'https://lightnovelpub.vip/novel/the-beginning-after-the-end-web-novel-11110049', 
+            'https://lightnovelpub.vip/novel/shadow-slave-05122222', 
+            'https://lightnovelpub.vip/novel/circle-of-inevitability-17122007', 
+            'https://lightnovelpub.vip/novel/damn-reincarnation-16091348',
+            'https://lightnovelpub.vip/novel/return-of-the-mount-hua-sect-16091350'
+            'https://lightnovelpub.vip/novel/a-regressors-tale-of-cultivation',
+            'https://lightnovelpub.vip/novel/overgeared-wn-16091311',
+            'https://lightnovelpub.vip/novel/trash-count-wn-05122225',
+            'https://lightnovelpub.vip/novel/the-legendary-mechanic-novel-05122221',
+            'https://lightnovelpub.vip/novel/the-authors-pov-05122222',
+            'https://lightnovelpub.vip/novel/advent-of-the-three-calamities',
+            'https://lightnovelpub.vip/novel/lord-of-the-mysteries-wn-16091313',
+            'https://lightnovelpub.vip/novel/the-world-after-the-fall-16091325',
+            'https://lightnovelpub.vip/novel/orv-wn-16091308',
+            'https://lightnovelpub.vip/novel/reverend-insanity-05122222',
+            'https://lightnovelpub.vip/novel/the-novels-extra-05122223',
+        ]
+    for link in links:
+        scraper = genChapters(link)
+        scraper.getChapters()
+    
+    end = time.time()
+
+    print(f"Finished scraping all novel in {end - start:.2f} seconds")

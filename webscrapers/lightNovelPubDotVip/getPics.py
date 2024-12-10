@@ -24,6 +24,7 @@ class NovelImageScraper:
         
         # Initialize Selenium driver
         self.driver = None
+        self.setup_driver()
     
     def setup_driver(self):
         """Set up Chrome driver with appropriate options"""
@@ -38,7 +39,7 @@ class NovelImageScraper:
             for key, value in self.__headers.items():
                 options.add_argument(f'{key}={value}')
             
-            service = Service(ChromeDriverManager().install())
+            service = Service(ChromeDriverManager(driver_version="131.0.6778.109").install())
             self.driver = webdriver.Chrome(service=service, options=options)
     
     def cleanup_driver(self):
@@ -74,7 +75,7 @@ class NovelImageScraper:
         """Fetch page using Selenium and wait for image to load"""
         try:
             print(f"Fetching page: {url}")
-            self.setup_driver()
+            #self.setup_driver()
             self.driver.get(url)
             
             # Wait for either the fixed-img div or the cover figure
@@ -213,17 +214,36 @@ class NovelImageScraper:
             print(f"Error in main scraping process: {e}")
             return False
         
-        finally:
-            self.cleanup_driver()
+        #finally:
+        #    self.cleanup_driver()
 
 
 if __name__ == "__main__":
     scraper = NovelImageScraper()
-    
+    links = [
+            'https://lightnovelpub.vip/novel/the-beginning-after-the-end-web-novel-11110049', 
+            'https://lightnovelpub.vip/novel/shadow-slave-05122222', 
+            'https://lightnovelpub.vip/novel/circle-of-inevitability-17122007', 
+            'https://lightnovelpub.vip/novel/damn-reincarnation-16091348',
+            'https://lightnovelpub.vip/novel/return-of-the-mount-hua-sect-16091350'
+            'https://lightnovelpub.vip/novel/a-regressors-tale-of-cultivation',
+            'https://lightnovelpub.vip/novel/overgeared-wn-16091311',
+            'https://lightnovelpub.vip/novel/trash-count-wn-05122225',
+            'https://lightnovelpub.vip/novel/the-legendary-mechanic-novel-05122221',
+            'https://lightnovelpub.vip/novel/the-authors-pov-05122222',
+            'https://lightnovelpub.vip/novel/advent-of-the-three-calamities',
+            'https://lightnovelpub.vip/novel/lord-of-the-mysteries-wn-16091313',
+            'https://lightnovelpub.vip/novel/the-world-after-the-fall-16091325',
+            'https://lightnovelpub.vip/novel/orv-wn-16091308',
+            'https://lightnovelpub.vip/novel/reverend-insanity-05122222',
+            'https://lightnovelpub.vip/novel/the-novels-extra-05122223',
+        ]
+    for link in links:
     # Example usage with URL
-    success = scraper._NovelImageScraper__scrape_novel_image(url="https://lightnovelpub.vip/novel/the-world-after-the-fall-16091325")
+        success = scraper._NovelImageScraper__scrape_novel_image(url=link)
+    scraper.cleanup_driver()
     
-    if not success:
-        print("\nRetrying with different URL format...")
-        # Try alternate URL format
-        success = scraper._NovelImageScraper__scrape_novel_image(novel_title="The World After the Fall")
+    #if not success:
+    #    print("\nRetrying with different URL format...")
+    #    # Try alternate URL format
+    #    success = scraper._NovelImageScraper__scrape_novel_image(novel_title="Advent of the Three Calamities")

@@ -900,9 +900,15 @@ def get_chapter_keys(novel_name):
         for chapter in chapters:
             parts = chapter.split('-')
             if len(parts) == 3:
-                chapter_number = float(f"{parts[1]}.{parts[2].split('.')[0]}")
+                try:
+                    chapter_number = float(f"{parts[1]}.{parts[2].split('.')[0]}")
+                except ValueError:
+                    continue
             else:
-                chapter_number = int(parts[1].split('.')[0])
+                try:
+                    chapter_number = int(parts[1].split('.')[0])
+                except ValueError:
+                    continue
             chapter_keys.append(parse_chapter_number(chapter_number))
         
         return sorted(chapter_keys)
@@ -955,9 +961,16 @@ def novels_chapters():
             for chapter in chapters:
                 parts = chapter.split('-')
                 if len(parts) == 3:
-                    chapter_number = float(f"{parts[1]}.{parts[2].split('.')[0]}")
+                    try:
+                        chapter_number = float(f"{parts[1]}.{parts[2].split('.')[0]}")
+                    except ValueError:
+                        continue
                 else:
-                    chapter_number = int(parts[1].split('.')[0])
+                    try:
+                        chapter_number = int(parts[1].split('.')[0])
+                    except ValueError:
+                        continue
+                
                 chapter_keys.append(chapter_number)
             chapter_keys.sort(key=lambda x: (int(x) if isinstance(x, int) else int(x.split('.')[0]), x))
         
