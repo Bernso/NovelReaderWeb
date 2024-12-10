@@ -116,7 +116,7 @@ def random_directory():
 def home():
     return render_template('home.html')   
     
-
+ 
 @app.route('/get-stats', methods=['GET'])
 def get_stats():
     novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
