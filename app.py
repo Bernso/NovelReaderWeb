@@ -28,6 +28,10 @@ try:
     # Project-specific imports
     from config import Config
     from dotenv import load_dotenv
+    
+    # Comments
+    from models import db, Comment
+
 except ImportError as e:
     input(f"Module not found: {e}")
 
@@ -39,6 +43,7 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = Config.SECRET_KEY
+db.init_app(app)
 
 # Port Number (Keep as string)
 port = Config.PORT
@@ -983,6 +988,103 @@ def novels_chapters():
         error_message = str(e)
         send_discord_message(error_message)
         return render_template('error.html'), 500
+
+
+
+
+@app.route('/api/comments', methods=['POST'])
+def add_comment():
+    try:
+        data = request.json
+        new_comment = Comment(
+            novel_name=data['novel_name'],
+            chapter_number=float(data['chapter_number']),
+            username=data['username'],
+            content=data['content'],
+            parent_id=data.get('parent_id')
+        )
+        db.session.add(new_comment)
+        db.session.commit()
+        return jsonify({'success': True, 'comment_id': new_comment.id})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/comments/<novel_name>/<chapter_number>', methods=['GET'])
+def get_comments(novel_name, chapter_number):
+    try:
+        comments = Comment.query.filter_by(
+            novel_name=novel_name,
+            chapter_number=float(chapter_number),
+            parent_id=None  # Get only top-level comments
+        ).order_by(Comment.pinned.desc(), Comment.timestamp.desc()).all()
+        
+        return jsonify([{
+            'id': c.id,
+            'username': c.username,
+            'content': c.content,
+            'timestamp': c.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+            'pinned': c.pinned,
+            'replies': [{
+                'id': r.id,
+                'username': r.username,
+                'content': r.content,
+                'timestamp': r.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            } for r in c.replies]
+        } for c in comments])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+
+
+@app.route('/comments')
+def comments_page():
+    try:
+        # Get all comments with their replies
+        comments = Comment.query.order_by(Comment.timestamp.desc()).all()
+        
+        # Format comments for display
+        formatted_comments = [{
+            'id': c.id,
+            'novel_name': c.novel_name,
+            'chapter_number': c.chapter_number,
+            'username': c.username,
+            'content': c.content,
+            'timestamp': c.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+            'is_reply': c.parent_id is not None,
+            'parent_id': c.parent_id,
+            'pinned': c.pinned
+        } for c in comments]
+        
+        return render_template('comments.html', comments=formatted_comments)
+    except Exception as e:
+        error_message = str(e)
+        send_discord_message(error_message)
+        return render_template('error.html'), 500
+
+
+
+
+@app.route('/api/comments/<int:comment_id>/toggle_pin', methods=['POST'])
+def toggle_pin(comment_id):
+    try:
+        comment = Comment.query.get_or_404(comment_id)
+        comment.pinned = not comment.pinned  # Toggle the pinned status
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/comments/<int:comment_id>', methods=['DELETE'])
+def delete_comment(comment_id):
+    try:
+        comment = Comment.query.get_or_404(comment_id)
+        db.session.delete(comment)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 

@@ -50,3 +50,7 @@ class Config:
             }
         }
     }
+    
+    # SQLAlchemy Settings
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///comments.db'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False

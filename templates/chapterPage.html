@@ -60,6 +60,226 @@
             cursor: not-allowed;
             pointer-events: none;
         }
+        .comments-section {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background: #1a1a1a;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .comments-section h3 {
+            color: #BB86FC;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        
+        .comment-form {
+            margin-bottom: 2rem;
+        }
+        
+        .comment-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .comment-input-group input,
+        .comment-input-group textarea {
+            padding: 0.8rem;
+            background: #2a2a2a;
+            border: 2px solid #3a3a3a;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .comment-input-group input:focus,
+        .comment-input-group textarea:focus {
+            border-color: #BB86FC;
+            outline: none;
+        }
+        
+        .submit-comment-btn {
+            padding: 0.8rem 1.5rem;
+            background: #BB86FC;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+            align-self: flex-end;
+        }
+        
+        .submit-comment-btn:hover {
+            background: #9965d4;
+            transform: translateY(-2px);
+        }
+        
+        .submit-comment-btn:active {
+            transform: translateY(0);
+        }
+        
+        .comment {
+            padding: 1.2rem;
+            margin: 1rem 0;
+            background: #2a2a2a;
+            border-radius: 8px;
+            transition: transform 0.2s ease;
+        }
+        
+        .comment:hover {
+            transform: translateX(4px);
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+        
+        .username {
+            color: #BB86FC;
+            font-weight: bold;
+        }
+        
+        .timestamp {
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        .comment-content {
+            color: #e0e0e0;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+        
+        .replies {
+            margin-left: 2rem;
+            border-left: 3px solid #BB86FC;
+            padding-left: 1rem;
+        }
+        
+        .reply-btn {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            color: #BB86FC;
+            border: 1px solid #BB86FC;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .reply-btn:hover {
+            background: rgba(187, 134, 252, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .comments-section {
+                margin: 1rem;
+                border-radius: 8px;
+            }
+            
+            .comment-input-group {
+                gap: 0.8rem;
+            }
+            
+            .submit-comment-btn {
+                width: 100%;
+                padding: 1rem;
+            }
+            
+            .comment {
+                padding: 1rem;
+            }
+            
+            .comment-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .replies {
+                margin-left: 1rem;
+            }
+        }
+
+        .reply-form {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #2a2a2a;
+            border-radius: 4px;
+        }
+        
+        .reply-form input,
+        .reply-form textarea {
+            width: 100%;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: #333;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+        }
+        
+        .reply-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .reply-actions button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .reply-actions button:first-child {
+            background: #BB86FC;
+            color: #000;
+        }
+        
+        .reply-actions button:last-child {
+            background: #333;
+            color: #fff;
+        }
+        
+        .replies {
+            margin-left: 2rem;
+            border-left: 2px solid #3a3a3a;
+            padding-left: 1rem;
+        }
+        
+        .reply-button {
+            margin-top: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid #BB86FC;
+            color: #BB86FC;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .reply-button:hover {
+            background: rgba(187, 134, 252, 0.1);
+        }
+
+        .comment.pinned {
+            border-left: 3px solid #BB86FC;
+            background: rgba(187, 134, 252, 0.1);
+        }
+
+        .pin-indicator {
+            color: #BB86FC;
+            font-size: 0.9em;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body class='no-select'>
@@ -68,6 +288,11 @@
     </div>
 
     {% include "header.html" %}
+
+    <div style="display: none;">
+        <p id="novel-title">{{ novel_title_clean }}</p>
+        <p id="chapter-number">{{ chapter_number }}</p>
+    </div>
 
     <main style='max-width: 100vw'>
         <section class="hero">
@@ -159,6 +384,20 @@
                 </a>
             </div>
         </section>
+        <section class="comments-section">
+            <h3>Comments</h3>
+            <div class="comment-form">
+                <div class="comment-input-group">
+                    <input type="text" id="comment-username" placeholder="Your username" maxlength="15">
+                    <textarea id="comment-content" placeholder="Write your comment..." maxlength="350"></textarea>
+                    <button onclick="submitComment()" class="submit-comment-btn">Post Comment</button>
+                </div>
+            </div>
+            
+            <div id="comments-container">
+                <!-- Comments will be loaded here -->
+            </div>
+        </section>
         <section class="community">
             <h2>Join Our Community</h2>
             <p>Connect with other readers on our <a href="https://www.discord.gg/k5HBFXqtCB" target="_blank" style='text-decoration: none;'>Discord Server</a>.</p>
@@ -226,14 +465,13 @@
         </div>
     </section>
 
-
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script>
         let chapters = [];
         let currentChapterIndex = "{{ chapter_number }}";
         let novel_title = "{{ novel_title }}"
         let totalChapters = 0
         
-      
         async function loadChapters(novelName, initialChapter) {
             try {
                 // Disable navigation buttons during loading
@@ -280,7 +518,41 @@
                 updateNavigationButtons([], 1);
             }
         }
-      
+        function loadComments() {
+            const novelName = document.getElementById('novel-title').textContent;
+            const chapterNumber = document.getElementById('chapter-number').textContent;
+            
+            fetch(`/api/comments/${encodeURIComponent(novelName)}/${chapterNumber}`)
+                .then(response => response.json())
+                .then(comments => {
+                    const container = document.getElementById('comments-container');
+                    container.innerHTML = comments.map(comment => `
+                        <div class="comment ${comment.pinned ? 'pinned' : ''}">
+                            ${comment.pinned ? '<div class="pin-indicator">📌 Pinned</div>' : ''}
+                            <div class="comment-header">
+                                <span class="username">${comment.username}</span>
+                                <span class="timestamp">${comment.timestamp}</span>
+                            </div>
+                            <div class="comment-content">${comment.content}</div>
+                            ${comment.replies.length > 0 ? `
+                                <div class="replies">
+                                    ${comment.replies.map(reply => `
+                                        <div class="comment">
+                                            <div class="comment-header">
+                                                <span class="username">${reply.username}</span>
+                                                <span class="timestamp">${reply.timestamp}</span>
+                                            </div>
+                                            <div class="comment-content">${reply.content}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            <button onclick="showReplyForm(${comment.id})" class="reply-button">Reply</button>
+                        </div>
+                    `).join('');
+                });
+        }
+        
         function displayChapter(index) {
             //console.log(index);
 
@@ -298,37 +570,47 @@
       
         function nextChapter() {
             let sortedChapters = Object.keys(chapters).map(Number).sort((a, b) => a - b);
-
+        
             if (currentChapterIndex < sortedChapters.length) {
                 currentChapterIndex++;
                 
                 // Save current chapter to localStorage
                 localStorage.setItem('lastRead_' + novel_title, sortedChapters[currentChapterIndex-1]);
-
+        
                 // Update URL with full chapter number
                 const newURL = `/read?n=${novel_title}&c=${sortedChapters[currentChapterIndex-1]}`
                 history.pushState({}, "", newURL);
-
+        
                 displayChapter(currentChapterIndex);
                 updateNavigationButtons(sortedChapters, currentChapterIndex);
+                
+                // Update chapter number in DOM for comments
+                document.getElementById('chapter-number').textContent = sortedChapters[currentChapterIndex-1];
+                // Load comments for new chapter
+                loadComments();
             }
         }
-      
+        
         function previousChapter() {
             let sortedChapters = Object.keys(chapters).map(Number).sort((a, b) => a - b);
-
+        
             if (currentChapterIndex > 1) {
                 currentChapterIndex--;
                 
                 // Save current chapter to localStorage
                 localStorage.setItem('lastRead_' + novel_title, sortedChapters[currentChapterIndex-1]);
-
+        
                 // Update URL with full chapter number
                 const newURL = `/read?n=${novel_title}&c=${sortedChapters[currentChapterIndex-1]}`
                 history.pushState({}, "", newURL);
-
+        
                 displayChapter(currentChapterIndex);
                 updateNavigationButtons(sortedChapters, currentChapterIndex);
+                
+                // Update chapter number in DOM for comments
+                document.getElementById('chapter-number').textContent = sortedChapters[currentChapterIndex-1];
+                // Load comments for new chapter
+                loadComments();
             }
         }
 
@@ -479,7 +761,7 @@
 
     
     </script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
     
 </body>
 </html>

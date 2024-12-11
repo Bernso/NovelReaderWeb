@@ -1440,3 +1440,99 @@ footer {
     border-color: var(--primary-color); /* Brighter purple when focused */
     box-shadow: 0 0 8px rgba(187, 134, 252, 0.5); /* Subtle glow effect */
 }
+
+/* Comments Section */
+.comments-section {
+    max-width: 1200px; /* Set a max width similar to other sections */
+    margin: 2rem auto; /* Center it */
+    padding: 2rem; /* Increased padding for a more spacious look */
+    background: var(--background-dark); /* Match background with other sections */
+    border-radius: 12px; /* Consistent border radius */
+    box-shadow: var(--box-shadow); /* Add shadow for consistency */
+}
+
+/* Comment Form */
+.comment-form {
+    margin-bottom: 2rem;
+    width: 100%; /* Full width */
+}
+
+/* Input Group */
+.comment-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Input and Textarea Styles */
+.comment-input-group input,
+.comment-input-group textarea {
+    padding: 0.8rem;
+    background: var(--background-light); /* Match background with other UI elements */
+    border: 2px solid #3a3a3a;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+/* Focus Styles */
+.comment-input-group input:focus,
+.comment-input-group textarea:focus {
+    border-color: #BB86FC;
+    outline: none;
+}
+
+/* Submit Button */
+.submit-comment-btn {
+    padding: 0.8rem 1.5rem;
+    background: #BB86FC;
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+    align-self: flex-end;
+}
+
+/* Button Hover Effects */
+.submit-comment-btn:hover {
+    background: #9965d4;
+    transform: translateY(-2px);
+}
+
+/* Comment Styles */
+.comment {
+    padding: 1.5rem; /* Increased padding for better spacing */
+    margin: 1rem 0;
+    background: var(--background-light); /* Match background with other UI elements */
+    border-radius: 8px; /* Consistent border radius */
+    transition: transform 0.2s ease;
+}
+
+/* Comment Hover Effect */
+.comment:hover {
+    transform: translateX(4px);
+}
+
+/* Comment Header */
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    border-bottom: 1px solid rgba(187, 134, 252, 0.1); /* Add a bottom border for separation */
+    padding-bottom: 0.5rem; /* Add padding for spacing */
+}
+
+/* Comment Content */
+.comment-content {
+    word-wrap: break-word; /* Allows long words to be broken and wrap onto the next line */
+    overflow-wrap: break-word; /* Ensures that the text wraps within the box */
+    white-space: normal; /* Allows text to wrap normally */
+    max-width: 100%; /* Ensures the content does not exceed the width of the comment box */
+    color: var(--text-color); /* Ensure text color matches */
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
