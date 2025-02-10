@@ -41,6 +41,21 @@
             <section class="search">
                 <input type="text" id="searchInput" onkeyup="searchChapters()" placeholder="Search for chapters...">
             </section>
+
+            
+            <p style='margin-bottom: 10px; margin-top: 30px;'>
+                Sort Chapters
+            </p>
+
+            <div class="button-container">
+                <a class='novelsChaptersButtons sortingButton' onclick="sortChapters('asc')">
+                    Ascending
+                </a>
+
+                <a class='novelsChaptersButtons sortingButton' onclick="sortChapters('desc')">
+                    Descending
+                </a>
+            </div>
         </section>
 
 
@@ -53,10 +68,9 @@
         </section>
         
 
-        <!--
-            <button onclick="sortChapters('asc')">Sort Ascending</button>
-            <button onclick="sortChapters('desc')">Sort Descending</button>
-        -->
+        
+            
+        
 
         <section class="community">
             <h2>Join Our Community</h2>
@@ -138,30 +152,12 @@
             return localStorage.getItem(`currentChapterContent_${novelTitle}`);
         }
 
-        // Example of saving and loading chapter content for a specific novel
-        const novelTitle = document.getElementById('novelName');
-        const currentChapterContent = "This is the content of the current chapter.";
-        saveChapterContentForNovel(novelTitle, currentChapterContent);
-        const loadedChapterContent = loadChapterContentForNovel(novelTitle);
-        console.log(loadedChapterContent);
     
         function continueReading() {
             const novelTitle = "{{ novel_title }}";
             const lastRead = localStorage.getItem('lastRead_' + novelTitle) || 1;
             window.location.href = `/read?n=${novelTitle}&c=${lastRead}`;
         }
-
-        // Fetch and display user's last read chapter
-        fetch(`/api/progress/{{ novel_title }}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.last_read_chapter) {
-                    document.getElementById('lastReadChapterNumber').textContent = data.last_read_chapter;
-                } else {
-                    document.getElementById('lastReadChapterNumber').textContent = 'Not started yet';
-                }
-            })
-            .catch(error => console.error('Error fetching progress:', error));
     </script>
 </body>
 </html>

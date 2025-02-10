@@ -16,14 +16,13 @@ try:
     
     
     # Flask and standard libraries
-    from flask import Flask, render_template, request, jsonify, session, send_file, redirect, url_for, flash
+    from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for
     import os
     import re  
     import random
     import requests
     import json
-    import logging
-    import logging.config 
+    import boLogger # My logger
     import urllib.parse  # Add this import for URL decoding
     
     
@@ -34,9 +33,7 @@ try:
 except ImportError as e:
     input(f"Module not found: {e}")
 
-# Configure logging
-logging.config.dictConfig(Config.LOGGING_CONFIG)
-logger = logging.getLogger(__name__)
+logger = boLogger.Logging()
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -1005,6 +1002,6 @@ if __name__ == "__main__":
             port=Config.PORT
         )
     except Exception as e:
-        logger.critical(f"Error running the app: {e}")
+        logger.error(f"Error running the app: {e}")
         input(f"Critical error: {e}")
 

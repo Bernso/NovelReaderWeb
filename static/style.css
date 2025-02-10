@@ -1539,3 +1539,9 @@ footer {
     line-height: 1.5;
     margin-bottom: 1rem;
 }
+
+
+.sortingButton {
+    padding: 15px 5px;
+}
+
