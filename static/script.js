@@ -336,50 +336,6 @@ function submitReply(parentId) {
 // Load comments when page loads
 document.addEventListener('DOMContentLoaded', loadComments);
 
-function submitComment() {
-    // Get the input values
-    const username = document.getElementById('comment-username').value;
-    const content = document.getElementById('comment-content').value;
-    const novelName = document.getElementById('novel-title').textContent;
-    const chapterNumber = document.getElementById('chapter-number').textContent;
-    
-    // Validate inputs
-    if (!username || !content) {
-        alert('Please fill in both username and comment');
-        return;
-    }
-    
-    // Send the comment to the server
-    fetch('/api/comments', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            novel_name: novelName,
-            chapter_number: chapterNumber,
-            username: username,
-            content: content
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Clear the form
-            document.getElementById('comment-username').value = '';
-            document.getElementById('comment-content').value = '';
-            
-            // Reload comments to show the new one
-            loadComments();
-        } else {
-            alert('Error posting comment: ' + (data.error || 'Unknown error'));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error posting comment. Please try again.');
-    });
-}
 
 function loadComments() {
     const novelName = document.getElementById('novel-title').textContent;

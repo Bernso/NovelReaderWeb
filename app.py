@@ -14,8 +14,9 @@ try:
     
     import webscrapers.updateNovel
     
+    
     # Flask and standard libraries
-    from flask import Flask, render_template, request, jsonify, session, send_file, redirect, url_for
+    from flask import Flask, render_template, request, jsonify, session, send_file, redirect, url_for, flash
     import os
     import re  
     import random
@@ -25,12 +26,10 @@ try:
     import logging.config 
     import urllib.parse  # Add this import for URL decoding
     
+    
     # Project-specific imports
     from config import Config
     from dotenv import load_dotenv
-    
-    # Comments
-    from models import db, Comment
 
 except ImportError as e:
     input(f"Module not found: {e}")
@@ -43,7 +42,6 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = Config.SECRET_KEY
-db.init_app(app)
 
 # Port Number (Keep as string)
 port = Config.PORT
@@ -93,6 +91,34 @@ def send_discord_message(message):
 currentPath = os.getcwd()
 
 
+# Getting the stats for the home page
+
+novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
+total_novels = 0
+total_chapters = 0
+all_categories = set()
+
+for novel in os.listdir(novels_folder_path):
+    novel_path = os.path.join(novels_folder_path, novel)
+    if os.path.isdir(novel_path):
+        total_novels += 1
+
+        json_path = os.path.join(novel_path, 'chapters.json')
+        if os.path.exists(json_path):
+            with open(json_path, 'r', encoding='utf-8') as f:
+                total_chapters += len(json.load(f))
+        else:
+            chapters = [file for file in os.listdir(novel_path) if file.endswith('.txt') and file.startswith('chapter-')]
+            total_chapters += len(chapters)
+
+        categories_file = os.path.join(novel_path, 'categories.txt')
+        if os.path.exists(categories_file):
+            with open(categories_file, 'r', encoding='utf-8') as f:
+                all_categories.update(line.strip() for line in f if line.strip())
+
+
+
+
 
 
 @app.route('/random_directory')
@@ -119,35 +145,11 @@ def random_directory():
 
 @app.route('/')
 def home():
-    return render_template('home.html')   
+    data = {"total_novels": total_novels, "total_chapters": total_chapters, "total_categories": len(all_categories)}
+    return render_template('home.html', data=data)
+
     
  
-@app.route('/get-stats', methods=['GET'])
-def get_stats():
-    novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
-    total_novels = 0
-    total_chapters = 0
-    all_categories = set()
-
-    for novel in os.listdir(novels_folder_path):
-        novel_path = os.path.join(novels_folder_path, novel)
-        if os.path.isdir(novel_path):
-            total_novels += 1
-
-            json_path = os.path.join(novel_path, 'chapters.json')
-            if os.path.exists(json_path):
-                with open(json_path, 'r', encoding='utf-8') as f:
-                    total_chapters += len(json.load(f))
-            else:
-                chapters = [file for file in os.listdir(novel_path) if file.endswith('.txt') and file.startswith('chapter-')]
-                total_chapters += len(chapters)
-
-            categories_file = os.path.join(novel_path, 'categories.txt')
-            if os.path.exists(categories_file):
-                with open(categories_file, 'r', encoding='utf-8') as f:
-                    all_categories.update(line.strip() for line in f if line.strip())
-    
-    return jsonify({"total_novels": total_novels, "total_chapters": total_chapters, "total_categories": len(all_categories)})
     
 
 
@@ -990,101 +992,6 @@ def novels_chapters():
         return render_template('error.html'), 500
 
 
-
-
-@app.route('/api/comments', methods=['POST'])
-def add_comment():
-    try:
-        data = request.json
-        new_comment = Comment(
-            novel_name=data['novel_name'],
-            chapter_number=float(data['chapter_number']),
-            username=data['username'],
-            content=data['content'],
-            parent_id=data.get('parent_id')
-        )
-        db.session.add(new_comment)
-        db.session.commit()
-        return jsonify({'success': True, 'comment_id': new_comment.id})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/comments/<novel_name>/<chapter_number>', methods=['GET'])
-def get_comments(novel_name, chapter_number):
-    try:
-        comments = Comment.query.filter_by(
-            novel_name=novel_name,
-            chapter_number=float(chapter_number),
-            parent_id=None  # Get only top-level comments
-        ).order_by(Comment.pinned.desc(), Comment.timestamp.desc()).all()
-        
-        return jsonify([{
-            'id': c.id,
-            'username': c.username,
-            'content': c.content,
-            'timestamp': c.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-            'pinned': c.pinned,
-            'replies': [{
-                'id': r.id,
-                'username': r.username,
-                'content': r.content,
-                'timestamp': r.timestamp.strftime('%Y-%m-%d %H:%M:%S')
-            } for r in c.replies]
-        } for c in comments])
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-
-
-@app.route('/comments')
-def comments_page():
-    try:
-        # Get all comments with their replies
-        comments = Comment.query.order_by(Comment.timestamp.desc()).all()
-        
-        # Format comments for display
-        formatted_comments = [{
-            'id': c.id,
-            'novel_name': c.novel_name,
-            'chapter_number': c.chapter_number,
-            'username': c.username,
-            'content': c.content,
-            'timestamp': c.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-            'is_reply': c.parent_id is not None,
-            'parent_id': c.parent_id,
-            'pinned': c.pinned
-        } for c in comments]
-        
-        return render_template('comments.html', comments=formatted_comments)
-    except Exception as e:
-        error_message = str(e)
-        send_discord_message(error_message)
-        return render_template('error.html'), 500
-
-
-
-
-@app.route('/api/comments/<int:comment_id>/toggle_pin', methods=['POST'])
-def toggle_pin(comment_id):
-    try:
-        comment = Comment.query.get_or_404(comment_id)
-        comment.pinned = not comment.pinned  # Toggle the pinned status
-        db.session.commit()
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@app.route('/api/comments/<int:comment_id>', methods=['DELETE'])
-def delete_comment(comment_id):
-    try:
-        comment = Comment.query.get_or_404(comment_id)
-        db.session.delete(comment)
-        db.session.commit()
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 
 

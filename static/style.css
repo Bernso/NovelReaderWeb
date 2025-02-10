@@ -351,6 +351,9 @@ a, .nav-link, .fancyLink {
     .nav.active li:nth-child(2) { transition-delay: 0.2s; }
     .nav.active li:nth-child(3) { transition-delay: 0.3s; }
     .nav.active li:nth-child(4) { transition-delay: 0.4s; }
+    .nav.active li:nth-child(5) { transition-delay: 0.5s; }
+    .nav.active li:nth-child(6) { transition-delay: 0.6s; }
+    
 
     /* Hamburger menu animation */
     .mobile-menu-button[aria-expanded="true"] span:nth-child(1) {
