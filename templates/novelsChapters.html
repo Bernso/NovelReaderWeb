@@ -6,9 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
     <meta name="description" content="Come and read all your favourite novels for free in the best UI now!">
-    <link rel="icon" type="image/png" href="/./static/MAINICON-20240501-rounded.png">
-    <link rel="stylesheet" href="{{ url_for('static', filename='chaptersPageStyle.css') }}">
-    <link rel="stylesheet" href="/./static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
@@ -43,6 +41,21 @@
             <section class="search">
                 <input type="text" id="searchInput" onkeyup="searchChapters()" placeholder="Search for chapters...">
             </section>
+
+            
+            <p style='margin-bottom: 10px; margin-top: 30px;'>
+                Sort Chapters
+            </p>
+
+            <div class="button-container">
+                <a class='novelsChaptersButtons sortingButton' onclick="sortChapters('asc')">
+                    Ascending
+                </a>
+
+                <a class='novelsChaptersButtons sortingButton' onclick="sortChapters('desc')">
+                    Descending
+                </a>
+            </div>
         </section>
 
 
@@ -55,10 +68,9 @@
         </section>
         
 
-        <!--
-            <button onclick="sortChapters('asc')">Sort Ascending</button>
-            <button onclick="sortChapters('desc')">Sort Descending</button>
-        -->
+        
+            
+        
 
         <section class="community">
             <h2>Join Our Community</h2>
@@ -140,12 +152,6 @@
             return localStorage.getItem(`currentChapterContent_${novelTitle}`);
         }
 
-        // Example of saving and loading chapter content for a specific novel
-        const novelTitle = document.getElementById('novelName');
-        const currentChapterContent = "This is the content of the current chapter.";
-        saveChapterContentForNovel(novelTitle, currentChapterContent);
-        const loadedChapterContent = loadChapterContentForNovel(novelTitle);
-        console.log(loadedChapterContent);
     
         function continueReading() {
             const novelTitle = "{{ novel_title }}";

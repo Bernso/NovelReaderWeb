@@ -267,3 +267,145 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+
+
+function showReplyForm(commentId) {
+    // Create reply form if it doesn't exist
+    let replyForm = document.getElementById(`reply-form-${commentId}`);
+    if (!replyForm) {
+        const comment = document.querySelector(`[data-comment-id="${commentId}"]`);
+        replyForm = document.createElement('div');
+        replyForm.id = `reply-form-${commentId}`;
+        replyForm.className = 'reply-form';
+        replyForm.innerHTML = `
+            <input type="text" id="reply-username-${commentId}" placeholder="Your username">
+            <textarea id="reply-content-${commentId}" placeholder="Write your reply..."></textarea>
+            <div class="reply-actions">
+                <button onclick="submitReply(${commentId})">Reply</button>
+                <button onclick="hideReplyForm(${commentId})">Cancel</button>
+            </div>
+        `;
+        comment.appendChild(replyForm);
+    }
+    replyForm.style.display = 'block';
+}
+
+function hideReplyForm(commentId) {
+    const replyForm = document.getElementById(`reply-form-${commentId}`);
+    if (replyForm) {
+        replyForm.style.display = 'none';
+    }
+}
+
+function submitReply(parentId) {
+    const username = document.getElementById(`reply-username-${parentId}`).value;
+    const content = document.getElementById(`reply-content-${parentId}`).value;
+    const novelName = document.getElementById('novel-title').textContent;
+    const chapterNumber = document.getElementById('chapter-number').textContent;
+    
+    if (!username || !content) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    fetch('/api/comments', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            novel_name: novelName,
+            chapter_number: chapterNumber,
+            username: username,
+            content: content,
+            parent_id: parentId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            hideReplyForm(parentId);
+            loadComments(); // Reload all comments to show the new reply
+        } else {
+            alert('Error posting reply');
+        }
+    });
+}
+
+// Load comments when page loads
+document.addEventListener('DOMContentLoaded', loadComments);
+
+
+function loadComments() {
+    const novelName = document.getElementById('novel-title').textContent;
+    const chapterNumber = document.getElementById('chapter-number').textContent;
+    
+    fetch(`/api/comments/${encodeURIComponent(novelName)}/${chapterNumber}`)
+        .then(response => response.json())
+        .then(comments => {
+            const container = document.getElementById('comments-container');
+            container.innerHTML = comments.map(comment => `
+                <div class="comment ${comment.pinned ? 'pinned' : ''}" data-comment-id="${comment.id}">
+                    ${comment.pinned ? '<div class="pin-indicator">📌 Pinned</div>' : ''}
+                    <div class="comment-header">
+                        <span class="username">${comment.username}</span>
+                        <span class="timestamp">${comment.timestamp}</span>
+                    </div>
+                    <div class="comment-content">${comment.content}</div>
+                    ${comment.replies.length > 0 ? `
+                        <div class="replies">
+                            ${comment.replies.map(reply => `
+                                <div class="comment" data-comment-id="${reply.id}">
+                                    <div class="comment-header">
+                                        <span class="username">${reply.username}</span>
+                                        <span class="timestamp">${reply.timestamp}</span>
+                                    </div>
+                                    <div class="comment-content">${reply.content}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    <button onclick="showReplyForm(${comment.id})" class="reply-button">Reply</button>
+                </div>
+            `).join('');
+        })
+        .catch(error => {
+            console.error('Error loading comments:', error);
+            document.getElementById('comments-container').innerHTML = 
+                '<p class="error">Error loading comments. Please refresh the page.</p>';
+        });
+}
+
+function togglePin(commentId) {
+    // Add CSRF token if you're using Flask's CSRF protection
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    fetch(`/api/comments/${commentId}/toggle_pin`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        credentials: 'same-origin' // This is important for cookies/session
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Reload comments to show updated pin status
+            loadComments();
+        } else {
+            alert('Error toggling pin status: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error toggling pin status. Please try again.');
+    });
+}
+
