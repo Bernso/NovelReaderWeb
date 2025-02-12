@@ -780,7 +780,9 @@ li a:hover, .novel-link:hover, .chapter-link:hover {
 
 /* Home Page */
 .hero {
+    
     padding: 120px 20px 60px;
+
 }
 
 .features {
@@ -794,6 +796,7 @@ li a:hover, .novel-link:hover, .chapter-link:hover {
 
 .community {
     padding: 80px 20px;
+    border-radius: 25px 25px 0 0;
 }
 
 /* Novel List Page */

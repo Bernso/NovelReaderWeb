@@ -221,8 +221,9 @@ class NovelImageScraper:
 if __name__ == "__main__":
     scraper = NovelImageScraper()
     links = [
+            'https://lightnovelpub.vip/novel/shadow-slave-05122222',
+            "https://lightnovelpub.vip/novel/return-of-the-mount-hua-sect-16091350",
             'https://lightnovelpub.vip/novel/the-beginning-after-the-end-web-novel-11110049', 
-            'https://lightnovelpub.vip/novel/shadow-slave-05122222', 
             'https://lightnovelpub.vip/novel/circle-of-inevitability-17122007', 
             'https://lightnovelpub.vip/novel/damn-reincarnation-16091348',
             'https://lightnovelpub.vip/novel/return-of-the-mount-hua-sect-16091350'
