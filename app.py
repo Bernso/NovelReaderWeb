@@ -18,6 +18,7 @@ try:
     
     # Flask and standard libraries
     from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for
+    from flask_caching import Cache
     import os
     import re  
     import random
@@ -40,6 +41,9 @@ logger = boLogger.Logging()
 app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = Config.SECRET_KEY
+
+app.config['CACHE_TYPE'] = 'SimpleCache'
+cache = Cache(app)
 
 # Port Number (Keep as string)
 port = Config.PORT
@@ -385,78 +389,71 @@ def cleanup_chapter_files(novel_name):
                     logger.error(f"Error deleting {file}: {e}")
 
 @app.route('/api/chapters', methods=['GET'])
+@cache.cached(timeout=300, query_string=True)
 def get_chapters():
     """
-    Get chapter(s) for a novel. If a specific chapter is requested via the 'c' parameter,
-    only that chapter is returned. Otherwise, all chapters are returned.
+    Retrieve chapter(s) for a novel.
+    If a specific chapter ('c' parameter) is provided, returns only that chapter;
+    otherwise, returns all chapters.
+    The response is cached for 5 minutes to reduce file I/O.
     """
     try:
         novel_name = request.args.get('n', '')
         chapter_number = request.args.get('c', '')
-        
-        # Clean up any text files if JSON exists
+
+        # Cleanup individual chapter files if chapters.json exists
         if novel_name:
             decoded_name = urllib.parse.unquote(novel_name).replace('+', ' ')
             if not decoded_name.endswith('-chapters'):
                 decoded_name = decoded_name + '-chapters'
             cleanup_chapter_files(decoded_name)
-        
+
         # Handle single chapter request
         if chapter_number:
             try:
-                # Convert chapter number to appropriate type (float or int)
                 chapter_number = float(chapter_number) if '.' in chapter_number else int(chapter_number)
-                
-                # URL decode the novel name
                 novel_name = urllib.parse.unquote(novel_name).replace('+', ' ')
                 if not novel_name.endswith('-chapters'):
                     novel_name = novel_name + '-chapters'
-                
-                # Check for JSON file first
                 json_path = os.path.join(app.root_path, 'templates', 'novels', novel_name, 'chapters.json')
                 if os.path.exists(json_path):
                     with open(json_path, 'r', encoding='utf-8') as json_file:
                         chapters = json.load(json_file)
                         if str(chapter_number) in chapters:
-                            return {chapter_number: chapters[str(chapter_number)]}
+                            return jsonify({chapter_number: chapters[str(chapter_number)]})
                         return jsonify({"error": "Chapter not found"}), 404
-                
-                # If no JSON file, look for individual chapter file
+                # Fallback: read individual chapter file
                 chapter_path = os.path.join(
                     app.root_path, 
                     'templates', 
                     'novels', 
                     novel_name, 
-                    f'chapter-{int(chapter_number)}.txt' if chapter_number.is_integer() 
-                    else f'chapter-{int(chapter_number)}-{str(chapter_number).split(".")[1]}.txt'
+                    f'chapter-{int(chapter_number)}.txt' if isinstance(chapter_number, int) else f'chapter-{int(chapter_number)}-{str(chapter_number).split(".")[1]}.txt'
                 )
-                
                 if os.path.exists(chapter_path):
                     with open(chapter_path, 'r', encoding='utf-8') as f:
                         content = f.read().replace('<br>', '\n')
-                        return {chapter_number: content}
+                        return jsonify({chapter_number: content})
                 return jsonify({"error": "Chapter not found"}), 404
-                
+
             except ValueError as e:
                 return jsonify({"error": f"Invalid chapter number: {str(e)}"}), 400
-        
+
         # Handle full chapter list request
         novel_name = urllib.parse.unquote(novel_name).replace('+', ' ')
         if not novel_name.endswith('-chapters'):
             novel_name = novel_name + '-chapters'
-        
         json_path = os.path.join(app.root_path, 'templates', 'novels', novel_name, 'chapters.json')
-        
         if os.path.exists(json_path):
             with open(json_path, 'r', encoding='utf-8') as json_file:
-                return json.load(json_file)
+                return jsonify(json.load(json_file))
         else:
             chapters = fetch_chapters_for_novel(novel_name)
             create_chapters_json(novel_name)
-            return chapters
-            
+            return jsonify(chapters)
+
     except Exception as e:
-        print(f"Error in get_chapters: {str(e)}")
+        logger.error(f"Error in get_chapters: {e}")
         return jsonify({"error": str(e)}), 500
 
 
