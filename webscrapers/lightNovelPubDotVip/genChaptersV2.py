@@ -6,7 +6,7 @@ import urllib
 import re
 from functools import lru_cache
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry # This may be flagged as not imported by it will work dw
+from requests.packages.urllib3.util.retry import Retry  # This may be flagged as not imported but it will work, dw
 import json
 import threading
 import time
@@ -58,14 +58,22 @@ class genChapters:
     
     @lru_cache(maxsize=32)
     def __fetch_page(self, url: str) -> BeautifulSoup:
-        """Cached function to fetch and parse a webpage."""
-        try:
-            response = self.session.get(url)
-            response.raise_for_status()
-            return BeautifulSoup(response.content, 'html.parser')
-        except Exception as e:
-            print(f"Error fetching page {url}: {e}")
-            return None
+        """Cached function to fetch and parse a webpage with a 3-second timeout.
+           If a timeout occurs, the request will be retried up to 3 times."""
+        max_attempts = 3
+        for attempt in range(max_attempts):
+            try:
+                response = self.session.get(url, timeout=3)
+                response.raise_for_status()
+                return BeautifulSoup(response.content, 'html.parser')
+            except requests.exceptions.Timeout:
+                print(f"Timeout fetching page {url}. Retrying {attempt+1}/{max_attempts}...")
+                time.sleep(1)  # Optional backoff delay before retrying
+            except Exception as e:
+                print(f"Error fetching page {url}: {e}")
+                return None
+        print(f"Failed to fetch page {url} after {max_attempts} attempts due to timeout.")
+        return None
     
     def __get_novel_info(self):
         """Combined function to get novel title, categories in a single request"""
