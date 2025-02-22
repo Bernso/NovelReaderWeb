@@ -90,7 +90,7 @@ def send_discord_message(message):
 
 
 
-currentPath = os.getcwd()
+currentPath = app.root_path
 
 
 # Getting the stats for the home page
@@ -647,23 +647,22 @@ def list_novels():
                      If an exception occurs, it returns an error message and renders an error template.
     """
     try:
-        if not os.path.exists(f"{currentPath}/templates/novels"):
-            os.makedirs(f"{currentPath}/templates/novels")
-        else:
-            print("Novel folder already exists")
-
-        novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
+        current_path = app.root_path
+        novels_folder_path = os.path.join(current_path, 'templates', 'novels')
+        
+        # Ensure the novels directory exists
+        os.makedirs(novels_folder_path, exist_ok=True)
+        
         novels_with_data = []
-        emojis = ["🌙", "📚", "✨", "🌟", "🔥", "🌹", "💫", "📖"]
-
         all_categories = set()
         
         for novel in os.listdir(novels_folder_path):
             if novel == "The%20Beginning%20After%20The%20End-chapters":
                 continue
+            
             novel_path = os.path.join(novels_folder_path, novel)
             categories_file = os.path.join(novel_path, 'categories.txt')
-            print(novel[:-9])
+            
             if os.path.exists(categories_file):
                 with open(categories_file, 'r', encoding='utf-8') as f:
                     categories = [line.strip() for line in f if line.strip()]
@@ -671,15 +670,25 @@ def list_novels():
                     all_categories.update(categories)
             else:
                 categories_str = ""
-
+            
             novel_name_clean = re.sub(r'\s*\(.*?\)', '', novel[:-9] if len(novel) >= 9 else novel)
             novels_with_data.append((novel, novel_name_clean, categories_str))
-
+        
+        # Sort novels alphabetically by modified novel name
+        novels_with_data.sort(key=lambda x: x[1].lower())
         sorted_categories = sorted(all_categories, key=lambda x: x.lower())
-
-        total_novels = len([novel for novel in os.listdir(novels_folder_path) if os.path.isdir(os.path.join(novels_folder_path, novel)) and novel != "The%20Beginning%20After%20The%20End-chapters"])
-
-        return render_template('novels.html', novels=novels_with_data, emojis=emojis, all_categories=sorted_categories, total_novels=total_novels)
+        
+        total_novels = sum(
+            os.path.isdir(os.path.join(novels_folder_path, novel)) and novel != "The%20Beginning%20After%20The%20End-chapters"
+            for novel in os.listdir(novels_folder_path)
+        )
+        
+        return render_template(
+            'novels.html', 
+            novels=novels_with_data, 
+            all_categories=sorted_categories, 
+            total_novels=total_novels
+        )
     except Exception as e:
         error_message = str(e)
         send_discord_message(error_message)
@@ -860,7 +869,7 @@ def webscraperss():
     Returns:
     render_template: A rendered HTML template with the number of web scrapers and their names.
     """
-    path = os.path.join(os.getcwd(), 'webscrapers')
+    path = os.path.join(app.root_path, 'webscrapers')
     directory_names = []
     
     for root, dirs, files in os.walk(path):

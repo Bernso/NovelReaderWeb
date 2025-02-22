@@ -39,9 +39,21 @@ class NovelImageScraper:
             for key, value in self.__headers.items():
                 options.add_argument(f'{key}={value}')
             
-            service = Service(ChromeDriverManager(driver_version="131.0.6778.109").install())
-            self.driver = webdriver.Chrome(service=service, options=options)
-    
+            # Use ChromeDriverManager to automatically handle the ChromeDriver installation
+            ChromeDriverManager().install()
+            self.driver = webdriver.Chrome(options=options)
+
+    def get_chrome_version(self):
+        """Fetch the version of the installed Chrome browser"""
+        try:
+            version = requests.get("https://www.google.com/chrome/browser/").text
+            match = re.search(r"Google Chrome (\d+\.\d+\.\d+\.\d+)", version)
+            if match:
+                return match.group(1)
+        except Exception as e:
+            print(f"Error fetching Chrome version: {e}")
+            return "latest"  # fallback to latest version if there's an issue
+
     def cleanup_driver(self):
         """Clean up the Selenium driver"""
         if self.driver:
@@ -130,11 +142,9 @@ class NovelImageScraper:
                 print(f"Found title: {novel_title}")
                 
                 return image_url, novel_title
-                
             except Exception as e:
                 print(f"Error extracting image and title: {e}")
                 return None, None
-                
         except Exception as e:
             print(f"Error fetching page {url}: {e}")
             return None, None
@@ -221,12 +231,13 @@ class NovelImageScraper:
 if __name__ == "__main__":
     scraper = NovelImageScraper()
     links = [
+            'https://lightnovelpub.vip/novel/vampires-slice-of-life-16091320',
             'https://lightnovelpub.vip/novel/shadow-slave-05122222',
             "https://lightnovelpub.vip/novel/return-of-the-mount-hua-sect-16091350",
             'https://lightnovelpub.vip/novel/the-beginning-after-the-end-web-novel-11110049', 
             'https://lightnovelpub.vip/novel/circle-of-inevitability-17122007', 
             'https://lightnovelpub.vip/novel/damn-reincarnation-16091348',
-            'https://lightnovelpub.vip/novel/return-of-the-mount-hua-sect-16091350'
+            'https://lightnovelpub.vip/novel/return-of-the-mount-hua-sect-16091350',
             'https://lightnovelpub.vip/novel/a-regressors-tale-of-cultivation',
             'https://lightnovelpub.vip/novel/overgeared-wn-16091311',
             'https://lightnovelpub.vip/novel/trash-count-wn-05122225',
@@ -240,11 +251,6 @@ if __name__ == "__main__":
             'https://lightnovelpub.vip/novel/the-novels-extra-05122223',
         ]
     for link in links:
-    # Example usage with URL
+        # Example usage with URL
         success = scraper._NovelImageScraper__scrape_novel_image(url=link)
     scraper.cleanup_driver()
-    
-    #if not success:
-    #    print("\nRetrying with different URL format...")
-    #    # Try alternate URL format
-    #    success = scraper._NovelImageScraper__scrape_novel_image(novel_title="Advent of the Three Calamities")
