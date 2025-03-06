@@ -191,60 +191,6 @@ def get_novel_title(base_url: str) -> str:
 
 
 
-# Function to fetch and save chapter content
-def main(url: str, chapter_number: int, novel_title: str) -> None:
-    """
-    This function fetches and saves the chapter content of a novel from a given URL.
-    It also checks if the chapter file already exists and skips if it does.
-    Additionally, it scrapes and saves the categories of the novel if the categories file does not exist.
-
-    Parameters:
-    url (str): The URL of the novel chapter.
-    chapter_number (int): The number of the novel chapter.
-    novel_title (str): The title of the novel.
-
-    Returns:
-    None
-    """
-    base_dir = f'templates/novels/{valid_dir_name(novel_title)}-chapters'
-    os.makedirs(base_dir, exist_ok=True)
-    file_path = os.path.join(base_dir, f'chapter-{chapter_number}.txt')
-    categories_path = os.path.join(base_dir, 'categories.txt')
-
-    # Debug print to check the file path
-
-    # Check if the chapter file already exists and skip if it does
-    if os.path.exists(file_path):
-        print(f"Chapter {chapter_number} already exists. Skipping...")
-        return
-
-    try:
-        if not os.path.exists(categories_path):
-            categories = scrape_categories(get_base_url(novel_title))
-            if categories:
-                with open(categories_path, 'w') as f:
-                    f.write('\n'.join(categories))
-                print(f"Categories saved to {categories_path}")
-            else:
-                print("Failed to scrape categories. Skipping...")
-        
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        if not os.path.exists(file_path):
-            soup = BeautifulSoup(response.text, 'html.parser')
-            chapter_container = soup.find('div', id='chapter-container')
-            if chapter_container:
-                chapter_text = chapter_container.get_text(separator='\n').strip()
-                with open(file_path, 'w', encoding='utf-8') as file:
-                    file.write(chapter_text.replace('\n', '<br><br>'))
-                print(f"TXT file created successfully for * {novel_title} * chapter * {chapter_number} *")
-            else:
-                print("Error: 'chapter-container' not found on the page.")
-
-    except requests.exceptions.RequestException as e:
-        print(f"Request failed: {e}")
-    except Exception as e:
-        print(f"Error: {e}")
 
 
 
@@ -288,7 +234,7 @@ def yes(novel_title: str) -> None:
 
     elif os.path.exists(f'templates/novels/{valid_dir_name(novel_title)}-chapters/webNovelDotCom.txt'):
         # URL creator
-        with open(f'templates/novels/{novel_title}0chapters/webNovelDotCom.txt', 'r') as f:
+        with open(f'templates/novels/{novel_title}-chapters/webNovelDotCom.txt', 'r') as f:
             novel_code = f.read()
             f.close()
         url = f"https://www.webnovel.com/book/{transform_title(novel_title)}_{novel_code}"
@@ -303,19 +249,17 @@ def yes(novel_title: str) -> None:
             novel_title = novel_title[:-3]
 
         base_url = get_base_url(novel_title)
-        latest_chapter_number = get_latest_chapter_number(base_url)
-        if not latest_chapter_number:
-            print("Failed to get the latest chapter number.")
-            return
-
-        novel_title_clean = get_novel_title(base_url)
-        print(f"Latest chapter number: {latest_chapter_number}")
-
-        for i in range(1, int(latest_chapter_number) + 1):
-            main(url=f"{base_url}/chapter-{i}", chapter_number=i, novel_title=novel_title_clean)
-        print(f"Finished updating * {novel_title_clean} *")
+        
         import webscrapers.lightNovelPubDotVip.getPics
-        webscrapers.lightNovelPubDotVip.getPics.main(base_url)
+        scraper = webscrapers.lightNovelPubDotVip.getPics.NovelImageScraper()
+        scraper._NovelImageScraper__scrape_novel_image(url=base_url)
+        scraper.cleanup_driver()
+        
+        import webscrapers.lightNovelPubDotVip.genChaptersV2
+        scraper = webscrapers.lightNovelPubDotVip.genChaptersV2.genChapters(base_url)
+        scraper.getChapters()
+        
+
 
 
     

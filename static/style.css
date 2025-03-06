@@ -409,6 +409,7 @@ a, .nav-link, .fancyLink {
 /* Main Hero Section */
 .hero {
     width: 100%;
+    max-width: 1200px;
     padding: 4rem 2rem 3rem;
     margin-top: 70px;
     text-align: center;
@@ -448,7 +449,19 @@ a, .nav-link, .fancyLink {
     font-size: 1.2em;
     margin-bottom: 40px;
     color: var(--text-muted);
-    }
+}
+
+
+#chapterNum {
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    padding: 0 20px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+
 
 .hero2 p {
     line-height: 1.6;

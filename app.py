@@ -190,9 +190,15 @@ def run_scriptlightNovelPubDotVip():
         print("Received request to /lightNovelPubDotVip")  # Debugging statement
         novel_link = request.json.get('novelLink')
         print(f"Novel link received: {novel_link}")  # Debugging statement
-        result = webscrapers.lightNovelPubDotVip.genChapters.yes(base_url=novel_link)
-        webscrapers.lightNovelPubDotVip.getPics.main(base_url=novel_link) 
-        return jsonify({"result": result})
+        import webscrapers.lightNovelPubDotVip.getPics
+        scraper = webscrapers.lightNovelPubDotVip.getPics.NovelImageScraper()
+        scraper._NovelImageScraper__scrape_novel_image(url=novel_link)
+        scraper.cleanup_driver()
+        
+        import webscrapers.lightNovelPubDotVip.genChaptersV2
+        scraper = webscrapers.lightNovelPubDotVip.genChaptersV2.genChapters(novel_link)
+        scraper.getChapters()
+        return jsonify({"result": "Done"})
     except Exception as e:
         print(f"Error occurred: {str(e)}")  # Debugging statement
         return jsonify({"error": str(e)}), 500

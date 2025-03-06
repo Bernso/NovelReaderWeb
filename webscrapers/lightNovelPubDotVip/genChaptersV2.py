@@ -11,6 +11,9 @@ import json
 import threading
 import time
 
+title_div = 'chapter-title' 
+
+
 class genChapters:
     def __init__(self, url='https://lightnovelpub.vip/novel/shadow-slave-05122222'):
         self.url = url
@@ -170,13 +173,21 @@ class genChapters:
             if not soup:
                 return
             
+            # Extract chapter title using the provided title_div (assumes the chapter title is contained in an element with that class)
+            chapter_title_elem = soup.find(class_=title_div)
+            if chapter_title_elem:
+                chapter_title = chapter_title_elem.get_text(strip=True)
+            else:
+                chapter_title = f"Chapter {chapter_num}"
+            
             chapter_container = soup.find('div', id='chapter-container')
             if chapter_container:
                 chapter_text = chapter_container.get_text(separator='\n').strip()
                 
-                # Store chapter in memory with thread safety
+                # Store chapter in memory with thread safety using the new format [chapterTitle, chapterContent]
                 with self.chapters_lock:
-                    self.chapters_data[chapter_num] = chapter_text.replace('\n', '\n\n')
+                    formatted_text = chapter_text.replace('\n', '\n\n')
+                    self.chapters_data[chapter_num] = [chapter_title, formatted_text]
                     # Write to JSON file after each chapter to prevent data loss
                     json_path = os.path.join(file_dir, 'chapters.json')
                     try:
@@ -189,8 +200,8 @@ class genChapters:
                                 except json.JSONDecodeError:
                                     print(f"Error reading JSON for chapter {chapter_num}, starting fresh")
                         
-                        # Update with new chapter
-                        existing_data[chapter_num] = chapter_text.replace('\n', '\n\n')
+                        # Update with new chapter data in the format: [chapterTitle, chapterContent]
+                        existing_data[chapter_num] = [chapter_title, formatted_text]
                         
                         # Write back to file
                         with open(json_path, 'w', encoding='utf-8') as f:
@@ -204,6 +215,7 @@ class genChapters:
         
         except Exception as e:
             print(f"Error processing chapter {num}: {e}")
+
 
     def __process_page(self, page_num):
         """Process all chapters in a single page"""
@@ -359,7 +371,6 @@ class genChapters:
 if __name__ == '__main__':
     start = time.time()
     links = [
-        'https://lightnovelpub.vip/novel/vampires-slice-of-life-16091320',
         'https://lightnovelpub.vip/novel/shadow-slave-05122222',
         "https://lightnovelpub.vip/novel/return-of-the-mount-hua-sect-16091350",
         'https://lightnovelpub.vip/novel/the-beginning-after-the-end-web-novel-11110049', 
