@@ -24,6 +24,77 @@
     {% include 'header.html' %}
 
     <main style='max-width: 100vw'>
+
+        <section class="hero">
+            <h2>Patch Notes 06/03/2025</h2>
+            <p>Novel Titles</p>
+        </section>
+        <section class="features">
+            <div class="feature">
+                <h3><a href="/novels">Novel Titles are shown when the chapter is selected</a></h3>
+                <p>I can't believe I'm only implementing this now...</p>
+            </div>
+        </section>
+
+
+
+
+        <section class="hero">
+            <h2>Patch Notes 22/02/2025</h2>
+            <p>Novel Sorting</p>
+        </section>
+        <section class="features">
+            <div class="feature">
+                <h3><a href="/novels">Novels are now sorted alphabetically</a></h3>
+                <p>I can't believe I'm only implementing this now...</p>
+            </div>
+
+            <div class="feature">
+                <h3><a href="/novels">Fixed 'Continue Reading' on some novels</a></h3>
+                <p>So sorry I only just realised this now.</p>
+            </div>
+
+        </section>
+
+        <section class="hero">
+            <h2>Patch Notes 12/02/2025</h2>
+            <p>Chapter Sorting</p>
+        </section>
+        <section class="features">
+            <div class="feature">
+                <h3><a href="/novels">Filters</a></h3>
+                <p>Enhanced the experience of looking through chapters, since it was allways a pain to find the most recent chapter.</p>
+            </div>
+            <div class="feature">
+                <h3><a href="/novels">UI</a></h3>
+                <p>You probably won't be able to notice but i made some minor changes to the ui, hope you like it, if you can even stop a difference. :)</p>
+            </div>
+        </section>
+
+        <section class="hero">
+            <h2>Patch Notes 30/01/2025</h2>
+            <p>New Novels</p>
+        </section>
+        <section class="features">
+            <div class="feature">
+                <h3><a href="/novels">Chapter Updates</a></h3>
+                <p>Updated all the novel for you guys, another 30 shadow slave chapters 💀</p>
+            </div>
+        </section>
+
+
+        <section class="hero">
+            <h2>Patch Notes 19/01/2025</h2>
+            <p>New Novels</p>
+        </section>
+        <section class="features">
+            <div class="feature">
+                <h3><a href="/novels">Chapter Updates</a></h3>
+                <p>Updated all the novel for you guys, shadow slave got like 30 more chapters 💀</p>
+            </div>
+        </section>
+
+
         <section class="hero">
             <h2>Patch Notes 07/12/2024</h2>
             <p>New Novels</p>
@@ -77,7 +148,7 @@
             <div class="feature">
                 <h3>Re-Directs</h3>
                 <p>
-                    We have now added support for users who may have had a tab open before the swap to the new urls, 
+                    We have now added support for users who may have had a tab open before the swap to the new urls,
                     this will now re-direct you to the correct url so you can continue reading where you left off if you forgot what chapter you where on.
                 </p>
             </div>
@@ -155,7 +226,7 @@
             <p>Created by <a href="https://www.github.com/Bernso" target="_blank" style='text-decoration: none;'>Bernso</a></p>
         </section>
     </main>
-
+    <script defer src="{{ url_for('static', filename='scroll.js') }}"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
