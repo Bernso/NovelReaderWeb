@@ -474,7 +474,6 @@ a, .nav-link, .fancyLink {
     }
 
     .hero2 {
-        margin: 0.5rem;
         padding: 0.75rem;
     }
 }
@@ -1435,12 +1434,14 @@ footer {
 
 
 .search {
-    margin: 20px;
+    margin: 20px auto;
     text-align: center;
+    display: block;
+    
 }
 
 .search input[type="text"] {
-    width: 80%; /* Adjust width as needed */
+    width: 85%; /* Adjust width as needed */
     padding: 10px;
     background-color: var(--background-light); /* Dark grey background */
     border: 1px solid rgba(187, 134, 252, 0.5); /* Purple border */
@@ -1448,6 +1449,7 @@ footer {
     color: var(--primary-color); /* Light purple text color */
     font-size: 16px;
     margin-top: 30px;
+    box-sizing: border-box;
 }
 
 .search input[type="text"]::placeholder {
@@ -1561,3 +1563,179 @@ footer {
     padding: 15px 5px;
 }
 
+
+
+
+/***************************************************
+ * Novel Details Split Layout (mimicking screenshot)
+ ***************************************************/
+
+/* Parent container for novel cover + info side by side */
+.novel-details {
+    display: flex;
+    flex-wrap: wrap; /* Allows stacking on mobile */
+    gap: 30px;
+    padding: 90px 20px 30px; /* Adjust top padding so it’s below the fixed header */
+    max-width: 1000px;
+    margin: 0 auto; /* Center the section horizontally */
+}
+
+/* Cover + rating container on the left */
+.cover-container {
+    position: relative;
+    flex: 0 0 300px; /* fixed width for the cover on larger screens */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+/* The cover image */
+.novel-cover {
+    width: 100%;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Rating badge in top-left or top-right corner */
+.rating {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: var(--background-dark); /* gold-ish color or your preferred color */
+    color: var(--text-color);
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Novel info on the right */
+.novel-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+/* Title */
+.novel-title {
+    font-size: 2em;
+    background: linear-gradient(45deg, var(--primary-color), #9965e3);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+/* Author/categories line */
+.novel-author-category {
+    font-size: 1em;
+    color: var(--text-muted);
+    margin-top: 5px;
+}
+
+/* Synopsis text */
+.novel-synopsis {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text-color);
+    margin-top: 10px;
+}
+
+/**********************************************
+ * Chapter Controls (Search + Sorting) 
+ **********************************************/
+.chapter-controls {
+    max-width: 1000px;
+    margin: 20px auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    padding: 0 20px;
+}
+
+/* You already have .search input styling, just ensure it fits nicely */
+.sort-buttons {
+    text-align: center;
+}
+
+/**********************************************
+ * Chapter List 
+ **********************************************/
+.chapters-list {
+    max-width: 1000px;
+    margin: 0 auto 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 20px;
+}
+
+/* If you want them in a vertical list that looks more like the screenshot,
+   you can override the .chapters-grid or .chapter-card styles. 
+   For example: 
+*/
+
+/* Turn off the grid and make them stacked */
+.chapters-list a.chapter-card {
+    display: block;
+    width: 100%;
+    background: var(--background-light);
+    border: 1px solid rgba(187, 134, 252, 0.1);
+    border-radius: 8px;
+    padding: 15px;
+    text-align: left;
+    color: var(--text-color);
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    margin: 5px 0;
+}
+
+.chapters-list a.chapter-card:hover {
+    transform: translateX(4px);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(187, 134, 252, 0.2);
+}
+
+/**********************************************
+ * Responsive Tweaks 
+ **********************************************/
+@media (max-width: 768px) {
+    .novel-details {
+        flex-direction: column;
+        align-items: center;
+        padding: 120px 20px 30px; /* More top padding on mobile if needed */
+    }
+    
+    .cover-container {
+        flex: 0 0 auto;
+        width: 70%;
+        max-width: 350px;
+        margin-bottom: 20px;
+    }
+
+    .novel-info {
+        align-items: center;
+        text-align: center;
+    }
+
+    .novel-title {
+        font-size: 1.8em;
+    }
+
+    .rating {
+        top: 15px;
+        right: 15px;
+    }
+
+    .chapters-list a.chapter-card {
+        margin: 5px auto;
+        max-width: 500px;
+    }
+}

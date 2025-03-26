@@ -4,83 +4,113 @@
     <meta charset="UTF-8">
     <title>{{ novel_title_clean }} - Chapters</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
     <meta name="description" content="Come and read all your favourite novels for free in the best UI now!">
+    <!-- Main CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
     {% include 'header.html' %}
 
-
-    <main style='max-width: 100vw;'>
-        <section class="hero" style='max-width: 1000px; padding: 90px 20px 30px;'>
-            <h2 id='novelName'>
-                {{ novel_title_clean }}
-            </h2>
-
-            <p style='margin-top: 10px; margin-bottom: 50px;'>
-                {{ categories }}
-            </p>
-
-            <div class="button-container">
-                <a class='novelsChaptersButtons' href="/read?n={{ novel_title }}&c=1">
-                    Start Reading
-                </a>
-        
-                <a class='novelsChaptersButtons' id="continueReadingBtn" onclick="continueReading()">
-                    Continue Reading
-                </a>
+    <main style="max-width: 100vw;">
+        <!-- Novel Details Section -->
+        <section class="novel-details hero">
+            
+            <!-- Left: Cover and rating -->
+            <div class="cover-container">
+                <!-- If you have a cover image in static folder, use it here -->
+                <img class="novel-cover" 
+                     src="{{ url_for('serve_image', novel_title=novel_title) }}"
+                     alt="{{ novel_title_clean }} cover">
                 
-                <a class='novelsChaptersButtons' onclick='updateNovel("{{ novel_title }}", "{{ novel_title2 }}")'>
-                    Update Novel
-                </a>
+                <!-- Example rating display; adjust or remove if not needed -->
+                <div class="rating">
+                    Ongoing
+                </div>
             </div>
-            
-            
-            <section class="search">
-                <input type="text" id="searchInput" onkeyup="searchChapters()" placeholder="Search for chapters...">
-            </section>
 
-            
-            <p style='margin-bottom: 10px; margin-top: 30px;'>
-                Sort Chapters
-            </p>
+            <!-- Right: Title, categories, synopsis, and buttons -->
+            <div class="novel-info">
+                <h2 class="novel-title" style="margin: 20px 0px 10px 0px;">
+                    {{ novel_title_clean }}
+                </h2>
+                <p class="novel-author-category" style=' margin-bottom: 10px;'>
+                    {{ categories }}
+                </p>
 
-            <div class="button-container">
-                <a class='novelsChaptersButtons sortingButton' onclick="sortChapters('asc')">
-                    Ascending
-                </a>
+                <!-- Synopsis or short description with show more/less button -->
+                <div style="position: relative; text-align: left;">
+                    <p class="novel-synopsis" id="synopsisText" style="margin-bottom: 10px; max-height: 80px; overflow: hidden; transition: max-height 0.3s ease; font-size: 0.9rem;">
+                        <strong>Description: </strong>Shadow Slave is peak
+                    </p>
+                    <a onclick="toggleSynopsis()" id="synopsisToggle" style="color: var(--primary-color); cursor: pointer; font-size: 0.9em; display: inline-block; margin-top: 5px;">Show more</a>
+                </div>
 
-                <a class='novelsChaptersButtons sortingButton' onclick="sortChapters('desc')">
-                    Descending
-                </a>
-            </div>
-        </section>
-
-
-        <section class="chapters-grid" id="chapterList">
-                {% for chapter in chapters %}
-                    <a href="{{ url_for('read_chapter', n=novel_title, c=chapter) }}" class="chapter-card" data-chapter-number="{{ chapter }}">
-                        Chapter {{ chapter }}
+                <!-- Buttons -->
+                <div class="button-container">
+                    <a class="novelsChaptersButtons" href="/read?n={{ novel_title }}&c=1">
+                        Start Reading
                     </a>
-                {% endfor %}
-        </section>
-        
+                    <a class="novelsChaptersButtons" id="continueReadingBtn" onclick="continueReading()">
+                        Continue Reading
+                    </a>
+                    <a class="novelsChaptersButtons" onclick='updateNovel("{{ novel_title }}", "{{ novel_title2 }}")'>
+                        Update Novel
+                    </a>
+                </div>
 
-        
+                <div class="button-container">
+                    
+                    <p style='margin-top: 15px;'>Sort Chapters: </p>
+                    <a class="novelsChaptersButtons sortingButton" onclick="sortChapters('asc')">
+                        Ascending
+                    </a>
+                    <a class="novelsChaptersButtons sortingButton" onclick="sortChapters('desc')">
+                        Descending
+                    </a>
+                </div>
+            </div>
             
+            <!-- Search - positioned at the bottom of the novel-details section -->
+            <div class="search" style="display: block; width: 100%; margin-top: 10px;">
+                <input type="text" id="searchInput" onkeyup="searchChapters()" placeholder="Search for chapters..." style='margin: 0;'>
+            </div>
+        </section>
+
         
 
+        <!-- Chapters List -->
+        <section class="chapters-grid" id="chapterList">
+            {% for chapter in chapters %}
+                <a href="{{ url_for('read_chapter', n=novel_title, c=chapter) }}" class="chapter-card" data-chapter-number="{{ chapter }}">
+                    Chapter {{ chapter }}
+                </a>
+            {% endfor %}
+    </section>
+
+        <!-- Community / Footer-ish Section -->
         <section class="community">
             <h2>Join Our Community</h2>
-            <p>Connect with other readers on our <a href="https://www.discord.gg/k5HBFXqtCB" target="_blank" style='text-decoration: none;'>Discord Server</a></p>
-            <p>Created by <a href="https://www.github.com/Bernso" target="_blank" style='text-decoration: none;'>Bernso</a></p>
+            <p>
+                Connect with other readers on our 
+                <a href="https://www.discord.gg/k5HBFXqtCB" target="_blank" style="text-decoration: none;">
+                    Discord Server
+                </a>
+            </p>
+            <p>
+                Created by 
+                <a href="https://www.github.com/Bernso" target="_blank" style="text-decoration: none;">
+                    Bernso
+                </a>
+            </p>
         </section>
     </main>
+
     <button onclick="topFunction()" id="backToTopBtn" title="Go to top"></button>
 
-
+    <!-- JS -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script>
         function updateNovel(novelTitle1, novelTitle2) {
@@ -89,13 +119,13 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ novelTitle2: novelTitle2 })  // Ensure novelTitle2 is sent in the JSON body
+                body: JSON.stringify({ novelTitle2: novelTitle2 })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
                     alert(data.message);
-                    location.reload(); // Reload the page after successful update
+                    location.reload();
                 } else {
                     alert('Error: ' + data.message);
                 }
@@ -104,8 +134,8 @@
                 console.error('Error:', error);
                 alert('Network error. Please try again later.');
             });
-        }        
-    
+        }
+
         function searchChapters() {
             const searchInput = document.getElementById('searchInput').value.toLowerCase();
             const chapterList = document.getElementById('chapterList');
@@ -114,10 +144,8 @@
             for (let chapter of chapters) {
                 const chapterText = chapter.textContent.toLowerCase();
                 const chapterNumber = chapter.getAttribute('data-chapter-number');
-                
-                // Support searching by decimal and integer chapter numbers
-                if (chapterText.includes(searchInput) || 
-                    chapterNumber.includes(searchInput)) {
+
+                if (chapterText.includes(searchInput) || chapterNumber.includes(searchInput)) {
                     chapter.style.display = '';
                 } else {
                     chapter.style.display = 'none';
@@ -125,7 +153,6 @@
             }
         }
 
-        // Useless right now but will implement later
         function sortChapters(order = 'asc') {
             const chapterList = document.getElementById('chapterList');
             const chapters = Array.from(chapterList.getElementsByTagName('a'));
@@ -133,30 +160,35 @@
             chapters.sort((a, b) => {
                 const chapterA = parseFloat(a.getAttribute('data-chapter-number'));
                 const chapterB = parseFloat(b.getAttribute('data-chapter-number'));
-                
                 return order === 'asc' ? chapterA - chapterB : chapterB - chapterA;
             });
 
-            // Clear and re-append sorted chapters
             chapterList.innerHTML = '';
             chapters.forEach(chapter => chapterList.appendChild(chapter));
         }
-    
-        // Save the current chapter content for a specific novel to localStorage
-        function saveChapterContentForNovel(novelTitle, content) {
-            localStorage.setItem(`currentChapterContent_${novelTitle}`, content);
-        }
 
-        // Load the saved chapter content for a specific novel from localStorage
-        function loadChapterContentForNovel(novelTitle) {
-            return localStorage.getItem(`currentChapterContent_${novelTitle}`);
-        }
-
-    
         function continueReading() {
             const novelTitle = "{{ novel_title }}";
             const lastRead = localStorage.getItem('lastRead_' + novelTitle) || 1;
             window.location.href = `/read?n=${novelTitle}&c=${lastRead}`;
+        }
+
+        // Initialize a variable to track the synopsis state
+        let synopsisExpanded = false;
+        
+        function toggleSynopsis() {
+            const synopsis = document.getElementById('synopsisText');
+            const toggle = document.getElementById('synopsisToggle');
+            
+            if (!synopsisExpanded) {
+                synopsis.style.maxHeight = '1000px'; // Use a large value instead of 'none'
+                toggle.textContent = 'Show less';
+                synopsisExpanded = true;
+            } else {
+                synopsis.style.maxHeight = '80px';
+                toggle.textContent = 'Show more';
+                synopsisExpanded = false;
+            }
         }
     </script>
 </body>
