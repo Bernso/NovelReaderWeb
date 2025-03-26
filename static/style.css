@@ -1667,7 +1667,7 @@ footer {
     justify-content: flex-start;
     align-items: flex-start;
     gap: 16px;
-    max-width: 600px;
+    max-width: 70%;
 }
 
 /* Title */
@@ -1698,6 +1698,8 @@ footer {
     color: var(--text-color);
     margin: 0;
     opacity: 0.9;
+    width: 100%;
+    text-align: left;
 }
 
 /**********************************************
@@ -1809,6 +1811,16 @@ footer {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
         gap: 12px;
         padding: 15px;
+    }
+
+    .novel-info {
+        padding: 0;
+        max-width: 100%;
+    }
+
+    .novel-synopsis {
+        padding: 0 10px;
+        text-align: justify;
     }
 }
 
