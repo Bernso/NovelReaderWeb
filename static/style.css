@@ -60,49 +60,62 @@ a, .nav-link, .fancyLink {
 .button-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
+    gap: 8px;
+    justify-content: flex-start;
     width: 100%;
-    margin: 20px 0;
+    margin: 12px 0;
+    align-items: center;
+}
+
+.button-container p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-right: 4px;
 }
 
 .novelsChaptersButtons {
     color: var(--primary-color);
     cursor: pointer;
-    font-weight: bold;
+    font-weight: 500;
     background-color: var(--background-light);
-    padding: 25px 20px;
+    padding: 6px 12px;
     text-decoration: none;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease;
-    white-space: nowrap; /* Prevent text wrapping */
-    min-width: 150px; /* Minimum width for buttons */
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    min-width: auto;
     text-align: center;
-    flex: 0 1 auto; /* Allow buttons to shrink but not grow */
+    flex: 0 0 auto;
+    font-size: 0.9rem;
+    border: 1px solid rgba(187, 134, 252, 0.15);
+    line-height: 1.5;
 }
 
 .novelsChaptersButtons:hover {
-    transform: translateY(-2px) scale(1.05) !important;
+    transform: translateY(-1px);
+    background-color: var(--background-dark);
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 6px rgba(187, 134, 252, 0.15);
 }
 
 @media (max-width: 768px) {
     .novelsChaptersButtons {
-        min-width: 140px;
-        padding: 20px 15px;
-        font-size: 0.9em;
+        padding: 6px 12px;
+        font-size: 0.9rem;
     }
 }
 
 @media (max-width: 480px) {
     .button-container {
-        flex-direction: column;
-        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
     }
 
     .novelsChaptersButtons {
-        width: 100%;
-        min-width: auto;
+        width: auto;
+        flex: 0 0 auto;
     }
 }
 
@@ -1377,6 +1390,7 @@ footer {
     position: relative;
     overflow: hidden;
     text-align: center;
+    cursor: pointer;
 }
 
 .chapter-card::before {
@@ -1386,7 +1400,7 @@ footer {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(45deg, rgba(187, 134, 252, 0.1), transparent);
+    background: linear-gradient(45deg, rgba(187, 134, 252, 0.05), transparent);
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -1560,7 +1574,15 @@ footer {
 
 
 .sortingButton {
-    padding: 15px 5px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    min-width: auto;
+    border: 1px solid rgba(187, 134, 252, 0.15);
+}
+
+.sortingButton:hover {
+    background-color: var(--background-light);
+    border-color: var(--primary-color);
 }
 
 
@@ -1573,17 +1595,35 @@ footer {
 /* Parent container for novel cover + info side by side */
 .novel-details {
     display: flex;
-    flex-wrap: wrap; /* Allows stacking on mobile */
-    gap: 30px;
-    padding: 90px 20px 30px; /* Adjust top padding so it’s below the fixed header */
-    max-width: 1000px;
-    margin: 0 auto; /* Center the section horizontally */
+    flex-wrap: wrap;
+    gap: 40px;
+    padding: 90px 20px 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: linear-gradient(135deg, var(--background-dark) 0%, var(--actual-background) 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.novel-details::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(187, 134, 252, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(98, 0, 238, 0.05) 0%, transparent 50%);
+    pointer-events: none;
 }
 
 /* Cover + rating container on the left */
 .cover-container {
     position: relative;
-    flex: 0 0 300px; /* fixed width for the cover on larger screens */
+    flex: 0 0 280px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1593,22 +1633,30 @@ footer {
 /* The cover image */
 .novel-cover {
     width: 100%;
-    border-radius: 8px;
+    height: 400px;
     object-fit: cover;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.novel-cover:hover {
+    transform: scale(1.02);
 }
 
 /* Rating badge in top-left or top-right corner */
 .rating {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: var(--background-dark); /* gold-ish color or your preferred color */
+    top: 15px;
+    right: 15px;
+    background-color: rgba(26, 26, 26, 0.9);
     color: var(--text-color);
-    padding: 6px 10px;
+    padding: 6px 12px;
     border-radius: 20px;
-    font-weight: bold;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    font-weight: 600;
+    font-size: 0.9rem;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(187, 134, 252, 0.2);
 }
 
 /* Novel info on the right */
@@ -1618,32 +1666,38 @@ footer {
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    gap: 15px;
+    gap: 16px;
+    max-width: 600px;
 }
 
 /* Title */
 .novel-title {
-    font-size: 2em;
+    font-size: 2.2em;
     background: linear-gradient(45deg, var(--primary-color), #9965e3);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin: 0;
+    line-height: 1.2;
 }
 
 /* Author/categories line */
 .novel-author-category {
-    font-size: 1em;
+    font-size: 1rem;
     color: var(--text-muted);
-    margin-top: 5px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 /* Synopsis text */
 .novel-synopsis {
     font-size: 1rem;
-    line-height: 1.5;
+    line-height: 1.6;
     color: var(--text-color);
-    margin-top: 10px;
+    margin: 0;
+    opacity: 0.9;
 }
 
 /**********************************************
@@ -1706,21 +1760,23 @@ footer {
 /**********************************************
  * Responsive Tweaks 
  **********************************************/
-@media (max-width: 768px) {
+@media (max-width: 800px) {
     .novel-details {
-        flex-direction: column;
-        align-items: center;
-        padding: 120px 20px 30px; /* More top padding on mobile if needed */
+        padding: 80px 15px 25px;
+        gap: 25px;
     }
     
     .cover-container {
-        flex: 0 0 auto;
-        width: 70%;
-        max-width: 350px;
-        margin-bottom: 20px;
+        flex: 0 0 240px;
+        margin: 0 auto;
+    }
+
+    .novel-cover {
+        height: 360px;
     }
 
     .novel-info {
+        flex: 1 1 100%;
         align-items: center;
         text-align: center;
     }
@@ -1729,13 +1785,102 @@ footer {
         font-size: 1.8em;
     }
 
-    .rating {
-        top: 15px;
-        right: 15px;
+    .button-container {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
     }
 
-    .chapters-list a.chapter-card {
-        margin: 5px auto;
-        max-width: 500px;
+    .button-container p {
+        text-align: center;
+        margin-bottom: 4px;
+    }
+
+    .novelsChaptersButtons {
+        padding: 8px 16px;
+        font-size: 0.95rem;
+    }
+
+    .search input[type="text"] {
+        width: 95%;
+    }
+
+    .chapters-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 12px;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 600px) {
+    .novel-details {
+        padding: 70px 12px 20px;
+        gap: 20px;
+    }
+
+    .cover-container {
+        flex: 0 0 200px;
+    }
+
+    .novel-cover {
+        height: 300px;
+    }
+
+    .novel-title {
+        font-size: 1.6em;
+    }
+
+    .button-container {
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .button-container p {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    .novelsChaptersButtons {
+        width: 100%;
+        padding: 10px;
+        font-size: 0.9rem;
+        justify-content: center;
+        display: flex;
+        align-items: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .novel-details {
+        padding: 60px 10px 20px;
+        gap: 15px;
+    }
+
+    .cover-container {
+        flex: 0 0 180px;
+    }
+
+    .novel-cover {
+        height: 270px;
+    }
+
+    .novel-title {
+        font-size: 1.4em;
+    }
+
+    .button-container {
+        gap: 6px;
+    }
+
+    .novelsChaptersButtons {
+        padding: 8px;
+        font-size: 0.85rem;
+    }
+
+    .search input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        font-size: 14px;
     }
 }
