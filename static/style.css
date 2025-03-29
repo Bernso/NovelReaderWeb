@@ -1679,6 +1679,7 @@ footer {
     -webkit-text-fill-color: transparent;
     margin: 0;
     line-height: 1.2;
+    text-align: left;
 }
 
 /* Author/categories line */
@@ -1700,6 +1701,34 @@ footer {
     opacity: 0.9;
     width: 100%;
     text-align: left;
+}
+
+.novel-synopsis-container {
+    margin: 15px 0;
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+}
+
+.summary-title {
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.last-updated {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.synopsis-toggle {
+    color: var(--primary-color);
+    cursor: pointer;
+    font-size: 0.9em;
+    display: inline-block;
+    margin-top: 5px;
 }
 
 /**********************************************
@@ -1785,6 +1814,7 @@ footer {
 
     .novel-title {
         font-size: 1.8em;
+        text-align: center;
     }
 
     .button-container {

@@ -79,10 +79,10 @@ class genChapters:
         return None
     
     def __get_novel_info(self):
-        """Combined function to get novel title, categories in a single request"""
+        """Combined function to get novel title, categories, and summary in a single request"""
         soup = self.__fetch_page(self.url)
         if not soup:
-            return {'title': None, 'categories': []}
+            return {'title': None, 'categories': [], 'summary': None}
         
         info = {}
         
@@ -96,6 +96,37 @@ class genChapters:
         if categories_div and (ul := categories_div.find('ul')):
             categories = [item.get_text(strip=True) for item in ul.find_all('li')]
         info['categories'] = categories
+        
+        # Get summary with preserved line breaks
+        summary = ""
+        summary_div = soup.find('div', class_='content expand-wrapper')
+        if summary_div:
+            # Find the main paragraph that contains the summary
+            summary_p = summary_div.find('p')
+            if summary_p:
+                # Get the HTML content
+                html_content = str(summary_p)
+                
+                # Split by <br> or <br/> tags
+                segments = re.split(r'<br\s*/?>', html_content)
+                
+                # Clean each segment (remove HTML tags and strip whitespace)
+                clean_segments = []
+                for segment in segments:
+                    # Remove any HTML tags
+                    text = re.sub(r'<[^>]+>', '', segment)
+                    # Strip whitespace but keep the content
+                    text = text.strip()
+                    if text:  # Only add non-empty segments
+                        clean_segments.append(text)
+                
+                # Join segments with newlines to preserve the breaks
+                summary = "\n".join(clean_segments)
+            else:
+                # Fallback: get text with newlines if no paragraph found
+                summary = summary_div.get_text(separator='\n', strip=True)
+        
+        info['summary'] = summary
         
         return info
     
@@ -197,6 +228,9 @@ class genChapters:
                             with open(json_path, 'r', encoding='utf-8') as f:
                                 try:
                                     existing_data = json.load(f)
+                                    # Remove _metadata if it exists to keep chapters.json clean
+                                    if '_metadata' in existing_data:
+                                        del existing_data['_metadata']
                                 except json.JSONDecodeError:
                                     print(f"Error reading JSON for chapter {chapter_num}, starting fresh")
                         
@@ -277,7 +311,7 @@ class genChapters:
     
     def getChapters(self, retry_chapters=None):
         try:
-            # Save categories
+            # Create novel directory
             folder_name = self.__validDirName(self.novelTitle)
             file_dir = f'templates/novels/{folder_name}-chapters'
             os.makedirs(file_dir, exist_ok=True)
@@ -288,16 +322,31 @@ class genChapters:
                 with open(json_path, 'r', encoding='utf-8') as f:
                     try:
                         self.chapters_data = json.load(f)
+                        # Remove _metadata from chapters.json if it exists
+                        if '_metadata' in self.chapters_data:
+                            del self.chapters_data['_metadata']
+                            with open(json_path, 'w', encoding='utf-8') as f:
+                                json.dump(self.chapters_data, f, ensure_ascii=False, indent=2)
                         print(f"Loaded {len(self.chapters_data)} existing chapters from JSON")
                     except json.JSONDecodeError:
                         print("Error reading existing JSON file, starting fresh")
                         self.chapters_data = {}
             
-            # If we're retrying specific chapters, skip categories and page scanning
+            # If we're retrying specific chapters, skip metadata creation
             if retry_chapters is None:
-                categories_path = os.path.join(file_dir, 'categories.txt')
-                with open(categories_path, 'w', encoding='utf-8') as f:
-                    f.write('\n'.join(self.novel_info['categories']))
+                # Create metadata.json instead of categories.txt
+                metadata_path = os.path.join(file_dir, 'metadata.json')
+                metadata = {
+                    'title': self.novelTitle,
+                    'categories': self.novel_info['categories'],
+                    'summary': self.novel_info.get('summary', ''),
+                    'last_updated': time.strftime('%Y-%m-%d')
+                }
+                
+                with open(metadata_path, 'w', encoding='utf-8') as f:
+                    json.dump(metadata, f, ensure_ascii=False, indent=2)
+                
+                print(f"Created metadata.json with title, categories, summary, and last updated date")
                 
                 # Get total pages
                 soup = self.__fetch_page(self.chapters)

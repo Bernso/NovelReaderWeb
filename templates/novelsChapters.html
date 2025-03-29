@@ -42,8 +42,8 @@
 
                 <!-- Synopsis or short description with show more/less button -->
                 <div style="position: relative; text-align: left; max-width: 100%;">
-                    <p class="novel-synopsis" id="synopsisText" style="margin-bottom: 10px; max-height: 80px; overflow: hidden; transition: max-height 0.3s ease; font-size: 0.9rem;">
-                        <strong>Description: </strong>Shadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peakShadow Slave is peak
+                    <p class="novel-synopsis" id="synopsisText" style="margin-bottom: 10px; max-height: 80px; overflow: hidden; transition: max-height 0.3s ease-in-out; font-size: 0.9rem;">
+                        <strong>Description: </strong>{{ summary|nl2br|safe }}
                     </p>
                     <a onclick="toggleSynopsis()" id="synopsisToggle" style="color: var(--primary-color); cursor: pointer; font-size: 0.9em; display: inline-block; margin-top: 5px;">Show more</a>
                 </div>
@@ -190,6 +190,25 @@
                 synopsisExpanded = false;
             }
         }
+        
+        // Add a function to check if the show more button is needed
+        function checkSynopsisHeight() {
+            const synopsis = document.getElementById('synopsisText');
+            const toggle = document.getElementById('synopsisToggle');
+            
+            if (synopsis && toggle) {
+                // Check if the content height exceeds the max height
+                if (synopsis.scrollHeight <= synopsis.clientHeight) {
+                    // Content fits, hide the button
+                    toggle.style.display = 'none';
+                } 
+            }
+        }
+        
+        // Run when the page is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSynopsisHeight();
+        });
     </script>
 </body>
 </html>

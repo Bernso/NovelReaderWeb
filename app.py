@@ -126,7 +126,7 @@ for novel in os.listdir(novels_folder_path):
             with open(categories_file, 'r', encoding='utf-8') as f:
                 all_categories.update(line.strip() for line in f if line.strip())
 end = time.time()
-logger.success(f"Chapters successfully read after {round((end - start), 2)} seconds")
+logger.success(f"All data successfully read after {round((end - start), 2)} seconds")
 
 
 
@@ -662,8 +662,7 @@ def list_novels():
                      If an exception occurs, it returns an error message and renders an error template.
     """
     try:
-        current_path = app.root_path
-        novels_folder_path = os.path.join(current_path, 'templates', 'novels')
+        novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
         
         # Ensure the novels directory exists
         os.makedirs(novels_folder_path, exist_ok=True)
@@ -676,25 +675,23 @@ def list_novels():
                 continue
             
             novel_path = os.path.join(novels_folder_path, novel)
-            categories_file = os.path.join(novel_path, 'categories.txt')
             
-            if os.path.exists(categories_file):
-                with open(categories_file, 'r', encoding='utf-8') as f:
-                    categories = [line.strip() for line in f if line.strip()]
-                    categories_str = ', '.join(categories)
-                    all_categories.update(categories)
-            else:
-                categories_str = ""
+            # Get metadata instead of reading categories.txt
+            metadata = get_novel_metadata(novel)
+            categories = metadata.get("categories", [])
+            categories_str = ", ".join(categories)
+            all_categories.update(categories)
             
             novel_name_clean = re.sub(r'\s*\(.*?\)', '', novel[:-9] if len(novel) >= 9 else novel)
             novels_with_data.append((novel, novel_name_clean, categories_str))
         
-        # Sort novels alphabetically by modified novel name
+        # Sort novels alphabetically
         novels_with_data.sort(key=lambda x: x[1].lower())
         sorted_categories = sorted(all_categories, key=lambda x: x.lower())
         
         total_novels = sum(
-            os.path.isdir(os.path.join(novels_folder_path, novel)) and novel != "The%20Beginning%20After%20The%20End-chapters"
+            os.path.isdir(os.path.join(novels_folder_path, novel)) 
+            and novel != "The%20Beginning%20After%20The%20End-chapters"
             for novel in os.listdir(novels_folder_path)
         )
         
@@ -770,6 +767,13 @@ def update_novel(novel_title):
         
         print("Calling webscrapers.updateNovel.yes function...")  # Debugging statement
         result = webscrapers.updateNovel.yes(novel_title2)
+
+        # After update, make sure metadata.json exists
+        novel_path = os.path.join(app.root_path, 'templates', 'novels', novel_title)
+        metadata_path = os.path.join(novel_path, 'metadata.json')
+        if not os.path.exists(metadata_path):
+            # Create metadata from categories if possible
+            get_novel_metadata(novel_title)
 
         return jsonify({"status": "success", "message": f"{novel_title} updated successfully.", "result": result})
     except Exception as e:
@@ -938,25 +942,75 @@ def get_chapter_keys(novel_name):
             chapter_keys.append(parse_chapter_number(chapter_number))
         
         return sorted(chapter_keys)
+
 def get_novel_categories(novel_name):
+    """Get categories from metadata"""
+    metadata = get_novel_metadata(novel_name)
+    return metadata.get("categories", [])
+
+def get_novel_summary(novel_name):
+    """Get summary from metadata"""
+    metadata = get_novel_metadata(novel_name)
+    return metadata.get("summary", "")
+
+def get_novel_last_updated(novel_name):
+    """Get last updated date from metadata"""
+    metadata = get_novel_metadata(novel_name)
+    return metadata.get("last_updated", "")
+
+def get_novel_metadata(novel_name):
     """
-    Retrieve categories for a given novel.
+    Retrieve metadata for a novel from metadata.json
     
     Args:
         novel_name (str): Name of the novel
     
     Returns:
-        str: Comma-separated list of categories, or empty string if not found
+        dict: Novel metadata including title, categories, summary, and last_updated
     """
     novel_path = os.path.join(app.root_path, 'templates', 'novels', novel_name)
-    categories_file = os.path.join(novel_path, 'categories.txt')
+    metadata_path = os.path.join(novel_path, 'metadata.json')
     
+    # Default empty metadata
+    default_metadata = {
+        "title": novel_name[:-9] if novel_name.endswith('-chapters') else novel_name,
+        "categories": [],
+        "summary": "",
+        "last_updated": ""
+    }
+    
+    # Try to read from metadata.json
+    if os.path.exists(metadata_path):
+        try:
+            with open(metadata_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            print(f"Error reading metadata.json for {novel_name}")
+            return default_metadata
+    
+    # Fallback: Use existing categories.txt for backward compatibility
+    categories_file = os.path.join(novel_path, 'categories.txt')
     if os.path.exists(categories_file):
+        print(f"Using legacy categories.txt for {novel_name} - consider updating to metadata.json")
         with open(categories_file, 'r', encoding='utf-8') as f:
             categories = [line.strip() for line in f if line.strip()]
-        return ', '.join(categories)
-    else:
-        return ""
+        
+        # Create metadata.json from categories.txt for future use
+        metadata = default_metadata.copy()
+        metadata["categories"] = categories
+        metadata["last_updated"] = time.strftime('%Y-%m-%d')
+        
+        try:
+            with open(metadata_path, 'w', encoding='utf-8') as f:
+                json.dump(metadata, f, ensure_ascii=False, indent=2)
+            print(f"Created metadata.json for {novel_name} from categories.txt")
+        except Exception as e:
+            print(f"Error creating metadata.json: {e}")
+        
+        return metadata
+    
+    return default_metadata
+
 
 @app.route('/novels_chapters')
 def novels_chapters():
@@ -964,7 +1018,7 @@ def novels_chapters():
     Route to display list of chapters for a novel.
     
     Returns:
-        Rendered template with chapter keys
+        Rendered template with chapter keys and metadata
     """
     novel_name = request.args.get('n')
     if not novel_name:
@@ -972,45 +1026,44 @@ def novels_chapters():
     
     chapterNumber = request.args.get('c')
     if chapterNumber:
-        
         return redirect(url_for('read_chapter', n=novel_name, c=chapterNumber))
     
     try:
-        novel_path = os.path.join(app.root_path, 'templates', 'novels', novel_name)
-        json_path = os.path.join(novel_path, 'chapters.json')
+        # Get metadata (single function call now gets all information)
+        metadata = get_novel_metadata(novel_name)
+        categories_str = ", ".join(metadata.get("categories", []))
+        summary = metadata.get("summary", "")
+        last_updated = metadata.get("last_updated", "")
+        title = metadata.get("title", novel_name[:-9] if novel_name.endswith('-chapters') else novel_name)
         
-        if os.path.exists(json_path):
-            chapter_keys = get_chapter_keys(novel_name)
-        else:
-            chapters = [f for f in os.listdir(novel_path) if f.startswith('chapter-') and f.endswith('.txt')]
-            chapter_keys = []
-            for chapter in chapters:
-                parts = chapter.split('-')
-                if len(parts) == 3:
-                    try:
-                        chapter_number = float(f"{parts[1]}.{parts[2].split('.')[0]}")
-                    except ValueError:
-                        continue
-                else:
-                    try:
-                        chapter_number = int(parts[1].split('.')[0])
-                    except ValueError:
-                        continue
-                
-                chapter_keys.append(chapter_number)
-            chapter_keys.sort(key=lambda x: (int(x) if isinstance(x, int) else int(x.split('.')[0]), x))
+        # Get chapters (existing code remains the same)
+        novel_path = os.path.join(app.root_path, 'templates', 'novels', novel_name)
+        chapter_keys = get_chapter_keys(novel_name)
         
         return render_template('novelsChapters.html', 
-                               chapters=chapter_keys, 
-                               novel_title=novel_name,
-                               categories=get_novel_categories(novel_name),
-                               novel_title_clean=novel_name[:-9])
+                              chapters=chapter_keys, 
+                              novel_title=novel_name,
+                              novel_title2=title,
+                              categories=categories_str,
+                              summary=summary,
+                              last_updated=last_updated,
+                              novel_title_clean=novel_name[:-9] if novel_name.endswith('-chapters') else novel_name)
     except Exception as e:
         error_message = str(e)
         send_discord_message(error_message)
         return render_template('error.html'), 500
 
 
+
+
+
+
+@app.template_filter('nl2br')
+def nl2br_filter(text):
+    """Convert newlines to HTML line breaks"""
+    if not text:
+        return text
+    return text.replace('\n', '<br>')
 
 
 
