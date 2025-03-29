@@ -27,6 +27,7 @@ try:
     import boLogger # My logger
     import urllib.parse  # Add this import for URL decoding
     import time
+    import datetime
     
     
     # Project-specific imports
@@ -106,7 +107,7 @@ currentPath = app.root_path
 novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
 total_novels = 0
 total_chapters = 0
-all_categories = set()
+all_categories = []
 
 for novel in os.listdir(novels_folder_path):
     novel_path = os.path.join(novels_folder_path, novel)
@@ -117,14 +118,20 @@ for novel in os.listdir(novels_folder_path):
         if os.path.exists(json_path):
             with open(json_path, 'r', encoding='utf-8') as f:
                 total_chapters += len(json.load(f))
+                f.close()
         else:
             chapters = [file for file in os.listdir(novel_path) if file.endswith('.txt') and file.startswith('chapter-')]
             total_chapters += len(chapters)
 
-        categories_file = os.path.join(novel_path, 'categories.txt')
+        categories_file = os.path.join(novel_path, 'metadata.json')
         if os.path.exists(categories_file):
             with open(categories_file, 'r', encoding='utf-8') as f:
-                all_categories.update(line.strip() for line in f if line.strip())
+                content = json.load(f)['categories']
+                for category in content:
+                    if category not in all_categories:
+                        all_categories.append(category)
+               
+                f.close()
 end = time.time()
 logger.success(f"All data successfully read after {round((end - start), 2)} seconds")
 
@@ -644,68 +651,6 @@ def transform_title(novel_title):
 
 
 
-@app.route('/novels')
-def list_novels():
-    """
-    List and display novels in the 'novels' directory.
-
-    This function retrieves all novels from the 'novels' directory, reads their categories, and prepares the data for display.
-    If a novel does not have a 'categories.txt' file, an empty string is assigned to its categories.
-    The novels are then sorted by their names and displayed in the 'novels.html' template.
-    Novels with the title "The%20Beginning%20After%20The%20End-chapters" are ignored.
-
-    Parameters:
-    None
-
-    Returns:
-    render_template: A rendered HTML template with the novels' data.
-                     If an exception occurs, it returns an error message and renders an error template.
-    """
-    try:
-        novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
-        
-        # Ensure the novels directory exists
-        os.makedirs(novels_folder_path, exist_ok=True)
-        
-        novels_with_data = []
-        all_categories = set()
-        
-        for novel in os.listdir(novels_folder_path):
-            if novel == "The%20Beginning%20After%20The%20End-chapters":
-                continue
-            
-            novel_path = os.path.join(novels_folder_path, novel)
-            
-            # Get metadata instead of reading categories.txt
-            metadata = get_novel_metadata(novel)
-            categories = metadata.get("categories", [])
-            categories_str = ", ".join(categories)
-            all_categories.update(categories)
-            
-            novel_name_clean = re.sub(r'\s*\(.*?\)', '', novel[:-9] if len(novel) >= 9 else novel)
-            novels_with_data.append((novel, novel_name_clean, categories_str))
-        
-        # Sort novels alphabetically
-        novels_with_data.sort(key=lambda x: x[1].lower())
-        sorted_categories = sorted(all_categories, key=lambda x: x.lower())
-        
-        total_novels = sum(
-            os.path.isdir(os.path.join(novels_folder_path, novel)) 
-            and novel != "The%20Beginning%20After%20The%20End-chapters"
-            for novel in os.listdir(novels_folder_path)
-        )
-        
-        return render_template(
-            'novels.html', 
-            novels=novels_with_data, 
-            all_categories=sorted_categories, 
-            total_novels=total_novels
-        )
-    except Exception as e:
-        error_message = str(e)
-        send_discord_message(error_message)
-        return render_template('error.html'), 500
-
 
 
 
@@ -802,24 +747,6 @@ def youShouldNotBeHere(novel_title):
 
 
 
-def fetch_popular_novels():
-    """
-    Fetch three popular novels from the 'novels' directory.
-
-    The function retrieves all novels from the 'novels' directory, selects three at random if there are at least three novels,
-    and returns the selected novels. If there are less than three novels, it returns all novels.
-
-    Parameters:
-    None
-
-    Returns:
-    list: A list of three randomly selected novels from the 'novels' directory.
-          If there are less than three novels, it returns all novels.
-    """
-    novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
-    all_novels = [novel for novel in os.listdir(novels_folder_path) if os.path.isdir(os.path.join(novels_folder_path, novel))]
-    popular_novels = random.sample(all_novels, 3) if len(all_novels) >= 3 else all_novels
-    return popular_novels
 
 
 
@@ -840,36 +767,36 @@ def popular_novels():
     """
     try:
         novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
-        all_novels = [novel for novel in os.listdir(novels_folder_path) if os.path.isdir(os.path.join(novels_folder_path, novel))]
-
-        if len(all_novels) < 3:
-            popular_novels = all_novels
-        else:
-            popular_novels = random.sample(all_novels, 3)
-
+        
+        # Ensure the novels directory exists
+        os.makedirs(novels_folder_path, exist_ok=True)
+        
         novels_with_data = []
-        emojis = ["🌙", "📚", "✨", "🌟", "🔥", "🌹", "💫", "📖"]
-
         all_categories = set()
-
-        for novel in popular_novels:
+        
+        
+        for novel in os.listdir(novels_folder_path):
+            if novel == "The%20Beginning%20After%20The%20End-chapters":
+                continue
+            
             novel_path = os.path.join(novels_folder_path, novel)
-            categories_file = os.path.join(novel_path, 'categories.txt')
-            if os.path.exists(categories_file):
-                with open(categories_file, 'r', encoding='utf-8') as f:
-                    categories = [line.strip() for line in f if line.strip()]
-                    categories_str = ', '.join(categories)
-                    all_categories.update(categories)
-            else:
-                categories_str = ""
-
+            
+            # Get metadata instead of reading categories.txt
+            metadata = get_novel_metadata(novel)
+            categories = metadata.get("categories", [])
+            categories_str = ", ".join(categories)
+            all_categories.update(categories)
+            
             novel_name_clean = re.sub(r'\s*\(.*?\)', '', novel[:-9] if len(novel) >= 9 else novel)
             novels_with_data.append((novel, novel_name_clean, categories_str))
- 
-        # Sort the categories by words
-        sorted_categories = sorted(all_categories, key=lambda x: x.lower())
-
-        return render_template('popularNovels.html', novels=novels_with_data, emojis=emojis, all_categories=sorted_categories)
+        
+        # Sort novels alphabetically
+        novels_with_data.sort(key=lambda x: x[1].lower())
+        
+        return render_template(
+            'popularNovels.html', 
+            novels=novels_with_data[:3], 
+        )
     except Exception as e:
         error_message = str(e)
         send_discord_message(error_message)
@@ -1036,6 +963,16 @@ def novels_chapters():
         last_updated = metadata.get("last_updated", "")
         title = metadata.get("title", novel_name[:-9] if novel_name.endswith('-chapters') else novel_name)
         
+        # If it's a string, convert it to a Unix timestamp (float)
+        if isinstance(last_updated, str):
+            try:
+                # Assuming the format is "YYYY-MM-DD"
+                dt = datetime.datetime.strptime(last_updated, "%Y-%m-%d")
+                last_updated = dt.timestamp()  # returns a float (seconds since epoch)
+            except ValueError:
+                # If parsing fails, leave it as is or handle the error
+                pass
+        
         # Get chapters (existing code remains the same)
         novel_path = os.path.join(app.root_path, 'templates', 'novels', novel_name)
         chapter_keys = get_chapter_keys(novel_name)
@@ -1054,12 +991,77 @@ def novels_chapters():
         return render_template('error.html'), 500
 
 
+#
+@app.route('/novels')
+def list_novels():
+    """
+    List and display novels in the 'novels' directory.
+
+    This function retrieves all novels from the 'novels' directory, reads their categories, and prepares the data for display.
+    If a novel does not have a 'categories.txt' file, an empty string is assigned to its categories.
+    The novels are then sorted by their names and displayed in the 'novels.html' template.
+    Novels with the title "The%20Beginning%20After%20The%20End-chapters" are ignored.
+
+    Parameters:
+    None
+
+    Returns:
+    render_template: A rendered HTML template with the novels' data.
+                     If an exception occurs, it returns an error message and renders an error template.
+    """
+    try:
+        novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
+        
+        # Ensure the novels directory exists
+        os.makedirs(novels_folder_path, exist_ok=True)
+        
+        novels_with_data = []
+        all_categories = set()
+        
+        
+        for novel in os.listdir(novels_folder_path):
+            if novel == "The%20Beginning%20After%20The%20End-chapters":
+                continue
+            
+            novel_path = os.path.join(novels_folder_path, novel)
+            
+            # Get metadata instead of reading categories.txt
+            metadata = get_novel_metadata(novel)
+            categories = metadata.get("categories", [])
+            last_updated = metadata.get("last_updated", "")
+            categories_str = ", ".join(categories)
+            all_categories.update(categories)
+            
+            novel_name_clean = re.sub(r'\s*\(.*?\)', '', novel[:-9] if len(novel) >= 9 else novel)
+            novels_with_data.append((novel, novel_name_clean, categories_str, last_updated))
+        
+        # Sort novels alphabetically
+        novels_with_data.sort(key=lambda x: x[1].lower())
+        sorted_categories = sorted(all_categories, key=lambda x: x.lower())
+        
+        total_novels = sum(
+            os.path.isdir(os.path.join(novels_folder_path, novel)) 
+            and novel != "The%20Beginning%20After%20The%20End-chapters"
+            for novel in os.listdir(novels_folder_path)
+        )
+        
+        return render_template(
+            'novels.html', 
+            novels=novels_with_data, 
+            all_categories=sorted_categories, 
+            total_novels=total_novels
+        )
+    except Exception as e:
+        error_message = str(e)
+        send_discord_message(error_message)
+        return render_template('error.html'), 500
+
 
 
 
 
 @app.template_filter('nl2br')
-def nl2br_filter(text):
+def nl2br_filter(text: str):
     """Convert newlines to HTML line breaks"""
     if not text:
         return text

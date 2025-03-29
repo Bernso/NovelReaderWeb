@@ -26,9 +26,10 @@
                      alt="{{ novel_title_clean }} cover">
                 
                 <!-- Example rating display; adjust or remove if not needed -->
-                <div class="rating">
-                    Ongoing
+                <div class="rating" id="lastUpdated" data-time="{{ last_updated }}">
+                    {{ last_updated }}
                 </div>
+                
             </div>
 
             <!-- Right: Title, categories, synopsis, and buttons -->
@@ -205,6 +206,52 @@
             }
         }
         
+        function timeAgo(timeInput) {
+            let time;
+            // If timeInput is numeric (or numeric string), treat it as a Unix timestamp (in seconds)
+            if (!isNaN(timeInput)) {
+                time = new Date(parseFloat(timeInput) * 1000);
+            } else {
+                // Otherwise, assume it's a date string (e.g., "YYYY-MM-DD")
+                time = new Date(timeInput.replace(/-/g, '/'));
+            }
+            if (isNaN(time)) {
+                console.error("Invalid date/time:", timeInput);
+                return "Unknown time";
+            }
+            const seconds = Math.floor((new Date() - time) / 1000);
+            const intervals = {
+                year: 31536000,
+                month: 2592000,
+                week: 604800,
+                day: 86400,
+                hour: 3600,
+                minute: 60,
+                second: 1
+            };
+
+            for (const [unit, value] of Object.entries(intervals)) {
+                const interval = Math.floor(seconds / value);
+                if (interval > 1) return `${interval} ${unit}s ago`;
+                if (interval === 1) return `1 ${unit} ago`;
+            }
+            return "Just now";
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const lastUpdatedElement = document.getElementById("lastUpdated");
+            if (lastUpdatedElement) {
+                const timeInput = lastUpdatedElement.getAttribute("data-time");
+                if (!timeInput) {
+                    console.error("Missing last updated time!");
+                    lastUpdatedElement.textContent = "Unknown time";
+                    return;
+                }
+                lastUpdatedElement.textContent = timeAgo(timeInput);
+            }
+        });
+
+       
         // Run when the page is loaded
         document.addEventListener('DOMContentLoaded', function() {
             checkSynopsisHeight();
