@@ -39,7 +39,9 @@
             background: var(--background-light);
             z-index: 1000;
         }
-
+        .hidden {
+            display: none;
+        }
         .progress-bar {
             height: 5px;
             background: linear-gradient(90deg, var(--background-light) 0%, #6200EE 100%);
@@ -237,6 +239,7 @@
         let currentChapterIndex = "{{ chapter_number }}";
         let novel_title = "{{ novel_title }}"
         let totalChapters = 0
+
         
         async function loadChapters(novelName, initialChapter) {
             try {
@@ -256,9 +259,10 @@
                 // First, fetch just the requested chapter
                 const singleChapterResponse = await fetch(`api/chapters?n=${novelName}&c=${initialChapter}`);
                 const singleChapterData = await singleChapterResponse.json();
-                
+                const protection = `<strong class='hidden'><br><br>WOAH WOAH WOAH<br>You aren't trying to steal from https://berns0.pythonanywhere.com are you?! <a href='https://berns0.pythonanywhere.com/read?n=${novel_title}&c=${initialChapter}'>Link</a><br><br></strong>`
+
                 // Display the initial chapter immediately
-                document.getElementById('textToRead').innerText = singleChapterData[initialChapter][1];
+                document.getElementById('textToRead').innerHTML = `${protection}${singleChapterData[initialChapter][1].replace(/\n\n/g, '<br><br>')}${protection}`;
                 document.getElementById('chapterNum').innerText = singleChapterData[initialChapter][0];
                 
                 // Then fetch all chapters in the background
@@ -293,10 +297,11 @@
 
             let sortedChapters = Object.keys(chapters).map(Number).sort((a, b) => a - b);
             let maxChapterNumber = Math.max(...sortedChapters);
-
+            
             if (index > 0 && index <= sortedChapters.length) {
                 currentChapterIndex = index;
-                document.getElementById('textToRead').innerText = chapters[sortedChapters[index-1]][1];
+                const protection = `<strong class='hidden'><br><br>WOAH WOAH WOAH<br>You aren't trying to steal from https://berns0.pythonanywhere.com are you?! <a href='https://berns0.pythonanywhere.com/read?n=${novel_title}&c=${sortedChapters[index-1]}'>Link</a><br><br></strong>`
+                document.getElementById('textToRead').innerHTML = `${protection}${chapters[sortedChapters[index-1]][1].replace(/\n\n/g, '<br><br>')}${protection}`;
                 document.getElementById('chapterNum').innerText = `${chapters[sortedChapters[index-1]][0]}`;
                 document.getElementById('title').innerText = `Chapter ${sortedChapters[index-1]} - {{ novel_title_clean }}`;
                 window.scrollTo(0, 0); // Scroll to top
@@ -389,6 +394,8 @@
             progressBar.style.width = `${scrollPercentage}%`;
         });
 
+
+        //
         // TTS and Word Highlighting
         const textToRead = document.getElementById('textToRead');
         const startSpeechButton = document.getElementById('start-speech');
@@ -396,10 +403,14 @@
         const stopSpeechButton = document.getElementById('stop-speech');
         const voiceSelector = document.getElementById('voice-selector');
         const utterance = new SpeechSynthesisUtterance();
+
         let currentWordIndex = 0;
+        let isPaused = false;
         let isSpeaking = false;
         let wordsArray = [];
-
+        let wordElements = [];
+        // Save the original HTML so we can restore formatting after speech stops.
+        let originalHTML = '';
 
         // Populate available voices
         function populateVoices() {
@@ -420,76 +431,178 @@
             utterance.voice = speechSynthesis.getVoices().find(voice => voice.name === selectedVoice);
         });
 
-        // Splitting text into an array of words, preserving HTML structure
-        function splitTextIntoWords(element) {
-            const textContent = element.innerHTML;
-            return textContent.split(/\s+/).map(word => word + ' ');
-        }
-
-        // Function to update the HTML with highlighted word
-        function updateTextWithHighlight(wordIndex) {
-            let updatedText = '';
-            for (let i = 0; i < wordsArray.length; i++) {
-                if (i === wordIndex) {
-                    updatedText += `<span class="highlight">${wordsArray[i]}</span>`;
-                } else {
-                    updatedText += wordsArray[i];
+        // Prepare text for TTS by wrapping each word in a span
+        function prepareTextForTTS() {
+            originalHTML = textToRead.innerHTML;
+            
+            // Create a temporary div to work with the content
+            let tempDiv = document.createElement('div');
+            tempDiv.innerHTML = originalHTML;
+            
+            // Remove content from hidden elements (display: none)
+            function removeHiddenContent(element) {
+                // Get all child elements
+                const children = Array.from(element.children);
+                
+                for (let child of children) {
+                    // Check computed style
+                    const computedStyle = window.getComputedStyle(child);
+                    
+                    // If the element is hidden, remove its content
+                    if (computedStyle.display === 'none' || 
+                        child.style.display === 'none' || 
+                        child.classList.contains('hidden')) {
+                        child.innerHTML = '';
+                    } else {
+                        // Recursively check children
+                        removeHiddenContent(child);
+                    }
                 }
             }
-            textToRead.innerHTML = updatedText;
+            
+            // Create a clone of the text element to avoid modifying the original
+            let contentClone = textToRead.cloneNode(true);
+            document.body.appendChild(contentClone);
+            contentClone.style.position = 'absolute';
+            contentClone.style.left = '-9999px';
+            contentClone.style.top = '-9999px';
+            
+            // Remove hidden content from the clone
+            removeHiddenContent(contentClone);
+            
+            // Replace <br> tags with newline characters
+            contentClone.querySelectorAll('br').forEach(br => {
+                br.replaceWith('\n');
+            });
+            
+            // Get clean text content
+            let text = contentClone.textContent;
+            
+            // Remove the temporary clone
+            document.body.removeChild(contentClone);
+            
+            // Split text into words, respecting punctuation
+            wordsArray = text.match(/\S+\s*/g) || [];
+            
+            // Create wrapped HTML
+            let wrappedHTML = '';
+            wordsArray.forEach((word, index) => {
+                wrappedHTML += `<span class="tts-word" data-index="${index}">${word}</span>`;
+            });
+            
+            // Insert back <br> tags where newlines were
+            wrappedHTML = wrappedHTML.replace(/\n/g, '<br>');
+            
+            return wrappedHTML;
         }
 
-
-        utterance.addEventListener('boundary', event => {
-            if (isSpeaking) {
-                // Check if it's a word boundary
-                if (event.name === 'word') {
-                    updateTextWithHighlight(currentWordIndex);
-                    currentWordIndex++;
-                } else if (event.name === 'sentence' || event.name === 'paragraph') {
-                    // Adjust the word index for punctuation and sentence boundaries
-                    updateTextWithHighlight(currentWordIndex);
-                }
+        // Function to highlight a specific word
+        function highlightWord(index) {
+            // Remove previous highlights
+            document.querySelectorAll('.tts-word.highlight').forEach(el => {
+                el.classList.remove('highlight');
+            });
+            
+            // Add highlight to current word
+            const wordElement = document.querySelector(`.tts-word[data-index="${index}"]`);
+            if (wordElement) {
+                wordElement.classList.add('highlight');
+                // Scroll the highlighted word into view if needed
+                //const rect = wordElement.getBoundingClientRect();
+                //const isInView = (
+                //    rect.top >= 0 &&
+                //    rect.left >= 0 &&
+                //    rect.bottom <= window.innerHeight &&
+                //    rect.right <= window.innerWidth
+                //);
+                //
+                //if (!isInView) {
+                //    wordElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                //}
             }
-        });
-  
+        }
 
         startSpeechButton.addEventListener('click', () => {
-            if (!isSpeaking) {
-                wordsArray = splitTextIntoWords(textToRead);
-                currentWordIndex = 0; // Reset word index
-                isSpeaking = true;
-                utterance.text = textToRead.innerText;
-                utterance.rate = 0.95; // Adjust rate for better synchronization
-                utterance.pitch = 1;   // Standard pitch
-                speechSynthesis.speak(utterance);
-            } else {
+            if (isSpeaking && isPaused) {
+                // Resume paused speech
                 speechSynthesis.resume();
+                isPaused = false;
+                return;
+            }
+            
+            if (!isSpeaking) {
+                // Start new speech
+                textToRead.innerHTML = prepareTextForTTS();
+                
+                currentWordIndex = 0;
+                isSpeaking = true;
+                isPaused = false;
+                
+                // Create a clean text version for the utterance (without HTML)
+                utterance.text = wordsArray.join('');
+                utterance.rate = 0.95;
+                utterance.pitch = 1;
+                
+                // Set up word boundary events
+                utterance.onboundary = function(event) {
+                    if (event.name === 'word' && event.charIndex !== undefined) {
+                        // Find which word this boundary corresponds to
+                        let wordCount = 0;
+                        let charCount = 0;
+                        
+                        for (let i = 0; i < wordsArray.length; i++) {
+                            charCount += wordsArray[i].length;
+                            if (event.charIndex < charCount) {
+                                currentWordIndex = i;
+                                break;
+                            }
+                        }
+                        
+                        highlightWord(currentWordIndex);
+                    }
+                };
+                
+                utterance.onend = function() {
+                    isSpeaking = false;
+                    isPaused = false;
+                    // Restore original HTML
+                    textToRead.innerHTML = originalHTML;
+                };
+                
+                utterance.onpause = function() {
+                    isPaused = true;
+                };
+                
+                utterance.onresume = function() {
+                    isPaused = false;
+                };
+                
+                // Start speaking
+                speechSynthesis.speak(utterance);
+                
+                // Initial highlight
+                highlightWord(0);
             }
         });
 
         pauseSpeechButton.addEventListener('click', () => {
-            speechSynthesis.pause();
+            if (isSpeaking && !isPaused) {
+                speechSynthesis.pause();
+                isPaused = true;
+            }
         });
 
         stopSpeechButton.addEventListener('click', () => {
-            speechSynthesis.cancel();
-            isSpeaking = false;
-            textToRead.innerHTML = wordsArray.join(''); // Reset text to original state
-        });
-
-        // Reset highlight after speech ends
-        utterance.addEventListener('end', () => {
-            isSpeaking = false;
-            textToRead.innerHTML = wordsArray.join(''); // Reset text after speech ends
-        });
-
-        // Handle speech start
-        utterance.addEventListener('start', () => {
             if (isSpeaking) {
-                updateTextWithHighlight(currentWordIndex);
+                speechSynthesis.cancel();
+                isSpeaking = false;
+                isPaused = false;
+                // Restore original HTML
+                textToRead.innerHTML = originalHTML;
             }
+            
         });
+
 
     
     </script>
