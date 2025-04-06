@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="scroll-behavior: smooth; scroll-snap-type: mandatory;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -605,6 +605,35 @@
 
 
     
+        // Add keyboard event listener for chapter navigation
+        document.addEventListener('keyup', function(event) {
+            // Check if any input or textarea is focused
+            const activeElement = document.activeElement;
+            const isInputFocused = activeElement.tagName === 'INPUT' || 
+                                activeElement.tagName === 'TEXTAREA' || 
+                                activeElement.isContentEditable;
+            
+            // Only handle keypresses if we're not in an input field
+            if (!isInputFocused) {
+                // 'n' key for next chapter
+                if (event.key === 'n' || event.key === 'N') {
+                    const nextButtons = document.querySelectorAll('.feature:last-child a');
+                    // Check if next chapter is available (button not disabled)
+                    if (!nextButtons[0].classList.contains('disabled')) {
+                        nextChapter();
+                    }
+                }
+                
+                // 'b' key for previous chapter
+                if (event.key === 'b' || event.key === 'B') {
+                    const prevButtons = document.querySelectorAll('.feature:first-child a');
+                    // Check if previous chapter is available (button not disabled)
+                    if (!prevButtons[0].classList.contains('disabled')) {
+                        previousChapter();
+                    }
+                }
+            }
+        });
     </script>
     
     
