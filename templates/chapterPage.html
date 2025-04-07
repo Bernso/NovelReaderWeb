@@ -8,72 +8,10 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
-    <!-- Header template -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="language" content="en">
-    <meta name="description" content="Read free web novels and light novels online with Novel Reader. Enjoy a sleek dark mode, fast chapter loading, and an extensive library of your favorite genres. Start reading now!">
-    <meta name="keywords" content="free web novels, read light novels, online novel reader, dark mode reading, vast library of novels, best web novel reader, fast chapter loading">
-    <meta name="author" content="Bernso">
-    <meta name="robots" content="index, follow">
-    <meta name="theme-color" content="#121212">
-    <meta name="application-name" content="Novel Reader">
-    <meta name="geo.region" content="UK">
-    <meta name="geo.placename" content="United Kingdom">
-    <meta name="referrer" content="no-referrer-when-downgrade">
-    <meta http-equiv="Cache-Control" content="max-age=31536000, public">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://berns0.pythonanywhere.com/; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
-
-    <!-- Open Graph -->
-    <meta property="og:title" content="Novel Reader - {{ novel_title_clean }}">
-    <meta property="og:description" content="Discover and read free web novels and light novels online. Access a vast library with fast-loading chapters and an immersive dark mode interface. Start reading today!">
-    <meta property="og:image" content="https://berns0.pythonanywhere.com/images/{{ novel_title_clean }}-chapters.png">
-    <meta property="og:url" content="https://berns0.pythonanywhere.com/">
-    <meta property="og:type" content="website">
-
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Novel Reader - Free Web Novels & Light Novels Online">
-    <meta name="twitter:description" content="Discover and read free web novels and light novels online. Access a vast library with fast-loading chapters and an immersive dark mode interface. Start reading today!">
-    <meta name="twitter:image" content="https://berns0.pythonanywhere.com/static/MAINICON-20240501-rounded.png">
-
-    <!-- Schema Markup -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "Novel Reader",
-        "url": "https://berns0.pythonanywhere.com/",
-        "description": "Read free web novels and light novels online. Access a sleek dark mode interface and a vast library of your favorite genres.",
-        "author": {
-            "@type": "Person",
-            "name": "Bernso"
-        },
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://berns0.pythonanywhere.com/novels?q={search_term_string}",
-            "query-input": "required name=search_term_string"
-        },
-        "genre": ["Fantasy", "Romance", "Action"],
-        "inLanguage": "English",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Readers"
-        }
-    }
-    </script>
-    <link rel="canonical" href="{{ request.url }}">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
- 
-    
-    <!-- Additional SEO Meta Tags -->
-    <meta name="theme-color" content="#121212">
-    <link rel="canonical" href="{{ request.url }}">
-    
-    <!-- Your existing header content -->
-    <title>Novel Reader</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
+    <!-- Import mini player stuff -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='mini-player.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="{{ url_for('static', filename='mini-player.js') }}"></script>
     <style>
         .features {
             display: grid;
@@ -99,7 +37,7 @@
         }
  
         /* Scroll Progress Bar */
-        .progress-container {
+        .progress-bar-container {
             position: fixed;
             top: 0;
             width: 100%;
@@ -132,8 +70,8 @@
     </style>
 </head>
 <body class='no-select'>
-    <div class="progress-container">
-        <div class="progress-bar" id="progressBar"></div>
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBarPage"></div>
     </div>
 
     {% include "header.html" %}
@@ -299,6 +237,108 @@
         </div>
     </section>
 
+    <!-- Mini Player Widget - Embedded at the bottom of the page -->
+    <div class="mini-player" id="miniPlayer">
+        <button class="toggle-expand" id="toggleExpand">
+            <i class="fas fa-compress"></i>
+        </button>
+  
+        <div class="mini-player-header">
+            <h3 class="mini-player-title">Music Player</h3>
+            <div class="mini-player-controls">
+                <button class="mini-player-btn" id="closeBtn" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+  
+        <div class="mini-player-content">
+            <!-- Song Selection Dropdown -->
+            <div class="song-select-container">
+                <select id="songSelect" class="song-select">
+                    <option value="" disabled selected>Select a song</option>
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+                <i class="fas fa-chevron-down song-select-icon"></i>
+            </div>
+  
+            <!-- <div class="now-playing" id="nowPlaying"> -->
+            <!--     Select a song to play -->
+            <!-- </div> -->
+  
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+  
+            <div class="time-display">
+                <span id="currentTime">0:00</span>
+                <span id="duration">0:00</span>
+            </div>
+  
+            <div class="player-controls">
+                <button id="shuffleBtn" class="control-btn shuffle" title="Shuffle">
+                    <i class="fas fa-random"></i>
+                </button>
+                <button id="prevBtn" class="control-btn">
+                    <i class="fas fa-backward"></i>
+                </button>
+                <button id="playBtn" class="control-btn play-btn">
+                    <i id="playIcon" class="fas fa-play"></i>
+                </button>
+                <button id="nextBtn" class="control-btn">
+                    <i class="fas fa-forward"></i>
+                </button>
+                <button id="loopBtn" class="control-btn loop" title="Loop">
+                    <i class="fas fa-redo"></i>
+                </button>
+            </div>
+  
+            <div class="volume-container">
+                <i class="fas fa-volume-up" id="volumeIcon"></i>
+                <input type="range" class="volume-slider" min="0" max="100" step='0.001' value="100" id="volumeSlider">
+            </div>
+        </div>
+  
+        <!-- Hidden audio element -->
+        <audio id="audioPlayer"></audio>
+    </div>
+  
+  
+    <!-- Configure the player with songs -->
+    <script>
+      // This array should be populated with the actual songs you want to play (URL paths)
+      const songPaths = [
+          "{{ url_for('static', filename='music/chill-vibes-322180.mp3') }}",
+          "{{ url_for('static', filename='music/coverless-book-lofi-186307.mp3') }}",
+          "{{ url_for('static', filename='music/lofi-girl-309226.mp3') }}",
+          "{{ url_for('static', filename='music/lofi-study-calm-peaceful-chill-hop-112191.mp3') }}",
+          "{{ url_for('static', filename='music/quite-time-lofi-moody-music-321961.mp3') }}",
+          "{{ url_for('static', filename='music/lofi-chill-315216.mp3') }}"
+      ];
+  
+      // Song titles for display (should match the order of songPaths)
+      const songTitles = [
+          "Chill Vibes",
+          "Coverless Book LoFi",
+          "LoFi Girl",
+          "LoFi Study Peaceful",
+          "Quiet Time LoFi",
+          "LoFi Chill"
+      ];
+  
+      // We need to make sure the player is fully loaded before we can use it
+      window.addEventListener('load', function() {
+          // Wait a short time to ensure all DOM elements and scripts are fully loaded
+          setTimeout(function() {
+              if (window.miniPlayer && typeof window.miniPlayer.loadSongs === 'function') {
+                  window.miniPlayer.loadSongs(songPaths, songTitles);
+              } else {
+                  console.error('miniPlayer is not available or loadSongs method is missing');
+              }
+          }, 300);
+      });
+  </script>
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script>
         let chapters = [];
@@ -453,7 +493,7 @@
 
 
         window.addEventListener('scroll', function() {
-            const progressBar = document.getElementById('progressBar');
+            const progressBar = document.getElementById('progressBarPage');
             const scrollTop = document.documentElement.scrollTop;
             const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
             const scrollPercentage = (scrollTop / scrollHeight) * 100;
