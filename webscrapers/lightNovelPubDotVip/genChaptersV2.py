@@ -11,6 +11,7 @@ from aiohttp import ClientTimeout
 from asyncio import Semaphore
 import random
 import boLogger  # Use boLogger instead of standard logging
+
 logger = boLogger.Logging()
 title_div = 'chapter-title'
 
