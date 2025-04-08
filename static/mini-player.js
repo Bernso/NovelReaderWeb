@@ -12,6 +12,87 @@ window.miniPlayer = {
     isInitialized: false
 };
 
+// Cache for preloaded audio files
+const audioCache = new Map();
+
+// Function to preload audio files
+function preloadAudio(url) {
+    return new Promise((resolve, reject) => {
+        // Check if already in cache
+        if (audioCache.has(url)) {
+            resolve(audioCache.get(url));
+            return;
+        }
+
+        // Create a new audio element
+        const audio = new Audio();
+        
+        // Set up event listeners
+        audio.addEventListener('canplaythrough', () => {
+            // Store in cache
+            audioCache.set(url, audio);
+            resolve(audio);
+        }, { once: true });
+        
+        audio.addEventListener('error', (e) => {
+            console.error(`Error preloading audio: ${url}`, e);
+            reject(new Error(`Failed to preload audio: ${url}`));
+        }, { once: true });
+        
+        // Set source and start loading
+        audio.preload = 'auto';
+        audio.src = url;
+    });
+}
+
+// Function to preload all songs
+async function preloadAllSongs(songUrls) {
+    console.log('Starting to preload all songs...');
+    const preloadPromises = songUrls.map(url => preloadAudio(url));
+    
+    try {
+        await Promise.all(preloadPromises);
+        console.log('All songs preloaded successfully');
+    } catch (error) {
+        console.error('Error preloading songs:', error);
+    }
+}
+
+// Function to parse M3U8 playlist
+async function parseM3U8Playlist(url) {
+    try {
+        const response = await fetch(url);
+        const text = await response.text();
+        
+        const lines = text.split('\n');
+        const songs = [];
+        const titles = [];
+        let currentTitle = '';
+        
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            
+            if (line.startsWith('#EXTINF:')) {
+                // Extract title from EXTINF line
+                const titleMatch = line.match(/,(.+)$/);
+                if (titleMatch && titleMatch[1]) {
+                    currentTitle = titleMatch[1];
+                }
+            } else if (line && !line.startsWith('#')) {
+                // This is a URL line
+                songs.push(line);
+                titles.push(currentTitle || `Song ${songs.length}`);
+                currentTitle = '';
+            }
+        }
+        
+        return { songs, titles };
+    } catch (error) {
+        console.error('Error parsing M3U8 playlist:', error);
+        return { songs: [], titles: [] };
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const miniPlayer = document.getElementById('miniPlayer');
@@ -39,6 +120,10 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Mini player: Required DOM elements not found');
         return; // Exit initialization if elements are missing
     }
+
+    // Start with the player minimized
+    miniPlayer.classList.add('collapsed');
+    toggleExpandBtn.innerHTML = '<i class="fas fa-expand"></i>';
 
     // State management
     let songs = [];
@@ -181,17 +266,37 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update UI
         updateNowPlaying(titleIndex);
 
-        // Play audio
-        audioPlayer.src = songPath;
-        audioPlayer.play()
-            .then(() => {
-                playIcon.classList.remove('fa-play');
-                playIcon.classList.add('fa-pause');
-            })
-            .catch(error => {
-                console.error('Playback failed:', error);
-                nowPlaying.textContent = 'Error playing song';
-            });
+        // Check if the song is in cache
+        if (audioCache.has(songPath)) {
+            // Use cached audio
+            const cachedAudio = audioCache.get(songPath);
+            audioPlayer.src = cachedAudio.src;
+            audioPlayer.load(); // Ensure the audio is loaded
+            
+            // Copy properties from cached audio
+            audioPlayer.currentTime = 0;
+            
+            // Play the audio
+            audioPlayer.play()
+                .then(() => {
+                    playIcon.classList.remove('fa-play');
+                    playIcon.classList.add('fa-pause');
+                })
+                .catch(error => {
+                    console.error('Playback failed:', error);
+                });
+        } else {
+            // Fallback to direct loading if not in cache
+            audioPlayer.src = songPath;
+            audioPlayer.play()
+                .then(() => {
+                    playIcon.classList.remove('fa-play');
+                    playIcon.classList.add('fa-pause');
+                })
+                .catch(error => {
+                    console.error('Playback failed:', error);
+                });
+        }
     }
 
     function togglePlay() {
@@ -373,48 +478,60 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? '<i class="fas fa-expand"></i>'
                 : '<i class="fas fa-compress"></i>';
         },
-        loadSongs: (songArray, titleArray) => {
-            if (!Array.isArray(songArray) || songArray.length === 0) {
-                console.error('Mini player: Invalid song array provided');
-                return;
-            }
-
-            songs = songArray;
-            originalSongOrder = [...songs];
-
-            // Handle song titles
-            if (Array.isArray(titleArray) && titleArray.length === songArray.length) {
-                songTitles = titleArray;
-            } else {
-                // Generate titles from song paths if not provided
-                songTitles = songArray.map(path => {
-                    try {
-                        // Extract filename from path without extension
-                        return path.split('/').pop().replace(/\.[^/.]+$/, "");
-                    } catch (e) {
-                        return "Unknown Song";
-                    }
-                });
-            }
-
-            // Populate song select dropdown
-            if (songSelect) {
-                // Clear existing options except the first one
-                while (songSelect.options.length > 1) {
-                    songSelect.remove(1);
+        loadSongs: async (playlistUrl = '/static/music/playlist.m3u8') => {
+            try {
+                // Parse the M3U8 playlist
+                const { songs: songArray, titles: titleArray } = await parseM3U8Playlist(playlistUrl);
+                
+                if (!Array.isArray(songArray) || songArray.length === 0) {
+                    console.error('Mini player: Invalid song array from playlist');
+                    return;
                 }
 
-                // Add new options
-                songArray.forEach((path, index) => {
-                    const option = document.createElement('option');
-                    option.value = path;
-                    option.textContent = songTitles[index];
-                    songSelect.appendChild(option);
-                });
-            }
+                songs = songArray;
+                originalSongOrder = [...songs];
 
-            currentSongIndex = -1;
-            updateNowPlaying(-1);
+                // Handle song titles
+                if (Array.isArray(titleArray) && titleArray.length === songArray.length) {
+                    songTitles = titleArray;
+                } else {
+                    // Generate titles from song paths if not provided
+                    songTitles = songArray.map(path => {
+                        try {
+                            // Extract filename from path without extension
+                            return path.split('/').pop().replace(/\.[^/.]+$/, "");
+                        } catch (e) {
+                            return "Unknown Song";
+                        }
+                    });
+                }
+
+                // Populate song select dropdown
+                if (songSelect) {
+                    // Clear existing options except the first one
+                    while (songSelect.options.length > 1) {
+                        songSelect.remove(1);
+                    }
+
+                    // Add new options
+                    songArray.forEach((path, index) => {
+                        const option = document.createElement('option');
+                        option.value = path;
+                        option.textContent = songTitles[index];
+                        songSelect.appendChild(option);
+                    });
+                }
+
+                currentSongIndex = -1;
+                updateNowPlaying(-1);
+                
+                // Preload all songs into cache
+                preloadAllSongs(songArray);
+                
+                console.log(`Loaded ${songArray.length} songs from playlist`);
+            } catch (error) {
+                console.error('Error loading playlist:', error);
+            }
         },
         playSongByIndex: (index) => {
             if (index >= 0 && index < songs.length) {

@@ -306,32 +306,13 @@
   
     <!-- Configure the player with songs -->
     <script>
-      // This array should be populated with the actual songs you want to play (URL paths)
-      const songPaths = [
-          "{{ url_for('static', filename='music/chill-vibes-322180.mp3') }}",
-          "{{ url_for('static', filename='music/coverless-book-lofi-186307.mp3') }}",
-          "{{ url_for('static', filename='music/lofi-girl-309226.mp3') }}",
-          "{{ url_for('static', filename='music/lofi-study-calm-peaceful-chill-hop-112191.mp3') }}",
-          "{{ url_for('static', filename='music/quite-time-lofi-moody-music-321961.mp3') }}",
-          "{{ url_for('static', filename='music/lofi-chill-315216.mp3') }}"
-      ];
-  
-      // Song titles for display (should match the order of songPaths)
-      const songTitles = [
-          "Chill Vibes",
-          "Coverless Book LoFi",
-          "LoFi Girl",
-          "LoFi Study Peaceful",
-          "Quiet Time LoFi",
-          "LoFi Chill"
-      ];
-  
       // We need to make sure the player is fully loaded before we can use it
       window.addEventListener('load', function() {
           // Wait a short time to ensure all DOM elements and scripts are fully loaded
           setTimeout(function() {
               if (window.miniPlayer && typeof window.miniPlayer.loadSongs === 'function') {
-                  window.miniPlayer.loadSongs(songPaths, songTitles);
+                  // Load songs from the M3U8 playlist
+                  window.miniPlayer.loadSongs("{{ url_for('static', filename='music/playlist.m3u8') }}");
               } else {
                   console.error('miniPlayer is not available or loadSongs method is missing');
               }
