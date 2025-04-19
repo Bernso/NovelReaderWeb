@@ -17,7 +17,7 @@ try:
     
     
     # Flask and standard libraries
-    from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for
+    from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, Response, render_template_string 
     from flask_caching import Cache
     import os
     import re  
@@ -28,7 +28,7 @@ try:
     import urllib.parse  # Add this import for URL decoding
     import time
     import datetime
-    
+
     
     # Project-specific imports
     from config import Config
@@ -167,9 +167,41 @@ def home():
     return render_template('home.html', data=data)
 
     
- 
-    
 
+
+@app.route('/sitemap.xml')
+def sitemap():
+    pages = []
+    for rule in app.url_map.iter_rules():
+        if "GET" in rule.methods and not rule.arguments and not rule.rule.startswith('/static'):
+            pages.append({
+                'loc': request.url_root.strip('/') + rule.rule,
+                'lastmod': datetime.datetime.utcnow().strftime('%Y-%m-%d')
+            })
+
+    xml = render_template_string('''<?xml version="1.0" encoding="UTF-8"?>
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      {% for page in pages %}
+      <url>
+        <loc>{{ page.loc }}</loc>
+        <lastmod>{{ page.lastmod }}</lastmod>
+      </url>
+      {% endfor %}
+    </urlset>''', pages=pages)
+
+    return Response(xml, mimetype='application/xml')
+
+@app.route('/robots.txt')
+def robots():
+    return Response(
+        "User-agent: *\n"
+        "Disallow:\n\n"
+        f"Sitemap: https://berns0.pythonanywhere.com{url_for('sitemap')}\n",
+        mimetype="text/plain")
+    
+@app.route('/sitemap')
+def reroutesitemap():
+    return redirect(url_for('sitemap'))
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -319,7 +351,7 @@ def fetch_chapters_for_novel(novel_name):
     print(f"Looking in path: {path}")
     
     if not os.path.exists(path):
-        raise FileNotFoundError(f"Novel directory not found: {path}")
+        raise FileNotFoundError(f"Novel not found")#{path}")
         
     chapters = [f for f in os.listdir(path) if f.startswith('chapter-') and f.endswith('.txt')]
     if not chapters:
@@ -515,9 +547,11 @@ def goToNewRouteChapters(novel, chapter_number):
 def goToNewRouteNovels(novel):
     return redirect(url_for('novels_chapters', n=novel))
 
+@app.route('/api/docs')
+def api_docs():
+    return render_template('api_docs.html')
 
 
-    
 @app.route('/p-notes')
 def patchNotes():
     return render_template("patchNotes.html")
@@ -991,7 +1025,7 @@ def novels_chapters():
         return render_template('error.html'), 500
 
 
-#
+
 @app.route('/novels')
 def list_novels():
     """

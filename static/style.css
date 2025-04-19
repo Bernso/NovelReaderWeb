@@ -482,9 +482,9 @@ a, .nav-link, .fancyLink {
 
 
 @media (max-width: 480px) {
-    .hero {
+    /*.hero {
         padding: 3rem 1rem 2rem;
-    }
+    }*/
 
     .hero2 {
         padding: 0.75rem;
@@ -1431,16 +1431,10 @@ footer {
     }
 }
 
-@media (max-width: 768px) {
-    .chapters-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 10px;
-    }
-}
 
 @media (max-width: 480px) {
     .chapters-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(120px, 3fr)) !important;
         gap: 8px;
         padding: 10px;
     }

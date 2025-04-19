@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="FreeTbate Website API Documentation" />
+  <title>API Documentation - Novel Reader</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+
+
+/* Overall container for documentation */
+.api-docs {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  color: #e0e0e0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Title and headings */
+.api-docs h1 {
+  color: #bb86fc;
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #333;
+  padding-bottom: 10px;
+}
+.api-docs h2 {
+  color: #03dac6;
+  border-bottom: 1px solid #444;
+  padding-bottom: 8px;
+  margin-top: 30px;
+  font-size: 1.8rem;
+}
+.api-docs h3 {
+  color: #ff9800;
+  margin-top: 25px;
+  font-size: 1.5rem;
+}
+.api-docs h4 {
+  color: #cf6679;
+  margin-top: 20px;
+  font-size: 1.3rem;
+}
+
+/* Paragraphs and links */
+.api-docs p {
+  margin: 15px 0;
+  font-size: 1rem;
+}
+.api-docs a {
+  color: #03dac6;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+.api-docs a:hover {
+  color: #bb86fc;
+}
+
+/* Code blocks styling */
+.api-docs code {
+  background-color: #2a2a2a;
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+.api-docs pre {
+  background-color: #2a2a2a;
+  padding: 15px;
+  border-radius: 5px;
+  overflow-x: auto;
+  margin: 20px 0;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+.api-docs pre code {
+  background-color: transparent;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+}
+.copy-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  padding: 5px 10px;
+  background-color: #444;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s ease;
+}
+.copy-button:hover {
+  background-color: #555;
+}
+
+/* Tables */
+.api-docs table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+  display: block;
+  overflow-x: auto;
+}
+.api-docs th, .api-docs td {
+  border: 1px solid #444;
+  padding: 10px;
+  text-align: left;
+}
+.api-docs th {
+  background-color: #2a2a2a;
+  color: #bb86fc;
+  font-weight: 600;
+}
+.api-docs tr:nth-child(even) {
+  background-color: #252525;
+}
+
+/* Blockquotes and horizontal rules */
+.api-docs blockquote {
+  border-left: 4px solid #bb86fc;
+  padding-left: 15px;
+  margin: 15px 0;
+  color: #aaa;
+  font-style: italic;
+}
+.api-docs hr {
+  border: none;
+  border-top: 1px solid #444;
+  margin: 30px 0;
+}
+
+/* Endpoints sections */
+.endpoint {
+  background-color: #262626;
+  padding: 20px;
+  border-radius: 5px;
+  margin-bottom: 30px;
+  overflow-x: hidden;
+}
+.endpoint h4 {
+  margin-top: 0;
+}
+.method {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 3px;
+  font-weight: bold;
+  margin-right: 10px;
+  font-size: 0.9rem;
+}
+.method.get { background-color: #4caf50; color: #fff; }
+.method.post { background-color: #2196f3; color: #fff; }
+.method.put { background-color: #ff9800; color: #fff; }
+.method.delete { background-color: #f44336; color: #fff; }
+
+/* Table of Contents */
+.toc {
+  background-color: #2a2a2a;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 30px;
+}
+.toc h3 {
+  margin-top: 0;
+  font-size: 1.5rem;
+}
+.toc ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+.toc li { margin-bottom: 8px; font-size: 1rem; }
+.toc a { color: #bb86fc; text-decoration: none; }
+.toc a:hover { color: #03dac6; }
+
+/* Main content sections */
+main section {
+  width: 100%;
+  max-width: 100%;
+  padding-left: 15px;
+  padding-right: 15px;
+  box-sizing: border-box;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  /* Overall container */
+  .api-docs {
+    padding: 15px;
+    margin: 20px auto;
+    border-radius: 5px;
+  }
+  
+  /* Headings */
+  .api-docs h1 { font-size: 1.8rem; }
+  .api-docs h2 { font-size: 1.4rem; }
+  .api-docs h3 { font-size: 1.2rem; }
+  .api-docs h4 { font-size: 1.1rem; }
+  
+  /* Method labels */
+  .method {
+    margin-bottom: 5px;
+    font-size: 0.8rem;
+  }
+  
+  /* Table styling */
+  .api-docs table {
+    font-size: 0.85rem;
+  }
+  .api-docs th, .api-docs td {
+    padding: 8px 5px;
+  }
+  
+  /* Code examples */
+  .api-docs code {
+    font-size: 0.8rem;
+  }
+  .api-docs pre {
+    padding: 12px 8px;
+  }
+  .api-docs pre code {
+    font-size: 0.8rem;
+  }
+  
+  /* Copy button */
+  .copy-button {
+    padding: 3px 6px;
+    font-size: 0.7rem;
+  }
+  
+  /* Endpoint sections */
+  .endpoint {
+    padding: 15px 10px;
+  }
+  
+  
+  
+  /* Community section */
+  .community {
+    padding: 20px 15px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .api-docs {
+    padding: 10px;
+    margin: 10px auto;
+  }
+  
+  .api-docs h1 { font-size: 1.6rem; }
+  .api-docs h2 { font-size: 1.3rem; }
+  .api-docs h3 { font-size: 1.1rem; }
+  
+  .method {
+    display: block;
+    margin-bottom: 5px;
+  }
+}
+  </style>
+</head>
+<body>
+  {% include "header.html" %}
+  <main>
+    <section class="hero">
+      <h2>API Documentation</h2>
+      <p>Learn how to use the Novel Reader API for accessing novel content. &#40;It's not hard&#41;</p>
+    </section>
+    
+    <section class="api-docs">
+      <!-- Table of Contents -->
+      <div class="toc">
+        <h3>Table of Contents</h3>
+        <ul>
+          <li><a href="#endpoint-chapters">/api/chapters</a></li>
+          <li><a href="#errors">Error Responses</a></li>
+          <li><a href="#quick-tips">Quick Tips</a></li>
+        </ul>
+      </div>
+      
+      <!-- API Endpoint: /api/chapters -->
+      <div id="endpoint-chapters" class="endpoint">
+        <h2>/api/chapters</h2>
+        <p class="method get">GET</p><p class="method post">POST</p>
+        <p><strong>Description:</strong> Returns the content of a specific chapter from a given novel.</p>
+        <h3>Query Parameters</h3>
+        <table>
+          <tr>
+            <th>Parameter</th>
+            <th>Type</th>
+            <th>Required</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><code>n</code></td>
+            <td>string</td>
+            <td>Yes</td>
+            <td>Novel name (with <code>-chapters</code> suffix, e.g., <code>Shadow Slave-chapters</code>)</td>
+          </tr>
+          <tr>
+            <td><code>c</code></td>
+            <td>integer</td>
+            <td>No</td>
+            <td>Chapter number to retrieve</td>
+          </tr>
+        </table>
+        <h3>Example Requests</h3>
+        <pre><code>/api/chapters?n=Shadow%20Slave-chapters&c=1</code></pre>
+        <pre><code>/api/chapters?n=Shadow%20Slave-chapters</code></pre>
+        <h3>Sample Response</h3>
+        <pre><code>{
+  "title": "Chapter 1: Nightmare Begins",
+  "content": "It was late at night when Sunny opened his eyes..."
+}</code></pre>
+      </div>
+      
+      <!-- API Errors -->
+      <div id="errors" class="endpoint">
+        <h2>Error Responses</h2>
+        <p>When something goes wrong, the API returns JSON formatted error messages. Common error responses include:</p>
+        <h3>Chapter Not Found</h3>
+        <pre><code>{
+  "error": "Chapter not found"
+}</code></pre>
+        <h3>Novel Chapters Not Found</h3>
+        <pre><code>{
+  "error": "No chapters found for novel: {novel_name}"
+}</code></pre>
+      </div>
+      
+      <!-- Quick Tips -->
+      <div id="quick-tips" class="endpoint">
+        <h2>Quick Tips</h2>
+        <ul>
+          <li>Replace spaces in URLs with <code>%20</code> or <code>+</code> (e.g., <code>Shadow%20Slave-chapters</code>).</li>
+          <li>Always include the <code>-chapters</code> suffix in the novel name.</li>
+          <li>Ensure chapter numbers are valid integers starting from 1.</li>
+        </ul>
+      </div>
+      
+      
+    </section>
+
+    <section class="community">
+        <h2>Join Our Community</h2>
+        <p>Connect with other readers on our <a href="https://www.discord.gg/k5HBFXqtCB" target="_blank">Discord Server</a>.</p>
+        <p>Created by <a href="https://www.github.com/Bernso" target="_blank">Bernso</a></p>
+      </section>
+  </main>
+  
+  
+  
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script>
+    // Add copy buttons to <pre> blocks
+    document.addEventListener('DOMContentLoaded', function () {
+      const preBlocks = document.querySelectorAll('pre');
+      preBlocks.forEach(function (pre) {
+        const copyButton = document.createElement('button');
+        copyButton.className = 'copy-button';
+        copyButton.textContent = 'Copy';
+        copyButton.addEventListener('click', function () {
+          const code = pre.querySelector('code').textContent;
+          navigator.clipboard.writeText(code).then(function () {
+            copyButton.textContent = 'Copied!';
+            setTimeout(() => { copyButton.textContent = 'Copy'; }, 2000);
+          });
+        });
+        pre.appendChild(copyButton);
+      });
+      
+      // Smooth scrolling for table of contents links
+      const tocLinks = document.querySelectorAll('.toc a[href^="#"]');
+      tocLinks.forEach(link => {
+        link.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.getElementById(this.getAttribute('href').substring(1));
+          if (target) {
+            window.scrollTo({ top: target.offsetTop - 70, behavior: 'smooth' });
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
