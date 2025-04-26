@@ -17,7 +17,7 @@ try:
     
     
     # Flask and standard libraries
-    from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, Response, render_template_string 
+    from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, Response, render_template_string
     from flask_caching import Cache
     import os
     import re  
@@ -239,13 +239,14 @@ def run_scriptlightNovelPubDotVip():
         novel_link = request.json.get('novelLink')
         print(f"Novel link received: {novel_link}")  # Debugging statement
         import webscrapers.lightNovelPubDotVip.getPics
+        import webscrapers.lightNovelPubDotVip.genChaptersV2
         scraper = webscrapers.lightNovelPubDotVip.getPics.NovelImageScraper()
         scraper._NovelImageScraper__scrape_novel_image(url=novel_link)
         scraper.cleanup_driver()
-        
-        import webscrapers.lightNovelPubDotVip.genChaptersV2
+
         scraper = webscrapers.lightNovelPubDotVip.genChaptersV2.genChapters(novel_link)
         scraper.getChapters()
+
         return jsonify({"result": "Done"})
     except Exception as e:
         print(f"Error occurred: {str(e)}")  # Debugging statement
