@@ -489,24 +489,23 @@ class genChapters:
 if __name__ == '__main__':
     start = time.time()
     links = [
-        'https://lightnovelpub.vip/novel/shadow-slave-05122222',
-        "https://lightnovelpub.vip/novel/re-evolution-online-05122223",
-        "https://lightnovelpub.vip/novel/return-of-the-mount-hua-sect-16091350",
-        'https://lightnovelpub.vip/novel/the-beginning-after-the-end-web-novel-11110049', 
-        'https://lightnovelpub.vip/novel/circle-of-inevitability-17122007', 
-        'https://lightnovelpub.vip/novel/damn-reincarnation-16091348',
-        'https://lightnovelpub.vip/novel/return-of-the-mount-hua-sect-16091350',
-        'https://lightnovelpub.vip/novel/a-regressors-tale-of-cultivation',
-        'https://lightnovelpub.vip/novel/overgeared-wn-16091311',
-        'https://lightnovelpub.vip/novel/trash-count-wn-05122225',
-        'https://lightnovelpub.vip/novel/the-legendary-mechanic-novel-05122221',
-        'https://lightnovelpub.vip/novel/the-authors-pov-05122222',
-        'https://lightnovelpub.vip/novel/advent-of-the-three-calamities',
-        'https://lightnovelpub.vip/novel/lord-of-the-mysteries-wn-16091313',
-        'https://lightnovelpub.vip/novel/the-world-after-the-fall-16091325',
-        'https://lightnovelpub.vip/novel/orv-wn-16091308',
-        'https://lightnovelpub.vip/novel/reverend-insanity-05122222',
-        'https://lightnovelpub.vip/novel/the-novels-extra-05122223',
+        #'https://lightnovelpub.vip/novel/shadow-slave-05122222', #
+        "https://lightnovelpub.vip/novel/re-evolution-online-05122223", #
+        #"https://lightnovelpub.vip/novel/return-of-the-mount-hua-sect-16091350", #
+        #'https://lightnovelpub.vip/novel/the-beginning-after-the-end-web-novel-11110049',  #
+        #'https://lightnovelpub.vip/novel/circle-of-inevitability-17122007', #
+        #'https://lightnovelpub.vip/novel/damn-reincarnation-16091348', #
+        #'https://lightnovelpub.vip/novel/a-regressors-tale-of-cultivation',
+        #'https://lightnovelpub.vip/novel/overgeared-wn-16091311', #
+        #'https://lightnovelpub.vip/novel/trash-count-wn-05122225', #
+        #'https://lightnovelpub.vip/novel/the-legendary-mechanic-novel-05122221', #
+        #'https://lightnovelpub.vip/novel/the-authors-pov-05122222', #
+        #'https://lightnovelpub.vip/novel/advent-of-the-three-calamities', #
+        #'https://lightnovelpub.vip/novel/lord-of-the-mysteries-wn-16091313', #
+        #'https://lightnovelpub.vip/novel/the-world-after-the-fall-16091325', #
+        #'https://lightnovelpub.vip/novel/orv-wn-16091308', #
+        #'https://lightnovelpub.vip/novel/reverend-insanity-05122222', #
+        #'https://lightnovelpub.vip/novel/the-novels-extra-05122223',
     ]
     
     async def main():

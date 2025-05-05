@@ -207,6 +207,9 @@
         }
         
         function timeAgo(timeInput) {
+            if (timeInput == 'Completed') {
+                return "Completed"
+            }
             let time;
             // If timeInput is numeric (or numeric string), treat it as a Unix timestamp (in seconds)
             if (!isNaN(timeInput)) {

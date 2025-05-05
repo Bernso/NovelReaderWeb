@@ -38,11 +38,14 @@ except ImportError as e:
     input(f"Module not found: {e}")
 
 logger = boLogger.Logging()
+MAINTAINANCE = False
 
 # Initialize Flask app
 app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = Config.SECRET_KEY
+
+
 
 app.config['CACHE_TYPE'] = 'SimpleCache'
 cache = Cache(app)
@@ -52,6 +55,114 @@ port = Config.PORT
 
 # Debug True/Flase
 debug = Config.DEBUG
+
+@app.before_request
+def maintainance_override():
+    if MAINTAINANCE:
+        return render_template_string("""
+            <!doctype html>
+            <html lang="en">
+            <head>
+                <meta charset='utf-8'>
+                <title>Maintenance</title>
+            </head>
+            <style>
+                :root {
+                    --hover-color: #8725ff;
+                    --background-light: #111111;
+                    --text-color: #e0e0e0;
+                    --text-muted: #ccccccbd;
+                    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+                    --border-radius: 5px;
+                    --actual-background: #0d0d0d;
+                    --m: #3b008d;
+                    --primary-color: #BB86FC;
+                    --primary-hover: #9965e3;
+                    --background-dark: #1a1a1a;
+                    --transition-speed: 0.3s;
+                }
+                
+                .hero {
+                    width: 100%;
+                    max-width: 1200px;
+                    padding: 4rem 2rem 3rem;
+                    margin-top: 70px;
+                    text-align: center;
+                    background: linear-gradient(135deg, var(--background-dark) 0%, var(--actual-background) 100%);
+                    position: relative;
+                    overflow: hidden;
+                    border-bottom: 1px solid rgba(187, 134, 252, 0.1);
+                }
+
+                .hero::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: 
+                        radial-gradient(circle at 20% 50%, rgba(187, 134, 252, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 50%, rgba(98, 0, 238, 0.08) 0%, transparent 50%);
+                    animation: pulse 8s infinite ease-in-out;
+                    pointer-events: none;
+                }
+
+                .hero h2 {
+                    font-size: 2.5em;
+                    position: relative;
+                    margin-bottom: 1.5rem;
+                    background: linear-gradient(45deg, var(--primary-color), #9965e3);
+                    background-clip: text;
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    text-shadow: 0 2px 15px rgba(187, 134, 252, 0.2);
+                    z-index: 1;
+                }
+
+                .hero p {
+                    font-size: 1.2em;
+                    margin-bottom: 40px;
+                    color: var(--text-muted);
+                }
+                
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                    font-family: sans-serif, "Arial";
+                }
+                
+                body {
+                    background: var(--actual-background);
+                    color: var(--text-color);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 100vh;
+                    overflow-x: hidden;
+                }
+                
+                a, .nav-link, .fancyLink {
+                    text-decoration: none;
+                    color: var(--primary-color);
+                }
+            </style>
+            <body>
+                <main>
+                    <section class="hero" style='border-radius: 20px;'>
+                        <h2>Under Maintenance</h2>
+                        <p>
+                            
+                            For more information join our <a href="https://www.discord.gg/k5HBFXqtCB" target="_blank" style='text-decoration: none;'>Discord Server</a>
+                        </p>
+                    </section>
+                </main>
+            </body>
+            </html>
+                
+        """), 503
 
 
 

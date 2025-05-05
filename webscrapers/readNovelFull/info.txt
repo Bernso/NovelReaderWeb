@@ -1,0 +1,55 @@
+ReadNovelFull Scraper Instructions
+
+1. Entry Point
+
+URL: Accept the base novel URL (e.g., https://readnovelfull.com/shadow-slave.html).
+
+2. Chapter Listing Extraction
+
+Locate Container: Select the <div> with id="list-chapter".
+
+List Blocks: Inside this div, find all <ul class="list-chapter"> elements.
+
+Chapter Elements: For each <ul>, iterate over its <li> children.
+
+Extract Link and Title:
+
+URL: Read the href attribute of the <a> inside each <li>.
+
+Title: Read the text content of that <a>.
+
+3. Chapter Page Extraction
+
+Navigate: Request the chapter page URL obtained above.
+
+Locate Content Block: Select the <div id="chr-content">.
+
+Extract Title: Grab the <h3> text inside this div.
+
+Extract Body:
+
+Collect all <p> elements within div#chr-content.
+
+Filter: Omit any <p> whose only content is a <strong> tag (commonly ads).
+
+For remaining <p> tags, strip any <strong> wrappers around inline text but keep the text inside.
+
+4. Politeness & Error Handling
+
+Robots.txt: Check and respect the site’s robots.txt before scraping.
+
+Rate Limiting: Add delays (e.g., 1–2 seconds) between requests to avoid overloading the server.
+
+Retries: On HTTP 5xx errors, retry up to 3 times with exponential backoff.
+
+Logging:
+
+Log unexpected HTML changes or missing elements for review.
+
+Record timestamps and URLs of each request.
+
+5. Integration Notes
+
+Apply the same request/session management and parsing utilities and file management as in /webscrapers/lightNovelPubDotVip/genChaptersV2.py.
+
+Ensure output format matches existing pipeline expectations (e.g., JSON with chapters: [{title, url, content}]).

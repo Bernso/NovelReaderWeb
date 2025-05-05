@@ -67,6 +67,12 @@
             cursor: not-allowed;
             pointer-events: none;
         }
+
+        @media (max-width: 768px) {
+            .icon {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body class='no-select'>
@@ -406,8 +412,9 @@
                 
                 // Update progress in the database
 
-                // Update URL with full chapter number
-                const newURL = `/read?n=${novel_title}&c=${sortedChapters[currentChapterIndex-1]}`
+                // Update URL with full chapter number, using encodeURIComponent to handle spaces consistently
+                const encodedNovelTitle = encodeURIComponent(novel_title).replace(/%20/g, '+');
+                const newURL = `/read?n=${encodedNovelTitle}&c=${sortedChapters[currentChapterIndex-1]}`
                 history.pushState({}, "", newURL);
                 
                 displayChapter(currentChapterIndex);
@@ -428,8 +435,9 @@
                 
                 // Update progress in the database
 
-                // Update URL with full chapter number
-                const newURL = `/read?n=${novel_title}&c=${sortedChapters[currentChapterIndex-1]}`
+                // Update URL with full chapter number, using encodeURIComponent to handle spaces consistently
+                const encodedNovelTitle = encodeURIComponent(novel_title).replace(/%20/g, '+');
+                const newURL = `/read?n=${encodedNovelTitle}&c=${sortedChapters[currentChapterIndex-1]}`
                 history.pushState({}, "", newURL);
                 
                 displayChapter(currentChapterIndex);
