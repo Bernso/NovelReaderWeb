@@ -447,6 +447,7 @@ if __name__ == '__main__':
         'https://readnovelfull.com/the-beginning-after-the-end-v1.html',
         'https://readnovelfull.com/overgeared.html',
         'https://readnovelfull.com/trash-of-the-counts-family-v1.html',
+        'https://readnovelfull.com/kill-the-sun.html'
         # Add more novel URLs here
     ]
     

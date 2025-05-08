@@ -73,6 +73,11 @@
                 display: none;
             }
         }
+
+        #textToRead {
+            word-break: normal;
+            word-wrap: break-word;
+        }
     </style>
 </head>
 <body class='no-select'>
@@ -355,7 +360,7 @@
                 const protection = `<strong class='hidden'><br><br>WOAH WOAH WOAH<br>You aren't trying to steal from https://berns0.pythonanywhere.com are you?! <a href='https://berns0.pythonanywhere.com/read?n=${novel_title}&c=${initialChapter}'>Link</a><br><br></strong>`
 
                 // Display the initial chapter immediately
-                document.getElementById('textToRead').innerHTML = `${protection}${singleChapterData[initialChapter][1].replace(/\n\n/g, '<br><br>')}${protection}`;
+                document.getElementById('textToRead').innerHTML = `${protection}${singleChapterData[initialChapter][1].replace(/\n/g, '<br>')}${protection}`;
                 document.getElementById('chapterNum').innerText = singleChapterData[initialChapter][0];
                 
                 // Then fetch all chapters in the background
@@ -394,7 +399,7 @@
             if (index > 0 && index <= sortedChapters.length) {
                 currentChapterIndex = index;
                 const protection = `<strong class='hidden'><br><br>WOAH WOAH WOAH<br>You aren't trying to steal from https://berns0.pythonanywhere.com are you?! <a href='https://berns0.pythonanywhere.com/read?n=${novel_title}&c=${sortedChapters[index-1]}'>Link</a><br><br></strong>`
-                document.getElementById('textToRead').innerHTML = `${protection}${chapters[sortedChapters[index-1]][1].replace(/\n\n/g, '<br><br>')}${protection}`;
+                document.getElementById('textToRead').innerHTML = `${protection}${chapters[sortedChapters[index-1]][1].replace(/\n/g, '<br>')}${protection}`;
                 document.getElementById('chapterNum').innerText = `${chapters[sortedChapters[index-1]][0]}`;
                 document.getElementById('title').innerText = `Chapter ${sortedChapters[index-1]} - {{ novel_title_clean }}`;
                 window.scrollTo(0, 0); // Scroll to top

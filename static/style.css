@@ -1448,7 +1448,7 @@ footer {
     
 }
 
-.search input[type="text"] {
+.search input[type="text"], .search input[type="password"] {
     width: 85%; /* Adjust width as needed */
     padding: 10px;
     background-color: var(--background-light); /* Dark grey background */
@@ -1460,11 +1460,11 @@ footer {
     box-sizing: border-box;
 }
 
-.search input[type="text"]::placeholder {
+.search input[type="text"]::placeholder, .search input[type="password"]::placeholder {
     color: rgba(187, 134, 252, 0.7); /* Lighter purple for placeholder */
 }
 
-.search input[type="text"]:focus {
+.search input[type="text"]:focus, .search input[type="password"]:focus {
     outline: none;
     border-color: var(--primary-color); /* Brighter purple when focused */
     box-shadow: 0 0 8px rgba(187, 134, 252, 0.5); /* Subtle glow effect */
