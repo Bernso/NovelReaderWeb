@@ -30,13 +30,11 @@ try:
     import datetime
     from flask_limiter import Limiter
     from flask_limiter.util import get_remote_address
-    import hashlib
-    import hmac
+
 
     
     # Project-specific imports
     from config import Config
-    from dotenv import load_dotenv
 
 except ImportError as e:
     input(f"Module not found: {e}")

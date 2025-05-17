@@ -438,6 +438,8 @@ class genChapters:
                     json.dump(metadata, f, ensure_ascii=False, indent=2)
 
 if __name__ == '__main__':
+    # Change script such that only if a novel got a new chapter it will update the time on the 'last_updated' in the 'metadata.json' file
+    
     from getPics import get_cover_image
     start = time.time()
     links = [
@@ -447,7 +449,14 @@ if __name__ == '__main__':
         'https://readnovelfull.com/the-beginning-after-the-end-v1.html',
         'https://readnovelfull.com/overgeared.html',
         'https://readnovelfull.com/trash-of-the-counts-family-v1.html',
-        'https://readnovelfull.com/kill-the-sun.html'
+        'https://readnovelfull.com/kill-the-sun.html',
+        
+        # 'https://readnovelfull.com/lightning-is-the-only-way-v1.html', # Completed
+        # 'https://readnovelfull.com/the-perfect-run.html', # Completed
+        'https://readnovelfull.com/the-innkeeper.html',
+        'https://readnovelfull.com/cultivation-online-v3.html'
+        
+        
         # Add more novel URLs here
     ]
     

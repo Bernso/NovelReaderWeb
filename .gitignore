@@ -15,3 +15,9 @@ webscrapers/readWebNovel/__pycache__/
 webscrapers/webNovelDotCom/__pycache__/
 app.log
 keys.json
+Experiments/data.json.gz
+Experiments/data.json.zst
+Experiments/data.msgpack
+Experiments/minified.json
+Experiments/original.json
+saved.html

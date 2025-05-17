@@ -78,6 +78,80 @@
             word-break: normal;
             word-wrap: break-word;
         }
+
+        /* Gradient Controls Styles */
+        .gradient-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .gradient-color-picker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .gradient-color-picker label {
+            min-width: 80px;
+        }
+
+        .gradient-color-picker input[type="color"] {
+            width: 50px;
+            height: 30px;
+            padding: 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .hex-input {
+            width: 80px;
+            padding: 4px 8px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background: #333;
+            color: #fff;
+            font-family: monospace;
+        }
+
+        .hex-input:focus {
+            outline: none;
+            border-color: #6200EE;
+        }
+
+        .hex-input::placeholder {
+            color: #666;
+        }
+
+        .gradient-angle {
+            margin-top: 10px;
+        }
+
+        .gradient-angle label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .settings-button {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .settings-button:hover {
+            background-color: #444;
+        }
+
+        .settings-button:active {
+            background-color: #555;
+        }
     </style>
 </head>
 <body class='no-select'>
@@ -136,7 +210,7 @@
             </div>
         </section>
 
-        <section class="hero2">
+        <section class="hero2" id="textContainer">
             <p class="no-select no-copy" id='textToRead'>
                 <strong>Loading...</strong>
             </p>
@@ -181,6 +255,28 @@
                 </a>
             </div>
         </section>
+
+
+        <!-- DISQUS THREAD -->
+        <section class='community' style='border-radius: 25px; margin: 20px 0;'>
+            <div id="disqus_thread"></div>
+            <script>
+                var disqus_shortname = 'berns0';
+                var disqus_config = function () {
+                this.page.url = window.location.href;  // current URL
+                this.page.identifier = 'chapter-{{ chapter_number }}-{{ novel_title_clean | replace(' ', '-') }}';
+                };
+                (function() {
+                var d = document, s = d.createElement('script');
+                s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+                })();
+            </script>
+            <noscript>This is a comment section, please enable JavaScript.</noscript>
+        </section>
+
+
         <section class="community">
             <h2>Join Our Community</h2>
             <p>Connect with other readers on our <a href="https://www.discord.gg/k5HBFXqtCB" target="_blank" style='text-decoration: none;'>Discord Server</a>.</p>
@@ -208,7 +304,7 @@
             </div>
 
             <div class="settings-section">
-                <h4>Font Family</h4>
+                <h4>Font Style</h4>
                 <select id="font-selector" class="settings-select">
                     <option value="sans-serif">Sans-Serif</option>
                     <option value="serif">Serif</option>
@@ -233,6 +329,35 @@
                        value="1">
                 <div class="settings-value">
                     Opacity: <span id="current-opacity">1</span>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h4>Background Gradient</h4>
+                <div class="gradient-controls">
+                    <div class="gradient-color-picker">
+                        <label>Start Color:</label>
+                        <input type="color" id="gradient-start" value="#121212">
+                        <input type="text" id="gradient-start-hex" class="hex-input" value="#121212" placeholder="#RRGGBB">
+                    </div>
+                    <div class="gradient-color-picker">
+                        <label>End Color:</label>
+                        <input type="color" id="gradient-end" value="#1a1a1a">
+                        <input type="text" id="gradient-end-hex" class="hex-input" value="#1a1a1a" placeholder="#RRGGBB">
+                    </div>
+                    <div class="gradient-angle">
+                        <label>Angle:</label>
+                        <input type="range" 
+                               id="gradient-angle-slider" 
+                               class="settings-slider"
+                               min="0" 
+                               max="360" 
+                               value="180">
+                        <div class="settings-value">
+                            Angle: <span id="current-angle">180</span>°
+                        </div>
+                    </div>
+                    <button id="reset-gradient" class="settings-button">Reset to Default</button>
                 </div>
             </div>
 
@@ -338,6 +463,17 @@
         let novel_title = "{{ novel_title }}"
         let totalChapters = 0
 
+        function updateDiscussion() {
+            if (window.DISQUS) {
+            DISQUS.reset({
+                reload: true,
+                config: function () {
+                this.page.url = window.location.href;
+                this.page.identifier = 'chapter-' + document.getElementById('chapter-number').textContent + '-{{ novel_title_clean | replace(' ', '-') }}';
+                }
+            });
+            }
+        }
         
         async function loadChapters(novelName, initialChapter) {
             try {
@@ -404,6 +540,7 @@
                 document.getElementById('title').innerText = `Chapter ${sortedChapters[index-1]} - {{ novel_title_clean }}`;
                 window.scrollTo(0, 0); // Scroll to top
             }
+            updateDiscussion();
         }
       
         function nextChapter() {
@@ -427,6 +564,8 @@
                 
                 document.getElementById('chapter-number').textContent = sortedChapters[currentChapterIndex-1];
             }
+            displayChapter(currentChapterIndex);
+            updateDiscussion();
         }
 
         function previousChapter() {
@@ -450,6 +589,8 @@
                 
                 document.getElementById('chapter-number').textContent = sortedChapters[currentChapterIndex-1];
             }
+            displayChapter(currentChapterIndex);
+            updateDiscussion();
         }
 
         function updateNavigationButtons(sortedChapters, currentIndex) {
@@ -502,6 +643,7 @@
         const pauseSpeechButton = document.getElementById('pause-speech');
         const stopSpeechButton = document.getElementById('stop-speech');
         const voiceSelector = document.getElementById('voice-selector');
+        const textToReadContainer = document.getElementById('textContainer');
         const utterance = new SpeechSynthesisUtterance();
 
         let currentWordIndex = 0;
@@ -734,6 +876,106 @@
                 }
             }
         });
+
+        // To re-load comments
+        window.addEventListener('popstate', function(e) {
+            if (e.state) {
+            displayChapter(currentChapterIndex);
+            updateDiscussion();
+            }
+        });
+
+        // Background Gradient Controls
+        const gradientStart = document.getElementById('gradient-start');
+        const gradientEnd = document.getElementById('gradient-end');
+        const gradientStartHex = document.getElementById('gradient-start-hex');
+        const gradientEndHex = document.getElementById('gradient-end-hex');
+        const gradientAngleSlider = document.getElementById('gradient-angle-slider');
+        const currentAngleSpan = document.getElementById('current-angle');
+
+        function validateHexColor(hex) {
+            return /^#[0-9A-F]{6}$/i.test(hex);
+        }
+
+        function updateGradient() {
+            const startColor = gradientStart.value;
+            const endColor = gradientEnd.value;
+            const angle = gradientAngleSlider.value;
+            currentAngleSpan.textContent = angle;
+            
+            textToReadContainer.style.background = `linear-gradient(${angle}deg, ${startColor}, ${endColor})`;
+            
+            // Save gradient settings to localStorage
+            localStorage.setItem('gradientSettings', JSON.stringify({
+                startColor,
+                endColor,
+                angle
+            }));
+        }
+
+        // Sync color picker with hex input
+        function syncColorWithHex(colorPicker, hexInput) {
+            colorPicker.value = hexInput.value;
+            updateGradient();
+        }
+
+        // Sync hex input with color picker
+        function syncHexWithColor(hexInput, colorPicker) {
+            hexInput.value = colorPicker.value;
+        }
+
+        // Add event listeners for hex inputs
+        gradientStartHex.addEventListener('input', function() {
+            if (validateHexColor(this.value)) {
+                syncColorWithHex(gradientStart, this);
+            }
+        });
+
+        gradientEndHex.addEventListener('input', function() {
+            if (validateHexColor(this.value)) {
+                syncColorWithHex(gradientEnd, this);
+            }
+        });
+
+        // Add event listeners for color pickers
+        gradientStart.addEventListener('input', function() {
+            syncHexWithColor(gradientStartHex, this);
+            updateGradient();
+        });
+
+        gradientEnd.addEventListener('input', function() {
+            syncHexWithColor(gradientEndHex, this);
+            updateGradient();
+        });
+
+        // Load saved gradient settings
+        const savedGradientSettings = localStorage.getItem('gradientSettings');
+        if (savedGradientSettings) {
+            const settings = JSON.parse(savedGradientSettings);
+            gradientStart.value = settings.startColor;
+            gradientEnd.value = settings.endColor;
+            gradientStartHex.value = settings.startColor;
+            gradientEndHex.value = settings.endColor;
+            gradientAngleSlider.value = settings.angle;
+            currentAngleSpan.textContent = settings.angle;
+            updateGradient();
+        }
+
+        // Add event listener for gradient angle
+        gradientAngleSlider.addEventListener('input', updateGradient);
+
+        // Reset gradient button
+        const resetGradientButton = document.getElementById('reset-gradient');
+        resetGradientButton.addEventListener('click', () => {
+            gradientStart.value = '#121212';
+            gradientEnd.value = '#121212';
+            gradientStartHex.value = '#121212';
+            gradientEndHex.value = '#121212';
+            gradientAngleSlider.value = '180';
+            updateGradient();
+        });
+
+        
     </script>
     
     

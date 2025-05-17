@@ -157,7 +157,7 @@ def main(url):
 
 # Example usage
 if __name__ == '__main__':
-    base_url = 'https://www.webnovel.com/book/world-online_23126079305076205'
+    base_url = 'https://www.webnovel.com/book/origins-of-blood_31471588608620705'
     main(base_url)
     #folder_path = os.getcwd()
     #scrape_and_download_images(base_url, folder_path=folder_path)

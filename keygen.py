@@ -27,6 +27,6 @@ for novel in get_novel_names():
     # write the updated data
     keys_data[novel] = key
     with open('keys.json', 'w') as f:
-        json.dump(keys_data, f)
+        json.dump(keys_data, f, indent=4)
         
 print("Done.")
