@@ -14,7 +14,8 @@ try:
     
     import webscrapers.updateNovel
     
-    
+    # Database
+    import database
     
     # Flask and standard libraries
     from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, Response, render_template_string, session
@@ -630,11 +631,12 @@ def get_chapters():
         novel_name = request.args.get('n', '')
         chapter_number = request.args.get('c', '')
 
-        # Cleanup individual chapter files if chapters.json exists
+        # Track view in database
         if novel_name:
             decoded_name = urllib.parse.unquote(novel_name).replace('+', ' ')
             if not decoded_name.endswith('-chapters'):
                 decoded_name = decoded_name + '-chapters'
+            database.increment_view(decoded_name, 'api_view')
             cleanup_chapter_files(decoded_name)
 
         # Handle single chapter request
@@ -1164,6 +1166,9 @@ def novels_chapters():
     if not novel_name:
         return "No novel specified", 400
     
+    # Track view in database
+    database.increment_view(novel_name, 'page_view')
+    
     chapterNumber = request.args.get('c')
     if chapterNumber:
         return redirect(url_for('read_chapter', n=novel_name, c=chapterNumber))
@@ -1175,6 +1180,9 @@ def novels_chapters():
         summary = metadata.get("summary", "")
         last_updated = metadata.get("last_updated", "")
         title = metadata.get("title", novel_name[:-9] if novel_name.endswith('-chapters') else novel_name)
+        
+        # Get view count
+        views = database.get_novel_views(novel_name)
         
         # If it's a string, convert it to a Unix timestamp (float)
         if isinstance(last_updated, str):
@@ -1197,6 +1205,7 @@ def novels_chapters():
                               categories=categories_str,
                               summary=summary,
                               last_updated=last_updated,
+                              views=views,
                               novel_title_clean=novel_name[:-9] if novel_name.endswith('-chapters') else novel_name)
     except Exception as e:
         error_message = str(e)

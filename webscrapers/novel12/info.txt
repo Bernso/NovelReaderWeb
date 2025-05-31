@@ -1,0 +1,6 @@
+On the base page there is the novel title within the <div class='title'> referenced as a <h1>, 
+also the cover_image is referenced in the base page as an image within the <a class='imagesCrop'> you can check it is the right image by checking the title metadata of the image is the title of the novel
+On the page of the inputted link there is a ul with the class of chuong, this is where all of the chapter links are.
+Please make an array of all of the links inside of the ul (all of the links are in an <a> element within the ul).
+Once you are on the actual page of the novel the content of the novel is within the <div class='content-center wl'>, there are other divs within this div but ignore those and only scrape the content within the <p> elemtns.
+Please save all data the same way you would with the readNovelFull webscraper, just make a clone of that webscraper for this website.
