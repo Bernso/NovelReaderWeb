@@ -3,52 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
-    <title>Popular Novels</title>
     <meta name="description" content="Come and read all your favourite novels for free in the best UI now!">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Popular Novels</title>
+    <style>
+        .rank {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: var(--primary-color);
+            color: var(--background-dark);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.2em;
+            z-index: 2;
+        }
+        .views {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: var(--primary-color);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        .feature {
+            position: relative;
+        }
+        .cover-container {
+            position: relative;
+        }
+    </style>
 </head>
-<style>
-    .hero {
-        position: relative;
-        background-image: url("{{ url_for('static', filename='cover_image.jpg') }}");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        filter: brightness(70%);
-    }
-
-    .hero::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5); /* Adjust the color and opacity as needed */
-        filter: blur(5px);
-    }
-</style>
-<body>
+<body class='no-select'>
     {% include 'header.html' %}
-    <main>
-        <section style='margin-bottom: 0;' class="hero">
+
+    <main style='max-width: 100vw'>
+        <section class="hero">
             <h2>Popular Novels</h2>
-            <p>
-                Our most viewed novels
-                <br>
-                &#40;3 random novels&#41;
+            <p style="margin-bottom: 0;">
+                Discover the most popular novels based on reader views
+                <br><br>
+                Browse through <strong style='color: #BB86FC;'>{{ total_novels }} novels</strong> ranked by popularity
             </p>
+            <section class="search" style="margin-top: 0;">
+                <input type="text" id="searchInput" onkeyup="searchNovels()" placeholder="Search for novels...">
+            </section>
         </section>
         
+
         <section class="features">
-            {% for original_novel, modified_novel, categories in novels %}
-                <div class="feature" data-categories="{{ categories }}">
-                    <a href='/novels_chapters?n={{ original_novel }}'>
-                        <img src="{{ url_for('serve_image', novel_title=original_novel) }}" alt="Cover Image">
+            {% for novel in novels %}
+                <div class="feature" data-categories="{{ novel[2] }}">
+                    <a href='/novels_chapters?n={{ novel[0] }}'>
+                        <div class='cover-container'>
+                            <div class="rank">#{{ loop.index }}</div>
+                            <img src="{{ url_for('serve_image', novel_title=novel[0]) }}" alt="Cover Image" class='novel-cover'>
+                            <div class="views">{{ novel[3] }} views</div>
+                        </div>
                         <div class="text">
-                            <h3>{{ modified_novel }}</h3>
-                            <p>{{ categories }}</p>
+                            <h3>{{ novel[1] }}</h3>
+                            <p>{{ novel[2] }}</p>
                         </div>
                     </a>
                 </div>
@@ -57,12 +75,35 @@
 
         <section class="community">
             <h2>Join Our Community</h2>
-            <p>Connect with other readers on our <a href="https://www.discord.gg/k5HBFXqtCB" target="_blank" style='text-decoration: none;'>Discord Server</a>.</p>
+            <p>Connect with other readers on our <a href="https://www.discord.gg/k5HBFXqtCB" target="_blank" style='text-decoration: none;'>Discord Server</a></p>
             <p>Created by <a href="https://www.github.com/Bernso" target="_blank" style='text-decoration: none;'>Bernso</a></p>
         </section>
     </main>
+    <button onclick="topFunction()" id="backToTopBtn" title="Go to top"></button>
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-    <script src='/./script.js'></script>
+    <script>
+        // Get the button
+        var mybutton = document.getElementById("backToTopBtn");
+
+        // When the user scrolls down 20px from the top of the document, show the button
+        window.onscroll = function() {scrollFunction()};
+
+        function scrollFunction() {
+          if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+            mybutton.style.display = "block";
+            mybutton.style.right = "20px"; // Slide-in effect
+          } else {
+            mybutton.style.right = "-100px"; // Slide-out effect
+          }
+        }
+
+        // When the user clicks on the button, scroll to the top of the document
+        function topFunction() {
+          document.body.scrollTop = 0; // For Safari
+          document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        }
+    </script>
 </body>
 </html>
 

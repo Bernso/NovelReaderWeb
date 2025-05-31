@@ -968,16 +968,16 @@ def youShouldNotBeHere(novel_title):
 @app.route('/popular-novels')
 def popular_novels():
     """
-    Display a page with three randomly selected popular novels.
+    Display a page with novels ranked by their view counts.
 
-    The function retrieves all novels from the 'novels' directory, selects three at random if there are at least three novels,
-    and retrieves the necessary data for each selected novel, such as categories and cover image.
+    The function retrieves all novels from the 'novels' directory, gets their view counts from the database,
+    and displays them in order of popularity.
 
     Parameters:
     None
 
     Returns:
-    render_template: A rendered HTML template with the selected novels' data.
+    render_template: A rendered HTML template with the ranked novels' data.
     If an exception occurs, it returns an error message and renders an error template.
     """
     try:
@@ -989,6 +989,8 @@ def popular_novels():
         novels_with_data = []
         all_categories = set()
         
+        # Get all novel views from database
+        novel_views = database.get_all_novel_views()
         
         for novel in os.listdir(novels_folder_path):
             if novel == "The%20Beginning%20After%20The%20End-chapters":
@@ -996,21 +998,23 @@ def popular_novels():
             
             novel_path = os.path.join(novels_folder_path, novel)
             
-            # Get metadata instead of reading categories.txt
+            # Get metadata
             metadata = get_novel_metadata(novel)
             categories = metadata.get("categories", [])
             categories_str = ", ".join(categories)
             all_categories.update(categories)
             
             novel_name_clean = re.sub(r'\s*\(.*?\)', '', novel[:-9] if len(novel) >= 9 else novel)
-            novels_with_data.append((novel, novel_name_clean, categories_str))
+            views = novel_views.get(novel, 0)
+            novels_with_data.append((novel, novel_name_clean, categories_str, views))
         
-        # Sort novels alphabetically
-        novels_with_data.sort(key=lambda x: x[1].lower())
+        # Sort novels by views in descending order
+        novels_with_data.sort(key=lambda x: x[3], reverse=True)
         
         return render_template(
             'popularNovels.html', 
-            novels=novels_with_data[:3], 
+            novels=novels_with_data,
+            total_novels=len(novels_with_data)
         )
     except Exception as e:
         error_message = str(e)
