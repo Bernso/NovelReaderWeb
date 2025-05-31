@@ -103,6 +103,23 @@
           document.body.scrollTop = 0; // For Safari
           document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
         }
+
+        function searchNovels() {
+            var input, filter, features, feature, h3, i, txtValue;
+            input = document.getElementById('searchInput');
+            filter = input.value.toUpperCase();
+            features = document.getElementsByClassName('feature');
+
+            for (i = 0; i < features.length; i++) {
+                h3 = features[i].getElementsByTagName('h3')[0]; 
+                txtValue = h3.textContent || h3.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    features[i].style.display = "";
+                } else {
+                    features[i].style.display = "none";
+                }
+            }
+        }
     </script>
 </body>
 </html>
