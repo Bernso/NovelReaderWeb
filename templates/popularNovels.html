@@ -62,7 +62,7 @@
                         <div class='cover-container'>
                             <div class="rank">#{{ loop.index }}</div>
                             <img src="{{ url_for('serve_image', novel_title=novel[0]) }}" alt="Cover Image" class='novel-cover'>
-                            <div class="views">{{ novel[3] }} views</div>
+                            <div class="views">{{ novel[3]|numberFormat }} views</div>
                         </div>
                         <div class="text">
                             <h3>{{ novel[1] }}</h3>

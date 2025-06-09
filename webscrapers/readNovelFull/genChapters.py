@@ -279,6 +279,8 @@ class genChapters:
                 text = text.replace('<p>', '').replace('</p>', '')
                 # Remove any remaining HTML tags except those within angular brackets
                 text = re.sub(r'<(?!\w+>)[^>]*>', '', text)
+                # Remove any instances of 'ReadNovelFull.me'
+                text = text.replace('ReadNovelFull.me', '')
                 text = text.strip()
                 if text:  # Only add non-empty paragraphs
                     paragraphs.append(text)
@@ -443,18 +445,33 @@ if __name__ == '__main__':
     from getPics import get_cover_image
     start = time.time()
     links = [
+        # Site 1
+        'https://readnovelfull.com/the-beginning-after-the-end-v1.html',
         'https://readnovelfull.com/shadow-slave.html',
         'https://readnovelfull.com/re-evolution-online.html',
         'https://readnovelfull.com/return-of-the-mount-hua-sect.html',
-        'https://readnovelfull.com/the-beginning-after-the-end-v1.html',
-        'https://readnovelfull.com/overgeared.html',
         'https://readnovelfull.com/trash-of-the-counts-family-v1.html',
         'https://readnovelfull.com/kill-the-sun.html',
+        'https://readnovelfull.com/the-innkeeper.html',
+        'https://readnovelfull.com/cultivation-online-v3.html',
         
+        # 'https://readnovelfull.com/renegade-immortal.html', # Completed
+        # 'https://readnovelfull.com/overgeared.html', # Completed
         # 'https://readnovelfull.com/lightning-is-the-only-way-v1.html', # Completed
         # 'https://readnovelfull.com/the-perfect-run.html', # Completed
-        'https://readnovelfull.com/the-innkeeper.html',
-        'https://readnovelfull.com/cultivation-online-v3.html'
+        
+        
+        # Site 2
+        "https://readnovelfull.com/supreme-magus-v1.html",
+        "https://readnovelfull.com/re-birth-of-a-genius-creatordestroyer.html",
+        "https://readnovelfull.com/genetic-ascension.html",
+        
+        # "https://readnovelfull.com/86-v1.html", # Completed
+        # "https://readnovelfull.com/arifureta-shokugyou-de-sekai-saikyou-wn-v1.html", # Completed
+        # "https://readnovelfull.com/overlord-wn-v1.html", # Hella hiatus
+        # "https://readnovelfull.com/only-i-level-up-novel.html", # Completed
+        # "https://readnovelfull.com/the-legendary-moonlight-sculptor.html", # Completed
+        
         
         
         # Add more novel URLs here

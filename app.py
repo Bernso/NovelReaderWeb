@@ -1341,6 +1341,28 @@ def nl2br_filter(text: str):
         return text
     return text.replace('\n', '<br>')
 
+@app.template_filter('numberFormat')
+def format_number_with_commas(number_str: str):
+    # Remove any existing commas or whitespace
+    number_str = str(number_str).replace(',', '').strip()
+
+    # Check if it's a valid number
+    if not number_str.isdigit():
+        return "Invalid input. Please enter a number made up of digits only."
+
+    # Reverse the number string to group from the end
+    reversed_str = number_str[::-1]
+    chunks = [reversed_str[i:i+3] for i in range(0, len(reversed_str), 3)]
+
+    # Join with commas and reverse back
+    formatted_number = ','.join(chunks)[::-1]
+    return formatted_number
+
+
+@app.route("/domains")
+def domain_page():
+    return render_template('domains.html')
+
 
 @app.route('/update_chapter', methods=['GET', 'POST'])
 def update_chapter():

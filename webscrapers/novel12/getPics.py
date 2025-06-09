@@ -152,5 +152,5 @@ def main(url: str) -> None:
 
 if __name__ == "__main__":
     # Example usage
-    novel_url = f"{BASE_URL}/254187/red-rising.htm"  # Replace with actual URL
+    novel_url = f"{BASE_URL}/254188/golden-son.htm"  # Replace with actual URL
     main(novel_url) 

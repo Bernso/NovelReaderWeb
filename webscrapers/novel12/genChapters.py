@@ -286,7 +286,7 @@ async def process_novel(link):
 async def main():
     """Main function to process novels"""
     # Example usage
-    novel_url = "https://novel12.com/254187/red-rising.htm"  # Replace with actual URL
+    novel_url = "https://novel12.com/254188/golden-son.htm"  # Replace with actual URL
     await process_novel(novel_url)
 
 if __name__ == "__main__":

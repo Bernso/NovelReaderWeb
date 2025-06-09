@@ -3,12 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Come and read all your favourite novels for free in the best UI now!">
+    
+    <!-- Primary Meta Tags -->
     <title id="title">Chapter {{ chapter_number }} - {{ novel_title_clean }}</title>
+    <meta name="title" content="Chapter {{ chapter_number }} - {{ novel_title_clean }}">
+    <meta name="description" content="Read Chapter {{ chapter_number }} of {{ novel_title_clean }} for free. Enjoy this captivating chapter with our beautiful reading interface, featuring dark mode, text-to-speech, and customizable settings.">
+    <meta name="keywords" content="{{ novel_title_clean }}, Chapter {{ chapter_number }}, free novel, online reading, web novel, light novel">
+    <meta name="author" content="Bernso">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:title" content="Chapter {{ chapter_number }} - {{ novel_title_clean }}">
+    <meta property="og:description" content="Read Chapter {{ chapter_number }} of {{ novel_title_clean }} for free. Enjoy this captivating chapter with our beautiful reading interface, featuring dark mode, text-to-speech, and customizable settings.">
+    <meta property="og:image" content="{{ url_for('static', filename='novel_thumbnails/' + novel_title + '.jpg', _external=True) }}">
+    <meta property="og:site_name" content="Novel Reader">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request.url }}">
+    <meta property="twitter:title" content="Chapter {{ chapter_number }} - {{ novel_title_clean }}">
+    <meta property="twitter:description" content="Read Chapter {{ chapter_number }} of {{ novel_title_clean }} for free. Enjoy this captivating chapter with our beautiful reading interface, featuring dark mode, text-to-speech, and customizable settings.">
+    <meta property="twitter:image" content="{{ url_for('static', filename='novel_thumbnails/' + novel_title + '.jpg', _external=True) }}">
+    
+    <!-- Additional Meta Tags -->
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="7 days">
+    <meta name="generator" content="Novel Reader">
+    
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-    <!-- Import mini player stuff -->
     <link rel="stylesheet" href="{{ url_for('static', filename='mini-player.css') }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="{{ url_for('static', filename='mini-player.js') }}"></script>
@@ -151,6 +180,43 @@
 
         .settings-button:active {
             background-color: #555;
+        }
+
+        /* Text Settings Group Styles */
+        .settings-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .settings-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .settings-item label {
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .settings-item .gradient-controls {
+            margin-top: 8px;
+        }
+
+        .settings-item .gradient-color-picker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-item .settings-button {
+            margin-top: 8px;
+            align-self: flex-start;
         }
     </style>
 </head>
@@ -330,6 +396,26 @@
                 <div class="settings-value">
                     Opacity: <span id="current-opacity">1</span>
                 </div>
+                <div style="margin-top: 15px;">
+                    <label for="font-weight-selector">Font Weight:</label>
+                    <select id="font-weight-selector" class="settings-select" style='margin-top: 5px;'>
+                        <option value="400" selected>Regular</option>
+                        <option value="700">Bold</option>
+                        <option value="800">Extra Bold</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h4>Text Color</h4>
+                <div class="gradient-controls">
+                    <div class="gradient-color-picker">
+                        <label>Text Color:</label>
+                        <input type="color" id="text-color" value="#ffffff">
+                        <input type="text" id="text-color-hex" class="hex-input" value="#ffffff" placeholder="#RRGGBB">
+                    </div>
+                    <button id="reset-text-color" class="settings-button">Reset to Default</button>
+                </div>
             </div>
 
             <div class="settings-section">
@@ -439,7 +525,6 @@
         <audio id="audioPlayer"></audio>
     </div>
   
-  
     <!-- Configure the player with songs -->
     <script>
       // We need to make sure the player is fully loaded before we can use it
@@ -468,8 +553,9 @@
             DISQUS.reset({
                 reload: true,
                 config: function () {
-                this.page.url = window.location.href;
-                this.page.identifier = 'chapter-' + document.getElementById('chapter-number').textContent + '-{{ novel_title_clean | replace(' ', '-') }}';
+                    this.page.url = window.location.href;
+                    this.page.identifier = 'chapter-' + document.getElementById('chapter-number').textContent + '-{{ novel_title_clean | replace(' ', '-') }}';
+                    
                 }
             });
             }
@@ -539,6 +625,12 @@
                 document.getElementById('chapterNum').innerText = `${chapters[sortedChapters[index-1]][0]}`;
                 document.getElementById('title').innerText = `Chapter ${sortedChapters[index-1]} - {{ novel_title_clean }}`;
                 window.scrollTo(0, 0); // Scroll to top
+
+                // Apply saved font weight to new chapter
+                const savedWeight = localStorage.getItem('fontWeight');
+                if (savedWeight) {
+                    document.getElementById('textToRead').style.fontWeight = savedWeight;
+                }
             }
             updateDiscussion();
         }
@@ -975,7 +1067,82 @@
             updateGradient();
         });
 
+        // Text Color Controls
+        const textColorPicker = document.getElementById('text-color');
+        const textColorHex = document.getElementById('text-color-hex');
+        const resetTextColorButton = document.getElementById('reset-text-color');
+
+        function updateTextColor() {
+            const color = textColorPicker.value;
+            textToRead.style.color = color;
+            
+            // Save text color to localStorage
+            localStorage.setItem('textColor', color);
+        }
+
+        // Sync color picker with hex input
+        textColorHex.addEventListener('input', function() {
+            if (validateHexColor(this.value)) {
+                textColorPicker.value = this.value;
+                updateTextColor();
+            }
+        });
+
+        // Sync hex input with color picker
+        textColorPicker.addEventListener('input', function() {
+            textColorHex.value = this.value;
+            updateTextColor();
+        });
+
+        // Load saved text color
+        const savedTextColor = localStorage.getItem('textColor');
+        if (savedTextColor) {
+            textColorPicker.value = savedTextColor;
+            textColorHex.value = savedTextColor;
+            updateTextColor();
+        }
+
+        // Reset text color button
+        resetTextColorButton.addEventListener('click', () => {
+            textColorPicker.value = '#ffffff';
+            textColorHex.value = '#ffffff';
+            updateTextColor();
+        });
         
+        // Text Opacity Controls
+        const opacitySlider = document.getElementById('opacity-slider');
+        const currentOpacity = document.getElementById('current-opacity');
+
+        opacitySlider.addEventListener('input', function() {
+            const opacity = this.value;
+            currentOpacity.textContent = opacity;
+            textToRead.style.opacity = opacity;
+            localStorage.setItem('textOpacity', opacity);
+        });
+
+        // Load saved opacity
+        const savedOpacity = localStorage.getItem('textOpacity');
+        if (savedOpacity) {
+            opacitySlider.value = savedOpacity;
+            currentOpacity.textContent = savedOpacity;
+            textToRead.style.opacity = savedOpacity;
+        }
+
+        // Font Weight Controls
+        const fontWeightSelector = document.getElementById('font-weight-selector');
+
+        fontWeightSelector.addEventListener('change', function() {
+            const weight = this.value;
+            document.getElementById('textToRead').style.fontWeight = weight;
+            localStorage.setItem('fontWeight', weight);
+        });
+
+        // Load saved font weight
+        const savedFontWeight = localStorage.getItem('fontWeight');
+        if (savedFontWeight) {
+            fontWeightSelector.value = savedFontWeight;
+            document.getElementById('textToRead').style.fontWeight = savedFontWeight;
+        }
     </script>
     
     
