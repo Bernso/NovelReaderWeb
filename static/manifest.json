@@ -1,0 +1,41 @@
+{
+    "name": "Novel Reader",
+    "short_name": "NovelReader",
+    "description": "Read your favorite novels with a beautiful interface, featuring dark mode, text-to-speech, and customizable settings.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#121212",
+    "theme_color": "#121212",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/static/MAINICON-20240501-rounded.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/static/MAINICON-20240501-rounded.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Browse Novels",
+            "url": "/novels",
+            "description": "Browse all available novels"
+        },
+        {
+            "name": "Popular Novels",
+            "url": "/popular-novels",
+            "description": "View most popular novels"
+        }
+    ],
+    "categories": ["books", "reading", "novels", "entertainment"],
+    "lang": "en-US",
+    "dir": "ltr",
+    "prefer_related_applications": false,
+    "related_applications": ["https://bernso.pythonanywhere.com/"]
+} 

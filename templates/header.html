@@ -1,5 +1,6 @@
-
 <header class="header">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
     <div class="logo">
         <h1><a href='/'>Novel Reader</a></h1>
     </div>
@@ -8,6 +9,7 @@
         <span></span>
         <span></span>
     </button>
+    
     <nav class="nav">
         <ul>
             <li>
@@ -28,3 +30,97 @@
         </ul>
     </nav>
 </header>
+
+<button id="toggleHeaderBtn" class="toggle-header-btn" title="Toggle Header">
+    <i class="fas fa-chevron-up"></i>
+</button>
+
+<style>
+    .toggle-header-btn {
+        position: fixed;
+        top: 15px;
+        right: 20px;
+        z-index: 1001;
+        background: var(--background-dark);
+        border: 1px solid rgba(187, 134, 252, 0.2);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .toggle-header-btn i {
+        color: var(--primary-color);
+        font-size: 1.2rem;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .toggle-header-btn:hover {
+        transform: translateY(-2px);
+        background: var(--background-light);
+        border-color: var(--primary-color);
+        box-shadow: 0 6px 16px rgba(187, 134, 252, 0.15);
+    }
+
+    .toggle-header-btn.rotated i {
+        transform: rotate(180deg);
+    }
+
+    .header.hidden {
+        transform: translateY(-100%);
+        position: absolute;
+        width: 100%;
+        opacity: 0;
+        visibility: hidden;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                    opacity 0.3s ease,
+                    visibility 0.3s ease;
+    }
+
+    .header {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                    opacity 0.3s ease,
+                    visibility 0.3s ease;
+        position: fixed;
+        width: 100%;
+        z-index: 100;
+    }
+
+    #randomDirButton {
+        margin-right: 80px;
+    }
+    @media (max-width: 768px) {
+        #randomDirButton {
+        
+            margin: 0px;
+        }
+    }
+
+    .mobile-menu-button {
+        margin-right: 70px;
+    }
+
+    @media (max-width: 768px) {
+
+        .logo h1 {
+            margin-right: 60px;
+
+        }
+    }
+
+</style>
+
+<script>
+
+</script>

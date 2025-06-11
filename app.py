@@ -307,12 +307,34 @@ def home():
 @app.route('/sitemap.xml')
 def sitemap():
     pages = []
+    # Add static pages
     for rule in app.url_map.iter_rules():
         if "GET" in rule.methods and not rule.arguments and not rule.rule.startswith('/static'):
             pages.append({
                 'loc': request.url_root.strip('/') + rule.rule,
                 'lastmod': datetime.datetime.utcnow().strftime('%Y-%m-%d')
             })
+    
+    # Add novel pages
+    novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
+    for novel in os.listdir(novels_folder_path):
+        if os.path.isdir(os.path.join(novels_folder_path, novel)):
+            # Add novel page
+            novel_name = novel[:-9] if novel.endswith('-chapters') else novel
+            pages.append({
+                'loc': request.url_root.strip('/') + f'/novels_chapters?n={urllib.parse.quote(novel)}',
+                'lastmod': datetime.datetime.utcnow().strftime('%Y-%m-%d')
+            })
+            
+            # Add chapter pages
+            novel_path = os.path.join(novels_folder_path, novel)
+            chapters = [f for f in os.listdir(novel_path) if f.startswith('chapter-') and f.endswith('.txt')]
+            for chapter in chapters:
+                chapter_num = chapter.split('-')[1].split('.')[0]
+                pages.append({
+                    'loc': request.url_root.strip('/') + f'/read?n={urllib.parse.quote(novel)}&c={chapter_num}',
+                    'lastmod': datetime.datetime.utcnow().strftime('%Y-%m-%d')
+                })
 
     xml = render_template_string('''<?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -330,7 +352,17 @@ def sitemap():
 def robots():
     return Response(
         "User-agent: *\n"
-        "Disallow:\n\n"
+        "Allow: /\n"
+        "Allow: /novels\n"
+        "Allow: /novels_chapters\n"
+        "Allow: /read\n"
+        "Allow: /popular-novels\n"
+        "Disallow: /api/*\n"
+        "Disallow: /webscrapers\n"
+        "Disallow: /update_novel/*\n"
+        "Disallow: /currentChapter\n"
+        "Disallow: /plans\n"
+        "Disallow: /domains\n\n"
         f"Sitemap: https://berns0.pythonanywhere.com{url_for('sitemap')}\n",
         mimetype="text/plain")
     
@@ -716,7 +748,14 @@ def read_chapter():
         if not os.path.exists(json_path):
             logger.error(f"Failed to create chapters.json for {novel_name}")
     
-    return render_template('chapterPage.html', novel_title=novel_name, chapter_number=chapter_number, novel_title_clean=novel_name[:-9].replace("%27", "'"))
+    # Get current timestamp in ISO format
+    current_time = datetime.datetime.utcnow().isoformat()
+    
+    return render_template('chapterPage.html', 
+                         novel_title=novel_name, 
+                         chapter_number=chapter_number, 
+                         novel_title_clean=novel_name[:-9].replace("%27", "'"),
+                         current_time=current_time)
 
 
 @app.route('/novels/<novel>/chapters/<chapter_number>')

@@ -267,3 +267,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+
+
+// Add this at the beginning of your script section
+const toggleHeaderBtn = document.getElementById('toggleHeaderBtn');
+const header = document.querySelector('.header');
+let isHeaderVisible = true;
+
+toggleHeaderBtn.addEventListener('click', () => {
+    isHeaderVisible = !isHeaderVisible;
+    header.classList.toggle('hidden');
+    toggleHeaderBtn.classList.toggle('rotated');
+    
+    // Save header state to localStorage
+    localStorage.setItem('headerVisible', isHeaderVisible);
+});
+
+// Load saved header state
+const savedHeaderState = localStorage.getItem('headerVisible');
+if (savedHeaderState === 'false') {
+    header.classList.add('hidden');
+    toggleHeaderBtn.classList.add('rotated');
+    isHeaderVisible = false;
+}
