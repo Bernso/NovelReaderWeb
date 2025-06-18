@@ -483,7 +483,8 @@ if __name__ == '__main__':
     start = time.time()
     links = [
         #"https://novelfire.net/book/shadow-slave",
-        "https://novelfire.net/book/the-beginning-after-the-end"
+        #"https://novelfire.net/book/the-beginning-after-the-end",
+        "https://novelfire.net/book/i-became-a-god-in-a-horror-game"
     ]
     
     async def main():

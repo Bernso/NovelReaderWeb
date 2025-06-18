@@ -178,12 +178,10 @@ a, .nav-link, .fancyLink {
 .logo h1 {
     font-size: 1.2em;
     color: var(--primary-color);
-    padding: 20px;
     margin: 10px;
 }
 
 .logo a {
-    padding: 10px;
     text-decoration: none;
     color: #BB86FC;
 }
@@ -417,14 +415,17 @@ a, .nav-link, .fancyLink {
 }
 
 
+.starter {
+    padding-top: 7rem !important;
+}
+
 
 
 /* Main Hero Section */
 .hero {
     width: 100%;
     max-width: 1200px;
-    padding: 4rem 2rem 3rem;
-    margin-top: 70px;
+    padding: 2rem 2rem 3rem;
     text-align: center;
     background: linear-gradient(135deg, var(--background-dark) 0%, var(--actual-background) 100%);
     position: relative;
@@ -805,9 +806,7 @@ li a:hover, .novel-link:hover, .chapter-link:hover {
 
 /* Home Page */
 .hero {
-    
-    padding: 120px 20px 60px;
-
+    padding: 80px 20px 60px;
 }
 
 .features {
