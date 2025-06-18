@@ -314,6 +314,7 @@ a, .nav-link, .fancyLink {
     }
 
     .nav.active {
+        background: rgba(0, 0, 0, 0.29);
         opacity: 1;
         visibility: visible;
     }
