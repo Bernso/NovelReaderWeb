@@ -417,7 +417,7 @@ a, .nav-link, .fancyLink {
 
 
 .starter {
-    padding-top: 7rem !important;
+    padding-top: 10rem !important;
 }
 
 
@@ -471,8 +471,6 @@ a, .nav-link, .fancyLink {
     overflow-wrap: break-word;
     word-break: break-word;
     max-width: 100%;
-    padding: 0 20px;
-    margin: 0 auto;
     text-align: center;
 }
 
@@ -1258,7 +1256,7 @@ footer {
 }
 
 #categoryFilters input[type="checkbox"]:checked::after {
-    content: '✓';
+    content: '✔';
     position: absolute;
     color: var(--background-dark);
     font-size: 14px;
@@ -1266,7 +1264,7 @@ footer {
     top: 45%;
     left: 50%;
     transform: translate(-50%, -50%);
-    text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 768px) {
