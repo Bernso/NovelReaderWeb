@@ -215,11 +215,11 @@ function showPromptwebNovelDotCom() {
     }
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
-    const button = document.getElementById('randomDirButton');
+    const desktopButton = document.getElementById('randomDirButtonDesktop');
+    const mobileButton = document.getElementById('randomDirButtonMobile');
 
-    button.addEventListener('click', () => {
+    function handleRandomNovelClick() {
         fetch('/random_directory')
             .then(response => response.json())
             .then(data => {
@@ -232,9 +232,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             })
             .catch(error => console.error('Error:', error));
-    });
-});
+    }
 
+    if (desktopButton) {
+        desktopButton.addEventListener('click', handleRandomNovelClick);
+    }
+    if (mobileButton) {
+        mobileButton.addEventListener('click', handleRandomNovelClick);
+    }
+});
 
 document.addEventListener('DOMContentLoaded', function() {
     const mobileMenuButton = document.querySelector('.mobile-menu-button');
@@ -269,25 +275,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-
-// Add this at the beginning of your script section
-const toggleHeaderBtn = document.getElementById('toggleHeaderBtn');
-const header = document.querySelector('.header');
-let isHeaderVisible = true;
-
-toggleHeaderBtn.addEventListener('click', () => {
-    isHeaderVisible = !isHeaderVisible;
-    header.classList.toggle('hidden');
-    toggleHeaderBtn.classList.toggle('rotated');
-    
-    // Save header state to localStorage
-    localStorage.setItem('headerVisible', isHeaderVisible);
-});
-
-// Load saved header state
-const savedHeaderState = localStorage.getItem('headerVisible');
-if (savedHeaderState === 'false') {
-    header.classList.add('hidden');
-    toggleHeaderBtn.classList.add('rotated');
-    isHeaderVisible = false;
-}

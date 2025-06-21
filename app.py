@@ -31,6 +31,7 @@ try:
     import datetime
     from flask_limiter import Limiter
     from flask_limiter.util import get_remote_address
+    from threading import Lock
 
 
     
@@ -69,6 +70,57 @@ limiter = Limiter(
     storage_options={},
     strategy="fixed-window"
 )
+
+# --- BEGIN: Most Recent Chapter Cache ---
+# Global cache for latest chapter numbers
+latest_chapter_cache = {}
+latest_chapter_cache_lock = Lock()
+
+def initialize_latest_chapter_cache():
+    """
+    Populate the latest_chapter_cache with the highest chapter number for each novel at server startup.
+    """
+    novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
+    for novel in os.listdir(novels_folder_path):
+        novel_path = os.path.join(novels_folder_path, novel)
+        if os.path.isdir(novel_path):
+            # Try chapters.json first
+            json_path = os.path.join(novel_path, 'chapters.json')
+            latest = None
+            if os.path.exists(json_path):
+                try:
+                    with open(json_path, 'r', encoding='utf-8') as f:
+                        chapters = json.load(f)
+                        if chapters:
+                            # Use float for sorting, but keep as string for key
+                            latest = max(chapters.keys(), key=lambda x: float(x))
+                except Exception:
+                    pass
+            else:
+                # Fallback to .txt files
+                chapters = [f for f in os.listdir(novel_path) if f.startswith('chapter-') and f.endswith('.txt')]
+                chapter_numbers = []
+                for chapter in chapters:
+                    parts = chapter.split('-')
+                    if len(parts) == 3:
+                        try:
+                            chapter_number = float(f"{parts[1]}.{parts[2].split('.')[0]}")
+                        except Exception:
+                            continue
+                    else:
+                        try:
+                            chapter_number = int(parts[1].split('.')[0])
+                        except Exception:
+                            continue
+                    chapter_numbers.append(chapter_number)
+                if chapter_numbers:
+                    latest = str(max(chapter_numbers))
+            if latest is not None:
+                latest_chapter_cache[novel] = latest
+
+# Call this at startup
+initialize_latest_chapter_cache()
+# --- END: Most Recent Chapter Cache ---
 
 @app.before_request
 def maintainance_override():
@@ -1501,6 +1553,15 @@ def update_chapter():
             logger.error(f"Error updating metadata.json: {e}")
             # Continue even if metadata update fails
 
+        # Update latest_chapter_cache if needed
+        with latest_chapter_cache_lock:
+            try:
+                current_latest = latest_chapter_cache.get(novel_name)
+                if current_latest is None or float(chapter_key) > float(current_latest):
+                    latest_chapter_cache[novel_name] = chapter_key
+            except Exception:
+                latest_chapter_cache[novel_name] = chapter_key
+
         # Redirect to the chapter page instead of returning JSON
         return redirect(url_for('read_chapter', n=novel_name, c=chapter_number))
 
@@ -1509,6 +1570,26 @@ def update_chapter():
         return jsonify({"error": str(e)}), 500
 
 
+
+
+@app.route('/api/chapters/latest', methods=['GET'])
+def get_latest_chapter():
+    """
+    Return the most recent chapter number for a given novel (fast, cached in memory).
+    Query param: n (novel name)
+    """
+    novel_name = request.args.get('n', '')
+    if not novel_name:
+        return jsonify({'error': 'No novel specified'}), 400
+    # Normalize name
+    decoded_name = urllib.parse.unquote(novel_name).replace('+', ' ')
+    if not decoded_name.endswith('-chapters'):
+        decoded_name = decoded_name + '-chapters'
+    with latest_chapter_cache_lock:
+        latest = latest_chapter_cache.get(decoded_name)
+    if latest is None:
+        return jsonify({'error': 'Novel not found'}), 404
+    return jsonify({'latest_chapter': latest})
 
 
 if __name__ == "__main__":
