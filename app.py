@@ -720,7 +720,7 @@ def get_chapters():
             decoded_name = urllib.parse.unquote(novel_name).replace('+', ' ')
             if not decoded_name.endswith('-chapters'):
                 decoded_name = decoded_name + '-chapters'
-            database.increment_view(decoded_name, 'api_view')
+            database.increment_view(decoded_name)
             cleanup_chapter_files(decoded_name)
 
         # Handle single chapter request
@@ -799,6 +799,9 @@ def read_chapter():
         # If the JSON still doesn't exist after creating it, log an error but continue
         if not os.path.exists(json_path):
             logger.error(f"Failed to create chapters.json for {novel_name}")
+    
+    # Increment view count for the novel
+    database.increment_view(novel_name)
     
     # Get current timestamp in ISO format
     current_time = datetime.datetime.utcnow().isoformat()
@@ -1262,7 +1265,7 @@ def novels_chapters():
         return "No novel specified", 400
     
     # Track view in database
-    database.increment_view(novel_name, 'page_view')
+    database.increment_view(novel_name)
     
     chapterNumber = request.args.get('c')
     if chapterNumber:
