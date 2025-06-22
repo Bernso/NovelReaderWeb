@@ -1079,7 +1079,7 @@
             
             if (totalChapters > 0) {
                 const progressPercentage = Math.round((currentChapterIndex / totalChapters) * 100);
-                progressText.textContent = `Chapter ${currentChapter} of ${totalChapters} (${progressPercentage}% complete) • Last read: ${stats.timeAgo}`;
+                progressText.textContent = `Chapter ${currentChapter} of ${totalChapters - 1} (${progressPercentage}% complete) • Last read: ${stats.timeAgo}`;
             } else {
                 progressText.textContent = `Chapter ${currentChapter} • Last read: ${stats.timeAgo}`;
             }
@@ -1153,12 +1153,12 @@
             });
         }
 
-        async function getChaptersFromDB(novelName) {
+        async function getNovelDataFromDB(novelName) {
             const db = await openDBWithStore(novelName);
             return new Promise((resolve, reject) => {
                 const tx = db.transaction(novelName, 'readonly');
                 const store = tx.objectStore(novelName);
-                const getReq = store.get('chapters');
+                const getReq = store.get('novel_data');
                 getReq.onsuccess = function() {
                     resolve(getReq.result || null);
                 };
@@ -1168,12 +1168,12 @@
             });
         }
 
-        async function saveChaptersToDB(novelName, chaptersObj) {
+        async function saveNovelDataToDB(novelName, data) {
             const db = await openDBWithStore(novelName);
             return new Promise((resolve, reject) => {
                 const tx = db.transaction(novelName, 'readwrite');
                 const store = tx.objectStore(novelName);
-                const putReq = store.put(chaptersObj, 'chapters');
+                const putReq = store.put(data, 'novel_data');
                 putReq.onsuccess = function() { resolve(); };
                 putReq.onerror = function() { reject(putReq.error); };
             });
@@ -1186,73 +1186,97 @@
         async function loadChapters(novelName, initialChapter) {
             // 1. Fetch and display the initial chapter for fast load
             const chapterNum = typeof initialChapter === 'string' ? initialChapter : String(initialChapter);
-            let initialChapterData = null;
-            try {
-                const singleChapterResponse = await fetch(`/api/chapters?n=${encodeURIComponent(novelName)}&c=${encodeURIComponent(chapterNum)}`);
-                if (singleChapterResponse.ok) {
-                    initialChapterData = await singleChapterResponse.json();
-                }
-            } catch (e) {}
+            
+            // Try to get the initial chapter from cache first for an even faster load
+            const cachedData = await getNovelDataFromDB(novelName);
+            const cachedChapters = cachedData ? cachedData.chapters : null;
 
-            // Display the initial chapter immediately
-            displayChapterContent(initialChapterData && initialChapterData[chapterNum], chapterNum);
+            if (cachedChapters && cachedChapters[chapterNum]) {
+                displayChapterContent(cachedChapters[chapterNum], chapterNum);
+            } else {
+                 // Fallback to network if not in cache
+                let initialChapterData = null;
+                try {
+                    const singleChapterResponse = await fetch(`/api/chapters?n=${encodeURIComponent(novelName)}&c=${encodeURIComponent(chapterNum)}`);
+                    if (singleChapterResponse.ok) {
+                        initialChapterData = await singleChapterResponse.json();
+                        displayChapterContent(initialChapterData && initialChapterData[chapterNum], chapterNum);
+                    }
+                } catch (e) {
+                    // Display loading, the full fetch will handle the error
+                    displayChapterContent(null, chapterNum)
+                }
+            }
+
             disableNavigation();
 
-            // 2. ALWAYS fetch the full chapter list and update IndexedDB and global state
+            // 2. In the background, check for updates and fetch the full chapter list if needed
             fetchAndCacheAllChapters(novelName, chapterNum);
         }
 
         async function fetchAndCacheAllChapters(novelName, initialChapterNum) {
             try {
-                // 1. Check IndexedDB for cached chapters
-                let dbChapters = await getChaptersFromDB(novelName);
-                let cachedLatest = null;
-                if (dbChapters) {
-                    chapters = dbChapters;
-                    let cachedKeys = Object.keys(chapters);
-                    if (cachedKeys.length > 0) {
-                        cachedLatest = Math.max(...cachedKeys.map(Number));
+                // 1. Get cached data from IndexedDB
+                const cachedData = await getNovelDataFromDB(novelName);
+                const cachedChapters = cachedData ? cachedData.chapters : null;
+                const cachedLastUpdated = cachedData ? cachedData.last_updated : null;
+
+                // 2. Fetch the latest last_updated timestamp from the server
+                let serverLastUpdated = null;
+                try {
+                    const lastUpdatedResp = await fetch(`/api/novel-last-updated?n=${encodeURIComponent(novelName)}`);
+                    if (lastUpdatedResp.ok) {
+                        const data = await lastUpdatedResp.json();
+                        serverLastUpdated = data.last_updated;
                     }
+                } catch (e) {
+                    console.error("Could not fetch last updated timestamp", e);
                 }
-                // 2. If no chapters in cache, fetch all from server and save
-                if (!dbChapters || cachedLatest === null) {
+                
+                // 3. Decide whether to fetch all chapters from the server
+                const shouldFetchAll = !cachedChapters || !cachedLastUpdated || (serverLastUpdated && new Date(serverLastUpdated) > new Date(cachedLastUpdated));
+
+                if (shouldFetchAll) {
+                    console.log("Fetching fresh chapter list from server.");
                     const response = await fetch(`/api/chapters?n=${encodeURIComponent(novelName)}`);
                     if (!response.ok) throw new Error('Failed to fetch chapter list');
                     chapters = await response.json();
-                    await saveChaptersToDB(novelName, chapters);
+                    // Save new chapters and the new timestamp to DB
+                    await saveNovelDataToDB(novelName, { chapters: chapters, last_updated: serverLastUpdated });
                 } else {
-                    // 3. If chapters in cache, check server's latest
-                    let serverLatest = null;
-                    try {
-                        const latestResp = await fetch(`/api/chapters/latest?n=${encodeURIComponent(novelName)}`);
-                        if (latestResp.ok) {
-                            const latestData = await latestResp.json();
-                            serverLatest = parseFloat(latestData.latest_chapter);
-                        }
-                    } catch (e) {}
-                    // 4. Only fetch all chapters if server has newer
-                    if (serverLatest !== null && serverLatest > cachedLatest) {
-                        const response = await fetch(`/api/chapters?n=${encodeURIComponent(novelName)}`);
-                        if (!response.ok) throw new Error('Failed to fetch chapter list');
-                        chapters = await response.json();
-                        await saveChaptersToDB(novelName, chapters);
-                    }
+                    console.log("Using cached chapters.");
+                    chapters = cachedChapters;
                 }
+
+                // --- The rest of the function remains the same ---
                 sortedChapters = Object.keys(chapters).sort((a, b) => parseFloat(a) - parseFloat(b));
                 totalChapters = sortedChapters.length;
                 let chapterIndex = sortedChapters.findIndex(chap => chap === initialChapterNum);
-                if (chapterIndex === -1) chapterIndex = 0;
+                if (chapterIndex === -1) { 
+                    // If current chapter is not in the list (e.g., it was removed), go to the first one
+                    chapterIndex = 0;
+                }
                 currentChapterIndex = chapterIndex + 1;
+                
+                // If we fell back to chapter 0, we need to re-display it.
+                const currentChapterKey = sortedChapters[chapterIndex];
+                displayChapterContent(chapters[currentChapterKey], currentChapterKey);
+
+
                 chaptersReady = true;
                 enableNavigation();
                 updateNavigationButtons(sortedChapters, currentChapterIndex);
-                // Update the progress display
                 updateProgressDisplay();
+
             } catch (error) {
+                console.error("Error in fetchAndCacheAllChapters:", error);
                 chaptersReady = false;
-                // Optionally show a message that navigation is unavailable
+                // Display error to user
+                const textToRead = document.getElementById('textToRead');
+                textToRead.innerHTML = `<p style='color: #ff6b6b; text-align: center; margin: 2rem;'>Could not load chapter list. Please check your connection and refresh.</p>`;
             }
         }
+
 
         function displayChapterContent(value, chapterNum) {
             const textToRead = document.getElementById('textToRead');

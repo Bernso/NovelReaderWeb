@@ -1595,6 +1595,63 @@ def get_latest_chapter():
     return jsonify({'latest_chapter': latest})
 
 
+@app.route('/api/novel-last-updated', methods=['GET'])
+def novel_last_updated():
+    """
+    Returns the last updated timestamp for a novel from its metadata or file modification time.
+    It returns the most recent of the two.
+    Query param: n (novel name)
+    """
+    novel_name = request.args.get('n', '')
+    if not novel_name:
+        return jsonify({'error': 'No novel specified'}), 400
+    
+    # Normalize name
+    decoded_name = urllib.parse.unquote(novel_name).replace('+', ' ')
+    if not decoded_name.endswith('-chapters'):
+        decoded_name = decoded_name + '-chapters'
+
+    # 1. Get timestamp from metadata
+    metadata = get_novel_metadata(decoded_name)
+    metadata_updated_str = metadata.get("last_updated", "")
+    metadata_ts = None
+    if metadata_updated_str:
+        try:
+            # Handle multiple possible formats (with or without time)
+            if ' ' in metadata_updated_str:
+                metadata_ts = datetime.datetime.strptime(metadata_updated_str, '%Y-%m-%d %H:%M:%S')
+            else:
+                metadata_ts = datetime.datetime.strptime(metadata_updated_str, '%Y-%m-%d')
+        except ValueError:
+            metadata_ts = None
+
+    # 2. Get timestamp from file modification time
+    file_ts = None
+    novel_path = os.path.join(app.root_path, 'templates', 'novels', decoded_name)
+    
+    mtime_path = None
+    # Prioritize chapters.json if it exists
+    chapters_json_path = os.path.join(novel_path, 'chapters.json')
+    if os.path.exists(chapters_json_path):
+        mtime_path = chapters_json_path
+    elif os.path.exists(novel_path):
+        mtime_path = novel_path
+    
+    if mtime_path:
+        file_mtime = os.path.getmtime(mtime_path)
+        file_ts = datetime.datetime.fromtimestamp(file_mtime)
+
+    # 3. Compare and return the most recent timestamp
+    if not metadata_ts and not file_ts:
+        return jsonify({'error': 'Novel not found or no timestamp available'}), 404
+    
+    # Filter out None values and find the max timestamp
+    valid_timestamps = [ts for ts in [metadata_ts, file_ts] if ts]
+    latest_ts = max(valid_timestamps)
+    
+    return jsonify({'last_updated': latest_ts.strftime('%Y-%m-%d %H:%M:%S')})
+
+
 if __name__ == "__main__":
     try:
         logger.header("Welcome to the Novel Reader developed by Bernso")

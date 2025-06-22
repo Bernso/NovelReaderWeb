@@ -484,7 +484,9 @@ if __name__ == '__main__':
     links = [
         #"https://novelfire.net/book/shadow-slave",
         #"https://novelfire.net/book/the-beginning-after-the-end",
-        "https://novelfire.net/book/i-became-a-god-in-a-horror-game"
+        #"https://novelfire.net/book/i-became-a-god-in-a-horror-game",
+        "https://novelfire.net/book/a-regressors-tale-of-cultivation",
+        "https://novelfire.net/book/advent-of-the-three-calamities"
     ]
     
     async def main():
