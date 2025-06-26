@@ -57,6 +57,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='mini-player.css') }}">
     <script src="{{ url_for('static', filename='mini-player.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
     <style>
         .features {
             display: grid;
@@ -1079,7 +1080,7 @@
             
             if (totalChapters > 0) {
                 const progressPercentage = Math.round((currentChapterIndex / totalChapters) * 100);
-                progressText.textContent = `Chapter ${currentChapter} of ${totalChapters - 1} (${progressPercentage}% complete) • Last read: ${stats.timeAgo}`;
+                progressText.textContent = `Chapter ${currentChapter} of ${totalChapters} (${progressPercentage}% complete) • Last read: ${stats.timeAgo}`;
             } else {
                 progressText.textContent = `Chapter ${currentChapter} • Last read: ${stats.timeAgo}`;
             }
@@ -1277,6 +1278,24 @@
             }
         }
 
+        // Whitelist of allowed tags
+        const ALLOWED_TAGS = [
+          'b', 'i', 'u', 'em', 'strong', 'br', 'p', 'ul', 'ol', 'li', 'span', 'div', 'a',
+          'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
+        ];
+
+        function escapeNonTagAngles(input) {
+            // Only allow tags that are exactly <b>, </b>, <i>, </i>, <strong>, </strong>, etc. (with optional attributes)
+            // ^ and $ ensure the whole match is the tag, not just part of it
+            const allowed = /^<\/?(b|i|u|em|strong|br|p|ul|ol|li|span|div|a|h[1-6])(\s[^>]*)?>$/;
+            // Replace all <...> that are NOT allowed tags (case-sensitive)
+            return input.replace(/<[^>]+>/g, function(match) {
+                // If it's an allowed tag (lowercase only, whole match), keep it
+                if (allowed.test(match)) return match;
+                // Otherwise, escape
+                return match.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            });
+        }
 
         function displayChapterContent(value, chapterNum) {
             const textToRead = document.getElementById('textToRead');
@@ -1287,13 +1306,18 @@
                 return;
             }
             const protection = `<strong class='hdText'><br><br>WOAH WOAH WOAH<br>You aren't trying to steal from https://berns0.pythonanywhere.com are you?! <a href='https://berns0.pythonanywhere.com/read?n=${encodeURIComponent(novel_title)}&c=${chapterNum}'>Link</a><br><br></strong>`;
+            let html = '';
             if (Array.isArray(value)) {
-                textToRead.innerHTML = `${protection}${String(value[1] || '').replace(/\n/g, '<br>')}${protection}`;
+                html = `${protection}${String(value[1] || '').replace(/\n/g, '<br>')}${protection}`;
                 chapterNumElement.textContent = value[0] || `Chapter ${chapterNum}`;
             } else if (typeof value === 'string') {
-                textToRead.innerHTML = `${protection}${value.replace(/\n/g, '<br>')}${protection}`;
+                html = `${protection}${value.replace(/\n/g, '<br>')}${protection}`;
                 chapterNumElement.textContent = `Chapter ${chapterNum}`;
             }
+            // Escape non-tag angle brackets before sanitizing
+            html = escapeNonTagAngles(html);
+            // Sanitize the HTML before inserting
+            textToRead.innerHTML = DOMPurify.sanitize(html, { ALLOWED_TAGS: ALLOWED_TAGS });
             // Save the current chapter progress
             saveCurrentChapter(novel_title, chapterNum);
             // Update the progress display

@@ -32,6 +32,7 @@ try:
     from flask_limiter import Limiter
     from flask_limiter.util import get_remote_address
     from threading import Lock
+    from markupsafe import Markup, escape
 
 
     
