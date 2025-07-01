@@ -347,11 +347,26 @@ def random_directory():
     return jsonify({'directory': 'No directories found'})
 
 
+novels_folder_path = os.path.join(app.root_path, 'templates', 'novels')
+total_views = 0
+try:
+    novel_views = database.get_all_novel_views()
+    total_views = sum(novel_views.values())
+except Exception as e:
+    logger.error(f"Error fetching total novel views from database: {e}")
+logger.success(f"Total novel views: {total_views}")
+
+
 
 
 @app.route('/')
 def home():
-    data = {"total_novels": total_novels, "total_chapters": total_chapters, "total_categories": len(all_categories)}
+    data = {
+        "total_novels": total_novels, 
+        "total_chapters": total_chapters, 
+        "total_categories": len(all_categories),
+        "total_views": total_views
+    }
     return render_template('home.html', data=data)
 
     

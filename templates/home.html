@@ -8,6 +8,26 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
     <title>Novel Reader</title>
 </head>
+<style>
+    .makeSmall {
+        min-height: 100px !important;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+    .no-pc {
+        display: none;
+    }
+
+    @media (max-width: 1200px) {
+        .no-pc {
+            display: flex;
+        }   
+    }
+    
+</style>
 
 <body class='no-select'>
     {% include 'header.html' %}
@@ -19,7 +39,6 @@
             <p>View our popular novels <a href='/popular-novels'>here</a></p>
             <p>You can view all the <a href='/p-notes'>recent patch notes</a> and <a href='/domains'>our domains</a></p>
         </section>
-
 
         <section class="features">
             <div class="feature no-select">
@@ -41,37 +60,32 @@
                 <h3>Dark Mode</h3>
                 <p>Enjoy reading with an eye-friendly dark mode.</p>
             </div>
+            <div class="feature no-select no-pc">
+                <a href='#authorSection'>
+                    <div class="icon">📚</div>
+                    <h3>Authors</h3>
+                    <p>Check out our section on authors and getting onto this site, or a sub-site!</p>
+                </a>
+            </div>
         </section>
+
 
         <section class='hero' style='border-radius: 20px'>
-            <h2>Our Stats</h2>
+            <h2>Recently Read</h2>
         </section>
 
-        <section class="features">
-            <div class="feature no-select">
+        <section class="features" id="recently-read-section">
+            <div class="feature no-select" id="no-recent-novels">
                 <a href='/novels'>
-                    <div class="icon">📖</div>
-                    <h3>Total Chapters</h3>
-                    <p><strong style='color: #BB86FC;'>{{ data.total_chapters }}</strong> chapters to read</p>
-                </a>
-            </div>
-            <div class="feature no-select">
-                <a href='/novels'>
-                    <div class="icon">📘</div>
-                    <h3>Total Novels</h3>
-                    <p><strong style='color: #BB86FC;'>{{ data.total_novels }}</strong> novels available</p>
-                </a>
-            </div>
-            <div class="feature no-select">
-                <a href='/novels'>
-                    <div class="icon">✨</div>
-                    <h3>Categories</h3>
-                    <p><strong style='color: #BB86FC;'>{{ data.total_categories }}</strong> different genres</p>
+                    <div class="icon">📚</div>
+                    <h3>No Recent Reads</h3>
+                    <p>Start reading novels to see them appear here!</p>
                 </a>
             </div>
         </section>
 
-        <section class='hero' style='border-radius: 20px'>
+
+        <section class='hero' style='border-radius: 20px' id='authorSection'>
             <h2>For Authors</h2>
         </section>
 
@@ -84,14 +98,56 @@
             <div class="feature no-select">
                 <div class="icon">📞</div>
                 <h3>Contact Us</h3>
-                <p>Discuss featuring your work, collaboration opportunities, or any questions about our platform.</p>
+                <p>Discuss your work, collaborations, or platform questions.</p>
             </div>
             <div class="feature no-select">
                 <div class="icon">💬</div>
                 <h3>How to Reach Us</h3>
                 <p>Join our <a href="https://www.discord.gg/k5HBFXqtCB" target="_blank" style='color: var(--primary-color) !important; display: inline; height: auto;'>Discord server</a> and message @.bernso</p>
             </div>
+            <div class="feature no-select no-pc">
+                <div class="icon">🔒</div>
+                <h3>Limitations</h3>
+                <p>Due to storage some novels may not make it to this site, but rather our sub-site</p>
+            </div>
         </section>
+
+        
+        <section class='hero' style='border-radius: 20px'>
+            <h2>Our Stats</h2>
+        </section>
+
+        <section class="features">
+            <div class="feature no-select">
+                <a href='/novels'>
+                    <div class="icon">📖</div>
+                    <h3>Total Chapters</h3>
+                    <p><strong style='color: #BB86FC;'>{{ data.total_chapters|numberFormat }}</strong> chapters to read</p>
+                </a>
+            </div>
+            <div class="feature no-select">
+                <a href='/novels'>
+                    <div class="icon">📘</div>
+                    <h3>Total Novels</h3>
+                    <p><strong style='color: #BB86FC;'>{{ data.total_novels|numberFormat }}</strong> novels available</p>
+                </a>
+            </div>
+            <div class="feature no-select">
+                <a href='/novels'>
+                    <div class="icon">✨</div>
+                    <h3>Categories</h3>
+                    <p><strong style='color: #BB86FC;'>{{ data.total_categories|numberFormat }}</strong> different genres</p>
+                </a>
+            </div>
+            <div class="feature no-select no-pc">
+                <a href='/novels'>
+                    <div class="icon">👀</div>
+                    <h3>Total Views</h3>
+                    <p><strong style='color: #BB86FC;'>{{ data.total_views|numberFormat }}</strong> views</p>
+                </a>
+            </div>
+        </section>
+
 
         <section class="community">
             <h2>Join Our Community</h2>
@@ -99,8 +155,193 @@
             <p>Created by <a href="https://www.github.com/Bernso" target="_blank" style='text-decoration: none;'>Bernso</a></p>
         </section>
     </main>
-
-
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <script>
+        
+        // Function to load and display recently read novels
+        function loadRecentlyReadNovels(showAll = false) {
+            const recentlyReadSection = document.getElementById('recently-read-section');
+            const noRecentNovels = document.getElementById('no-recent-novels');
+            
+            // Get all localStorage keys
+            const keys = Object.keys(localStorage);
+            const recentlyReadNovels = [];
+            
+            // Find all keys that start with "lastRead_"
+            keys.forEach(key => {
+                if (key.startsWith('lastRead_')) {
+                    const novelName = key.replace('lastRead_', '');
+                    const chapterNumber = localStorage.getItem(key);
+                    const timeKey = `lastReadTime_${novelName}`;
+                    const readTime = localStorage.getItem(timeKey);
+                    
+                    if (readTime) {
+                        recentlyReadNovels.push({
+                            name: novelName,
+                            chapter: chapterNumber,
+                            time: new Date(parseInt(readTime))
+                        });
+                    }
+                }
+            });
+            
+            // Sort by read time (newest first)
+            recentlyReadNovels.sort((a, b) => b.time - a.time);
+            
+            // Clear the section
+            recentlyReadSection.innerHTML = '';
+            
+            if (recentlyReadNovels.length === 0) {
+                // Show no recent novels message
+                recentlyReadSection.appendChild(noRecentNovels);
+            } else {
+                // Determine how many to show based on screen width
+                let maxToShow = 3;
+                if (window.innerWidth <= 1200) {
+                    maxToShow = 4;
+                }
+                // Limit to first maxToShow unless showAll is true
+                const novelsToShow = showAll ? recentlyReadNovels : recentlyReadNovels.slice(0, maxToShow);
+                
+                // Display recently read novels
+                novelsToShow.forEach(novel => {
+                    const featureDiv = document.createElement('div');
+                    featureDiv.className = 'feature no-select makeSmall';
+                    
+                    const timeAgo = getTimeAgo(novel.time);
+                    
+                    featureDiv.innerHTML = `
+                        <a href="/read?n=${encodeURIComponent(novel.name)}&c=${novel.chapter}">
+                            <!-- <div class="icon">📖</div> -->
+                            <h3>${novel.name.slice(0, -9)}</h3>
+                            <p>Chapter <strong style='color: #BB86FC;'>${novel.chapter}</strong></p>
+                            <p style="font-size: 0.9em; color: var(--text-muted);">${timeAgo}</p>
+                        </a>
+                    `;
+                    
+                    recentlyReadSection.appendChild(featureDiv);
+                });
+                
+                // Add "Load More" button if there are more than maxToShow novels and not showing all
+                if (recentlyReadNovels.length > maxToShow && !showAll) {
+                    const loadMoreWrapper = document.createElement('div');
+                    loadMoreWrapper.style.cssText = `
+                        grid-column: 1 / -1;
+                        text-align: center;
+                        margin: 20px 0;
+                    `;
+                    
+                    const loadMoreButton = document.createElement('button');
+                    loadMoreButton.textContent = `Load More (${recentlyReadNovels.length - maxToShow} more)`;
+                    loadMoreButton.style.cssText = `
+                        background: var(--actual-background);
+                        color: var(--text-muted);
+                        border: 1px solid var(--primary-color);
+                        padding: 15px 30px;
+                        border-radius: 12px;
+                        cursor: pointer;
+                        font-size: 16px;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 0 5px rgba(187, 134, 252, 0.4), 0 4px 15px rgba(187, 134, 252, 0.3);
+                        letter-spacing: 0.5px;
+                        display: inline-block;
+                    `;
+                    
+                    loadMoreButton.addEventListener('mouseenter', function() {
+                        this.style.transform = 'translateY(-2px)';
+                        this.style.boxShadow = '0 0 10px rgba(187, 134, 252, 0.6), 0 6px 20px rgba(187, 134, 252, 0.4)';
+                        this.style.borderColor = 'var(--primary-hover)';
+                    });
+                    
+                    loadMoreButton.addEventListener('mouseleave', function() {
+                        this.style.transform = 'translateY(0)';
+                        this.style.boxShadow = '0 0 5px rgba(187, 134, 252, 0.4), 0 4px 15px rgba(187, 134, 252, 0.3)';
+                        this.style.borderColor = 'var(--primary-color)';
+                    });
+                    
+                    loadMoreButton.addEventListener('click', function() {
+                        loadRecentlyReadNovels(true);
+                    });
+                    
+                    loadMoreWrapper.appendChild(loadMoreButton);
+                    recentlyReadSection.appendChild(loadMoreWrapper);
+                }
+                
+                // Add "Hide" button if showing all novels and there are more than maxToShow
+                if (showAll && recentlyReadNovels.length > maxToShow) {
+                    const hideWrapper = document.createElement('div');
+                    hideWrapper.style.cssText = `
+                        grid-column: 1 / -1;
+                        text-align: center;
+                        margin: 20px 0;
+                    `;
+                    
+                    const hideButton = document.createElement('button');
+                    hideButton.textContent = 'Hide Extra';
+                    hideButton.style.cssText = `
+                        background: var(--actual-background);
+                        color: var(--text-muted);
+                        border: 1px solid var(--primary-color);
+                        padding: 15px 30px;
+                        border-radius: 12px;
+                        cursor: pointer;
+                        font-size: 16px;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 0 5px rgba(187, 134, 252, 0.4), 0 4px 15px rgba(187, 134, 252, 0.3);
+                        letter-spacing: 0.5px;
+                        display: inline-block;
+                    `;
+                    
+                    hideButton.addEventListener('mouseenter', function() {
+                        this.style.transform = 'translateY(-2px)';
+                        this.style.boxShadow = '0 0 10px rgba(187, 134, 252, 0.6), 0 6px 20px rgba(187, 134, 252, 0.4)';
+                        this.style.borderColor = 'var(--primary-hover)';
+                    });
+                    
+                    hideButton.addEventListener('mouseleave', function() {
+                        this.style.transform = 'translateY(0)';
+                        this.style.boxShadow = '0 0 5px rgba(187, 134, 252, 0.4), 0 4px 15px rgba(187, 134, 252, 0.3)';
+                        this.style.borderColor = 'var(--primary-color)';
+                    });
+                    
+                    hideButton.addEventListener('click', function() {
+                        loadRecentlyReadNovels(false);
+                    });
+                    
+                    hideWrapper.appendChild(hideButton);
+                    recentlyReadSection.appendChild(hideWrapper);
+                }
+            }
+        }
+        
+        // Function to get time ago string
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) {
+                return 'Just now';
+            } else if (diffInSeconds < 3600) {
+                const minutes = Math.floor(diffInSeconds / 60);
+                return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            } else if (diffInSeconds < 86400) {
+                const hours = Math.floor(diffInSeconds / 3600);
+                return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            } else if (diffInSeconds < 2592000) {
+                const days = Math.floor(diffInSeconds / 86400);
+                return `${days} day${days > 1 ? 's' : ''} ago`;
+            } else {
+                const months = Math.floor(diffInSeconds / 2592000);
+                return `${months} month${months > 1 ? 's' : ''} ago`;
+            }
+        }
+        
+        // Load recently read novels when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRecentlyReadNovels();
+        });
+    </script>
+
 </body>
 </html>
