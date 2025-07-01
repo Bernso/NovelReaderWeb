@@ -711,7 +711,7 @@ footer {
 
 @media only screen and (max-width: 768px) {
     .features {
-        grid-template-columns: 1fr; /* Single column on small screens */
+        grid-template-columns: repeat(2, 1fr); /* Two columns for 481px-768px */
     }
 }
 
