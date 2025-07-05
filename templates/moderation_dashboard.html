@@ -1,3 +1,39 @@
+{% macro render_comment(comment, level=0) %}
+<div class="comment-card" data-comment-id="{{ comment.id }}" style="margin-left: {{ level * 30 }}px;">
+    <div class="comment-header">
+        <div class="comment-info">
+            <div class="comment-author">{{ comment.name or 'Anonymous' }}</div>
+            <div class="comment-thread">
+                📚 <a href="/read?n={{ comment.novel_name }}-chapters&c={{ comment.chapter_number }}" target="_blank">
+                    {{ comment.novel_name }} - Chapter {{ comment.chapter_number }}
+                </a>
+                {% if comment.parent_comment_id %}
+                    <span style="color: #888; font-size: 0.9em;">↳ Reply</span>
+                {% endif %}
+            </div>
+            <div class="comment-timestamp">{{ comment.timestamp }}</div>
+        </div>
+        <div class="comment-actions">
+            <button class="action-btn edit-btn" onclick="editComment({{ comment.id }})">✏️ Edit</button>
+            <button class="action-btn delete-btn" onclick="deleteComment({{ comment.id }})">🗑️ Delete</button>
+        </div>
+    </div>
+    <div class="comment-text" id="comment-text-{{ comment.id }}">{{ comment.text }}</div>
+    <div class="comment-ip">IP: {{ comment.ip_address }}</div>
+    <div class="edit-form" id="edit-form-{{ comment.id }}">
+        <textarea class="edit-textarea" id="edit-textarea-{{ comment.id }}" maxlength="1000">{{ comment.text }}</textarea>
+        <div class="edit-actions">
+            <button class="save-btn" onclick="saveComment({{ comment.id }})">💾 Save</button>
+            <button class="cancel-btn" onclick="cancelEdit({{ comment.id }})">❌ Cancel</button>
+        </div>
+    </div>
+    {% if comment.replies %}
+        {% for reply in comment.replies %}
+            {{ render_comment(reply, level+1) }}
+        {% endfor %}
+    {% endif %}
+</div>
+{% endmacro %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -398,35 +434,9 @@
             {% endif %}
             
             <div id="comments-container">
-                {% if comments %}
-                    {% for comment in comments %}
-                    <div class="comment-card" data-comment-id="{{ comment.id }}">
-                        <div class="comment-header">
-                            <div class="comment-info">
-                                <div class="comment-author">{{ comment.name or 'Anonymous' }}</div>
-                                <div class="comment-thread">
-                                    📚 <a href="/read?n={{ comment.novel_name }}-chapters&c={{ comment.chapter_number }}" target="_blank">
-                                        {{ comment.novel_name }} - Chapter {{ comment.chapter_number }}
-                                    </a>
-                                </div>
-                                <div class="comment-timestamp">{{ comment.timestamp }}</div>
-                            </div>
-                            <div class="comment-actions">
-                                <button class="action-btn edit-btn" onclick="editComment({{ comment.id }})">✏️ Edit</button>
-                                <button class="action-btn delete-btn" onclick="deleteComment({{ comment.id }})">🗑️ Delete</button>
-                            </div>
-                        </div>
-                        <div class="comment-text" id="comment-text-{{ comment.id }}">{{ comment.text }}</div>
-                        <div class="comment-ip">IP: {{ comment.ip_address }}</div>
-                        
-                        <div class="edit-form" id="edit-form-{{ comment.id }}">
-                            <textarea class="edit-textarea" id="edit-textarea-{{ comment.id }}" maxlength="1000">{{ comment.text }}</textarea>
-                            <div class="edit-actions">
-                                <button class="save-btn" onclick="saveComment({{ comment.id }})">💾 Save</button>
-                                <button class="cancel-btn" onclick="cancelEdit({{ comment.id }})">❌ Cancel</button>
-                            </div>
-                        </div>
-                    </div>
+                {% if threaded_comments %}
+                    {% for comment in threaded_comments %}
+                        {{ render_comment(comment) }}
                     {% endfor %}
                 {% else %}
                     <div class="no-comments">

@@ -1716,7 +1716,7 @@ def get_comments_api():
 
 @app.route('/api/comments', methods=['POST'])
 def add_comment_api():
-    """Add a new comment with advanced rate limiting"""
+    """Add a new comment or reply with advanced rate limiting"""
     data = request.get_json()
     
     if not data:
@@ -1726,6 +1726,7 @@ def add_comment_api():
     chapter_number = data.get('chapter')
     user_name = data.get('name', 'Anonymous').strip()
     comment_text = data.get('text', '').strip()
+    parent_comment_id = data.get('parent_comment_id')
     
     if not novel_name or not chapter_number or not comment_text:
         return jsonify({'error': 'Missing required fields'}), 400
@@ -1756,14 +1757,25 @@ def add_comment_api():
     comment_text = escape(comment_text)
     
     try:
-        success, message = comments_db.add_comment(
-            novel_name=novel_name,
-            chapter_number=chapter_number,
-            user_name=user_name,
-            comment_text=comment_text,
-            ip_address=request.remote_addr,
-            user_agent=request.headers.get('User-Agent')
-        )
+        if parent_comment_id:
+            # Add reply
+            success, message = comments_db.add_reply(
+                parent_comment_id=parent_comment_id,
+                user_name=user_name,
+                comment_text=comment_text,
+                ip_address=request.remote_addr,
+                user_agent=request.headers.get('User-Agent')
+            )
+        else:
+            # Add top-level comment
+            success, message = comments_db.add_comment(
+                novel_name=novel_name,
+                chapter_number=chapter_number,
+                user_name=user_name,
+                comment_text=comment_text,
+                ip_address=request.remote_addr,
+                user_agent=request.headers.get('User-Agent')
+            )
         
         if success:
             # Record the rate limit attempt
@@ -1776,6 +1788,31 @@ def add_comment_api():
         logger.error(f"Error adding comment: {e}")
         return jsonify({'error': 'Failed to add comment'}), 500
 
+# --- Replies API ---
+@app.route('/api/comments/<int:comment_id>/replies', methods=['GET'])
+def get_replies_api(comment_id):
+    """Get replies for a specific comment, including reactions and user_reactions"""
+    try:
+        device_id = comments_db.generate_device_id(request.remote_addr, request.headers.get('User-Agent'))
+        replies = comments_db.get_replies(comment_id, device_id=device_id)
+        return jsonify({'replies': replies})
+    except Exception as e:
+        logger.error(f"Error getting replies: {e}")
+        return jsonify({'error': 'Failed to load replies'}), 500
+
+@app.route('/api/comments/<int:comment_id>', methods=['GET'])
+def get_comment_with_replies_api(comment_id):
+    """Get a comment with its replies"""
+    try:
+        device_id = comments_db.generate_device_id(request.remote_addr, request.headers.get('User-Agent'))
+        comment = comments_db.get_comment_with_replies(comment_id, device_id=device_id)
+        if comment:
+            return jsonify({'comment': comment})
+        else:
+            return jsonify({'error': 'Comment not found'}), 404
+    except Exception as e:
+        logger.error(f"Error getting comment with replies: {e}")
+        return jsonify({'error': 'Failed to load comment'}), 500
 
 @app.route('/api/comments/reaction', methods=['POST'])
 def add_reaction_api():
@@ -1920,7 +1957,6 @@ def get_comment_count_api():
 
 
 @app.route('/moderation', methods=['GET', 'POST'])
-@limiter.limit("5 per minute")
 def moderation_page():
     """Moderation page with key verification"""
     if request.method == 'POST':
@@ -1982,48 +2018,44 @@ def moderation_dashboard():
     # Check if user is authenticated
     if not session.get('moderation_authenticated'):
         return redirect(url_for('moderation_page'))
-    
-    # Get all comments for moderation
+    # Get all comments for moderation (threaded)
     try:
-        comments = comments_db.get_all_comments_for_moderation()
-        
+        threaded_comments = comments_db.get_all_comments_tree_for_moderation()
         # Calculate statistics
         now = datetime.datetime.now()
         recent_count = 0
         unique_novels = set()
-        
-        for comment in comments:
+        def count_stats(comment):
+            nonlocal recent_count
             # Count recent comments (last 24 hours)
             try:
-                # Handle different timestamp formats
                 timestamp_str = str(comment['timestamp'])
                 if 'T' in timestamp_str:
-                    # ISO format: 2024-01-01T12:00:00
                     comment_time = datetime.datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
                 else:
-                    # SQLite format: 2024-01-01 12:00:00
                     comment_time = datetime.datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
-                
                 if (now - comment_time).total_seconds() < 24 * 3600:
                     recent_count += 1
             except Exception as e:
-                print(f"Error parsing timestamp {comment['timestamp']}: {e}")
                 pass
-            
-            # Count unique novels
             unique_novels.add(comment['novel_name'])
-        
+            for reply in comment.get('replies', []):
+                count_stats(reply)
+        for comment in threaded_comments:
+            count_stats(comment)
         return render_template('moderation_dashboard.html', 
-                            comments=comments, 
-                            recent_count=recent_count,
-                            unique_novels=len(unique_novels))
+                              threaded_comments=threaded_comments, 
+                              recent_count=recent_count,
+                              unique_novels=len(unique_novels),
+                              comments=[])
     except Exception as e:
         logger.error(f"Error loading moderation dashboard: {e}")
         return render_template('moderation_dashboard.html', 
-                            comments=[], 
-                            error="Failed to load comments",
-                            recent_count=0,
-                            unique_novels=0)
+                              threaded_comments=[], 
+                              comments=[], 
+                              error="Failed to load comments",
+                              recent_count=0,
+                              unique_novels=0)
 
 @app.route('/api/moderation/delete-comment', methods=['POST'])
 def delete_comment_api():

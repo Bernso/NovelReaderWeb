@@ -454,6 +454,7 @@ if __name__ == '__main__':
         'https://readnovelfull.com/kill-the-sun.html',
         'https://readnovelfull.com/the-innkeeper.html',
         'https://readnovelfull.com/cultivation-online-v3.html',
+        "https://readnovelfull.com/warlock-of-the-magus-world.html",
         
         # 'https://readnovelfull.com/renegade-immortal.html', # Completed
         # 'https://readnovelfull.com/overgeared.html', # Completed

@@ -313,6 +313,11 @@
             font-size: 14px;
         }
 
+        #comment-section {
+            max-width: 1200px;
+        }
+        
+
     </style>
     
 </head>
@@ -760,44 +765,86 @@
         
         function displayComments(comments) {
             const commentsContainer = document.getElementById('comments-container');
-            
             if (!commentsContainer) {
                 console.error('Comments container not found');
                 return;
             }
-            
             if (comments.length === 0) {
                 commentsContainer.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">No comments yet. Be the first to comment!</p>';
                 return;
             }
-            
-            let commentsHTML = '';
-            comments.forEach((comment, index) => {
+            commentsContainer.innerHTML = renderCommentTree(comments, 0);
+            addReactionEventListeners();
+            addReplyButtonListeners();
+        }
+        function renderCommentTree(comments, level) {
+            let html = '';
+            comments.forEach(comment => {
                 const date = new Date(comment.timestamp).toLocaleDateString();
                 const reactions = comment.reactions || {};
                 const userReactions = comment.user_reactions || [];
-                
-                // Create reaction buttons
+                const replyCount = comment.reply_count || (comment.replies ? comment.replies.length : 0);
                 const reactionButtons = createReactionButtons(comment.id, reactions, userReactions);
                 
-                commentsHTML += `
-                    <div style="border: 1px solid #444; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: rgba(255,255,255,0.05);">
+                // Alternate background color by level
+                let bgColor, borderColor;
+                if (level % 2 === 0) {
+                    bgColor = '#1a1a1a';
+                    borderColor = '#444';
+                } else {
+                    bgColor = '#232228';
+                    borderColor = '#555';
+                }
+                const leftMargin = level * 14;
+                
+                // Show View Replies button only if there are replies
+                const replyButtonHtml = replyCount > 0 ? 
+                    `<span style="color: #666; margin: 0 8px;">•</span><button class="view-replies-btn" data-comment-id="${comment.id}" data-reply-count="${replyCount}" style="background: none; color: #BB86FC; border: none; cursor: pointer; font-size: 13px;">View ${replyCount} repl${replyCount === 1 ? 'y' : 'ies'}</button>` : '';
+                
+                html += `
+                    <div class="comment-block" style="border: 1px solid ${borderColor}; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: ${bgColor}; margin-left: ${leftMargin}px; max-width: 100%; word-wrap: break-word; overflow-wrap: break-word; box-sizing: border-box; position: relative;">
+                        ${level > 0 ? '<div style="position: absolute; left: -15px; top: 20px; width: 10px; height: 1px; background: #555;"></div>' : ''}
                         <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                             <strong style="color: #BB86FC;">${comment.name || 'Anonymous'}</strong>
                             <span style="color: #888; font-size: 12px;">${date}</span>
                         </div>
-                        <p style="color: #fff; line-height: 1.6; margin: 0 0 15px 0;">${comment.text}</p>
+                        <p class="comment-text" style="color: #fff; line-height: 1.6; margin: 0 0 15px 0; word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; max-width: 100%; text-align: left;">${comment.text}</p>
                         <div class="reactions-container" data-comment-id="${comment.id}">
                             ${reactionButtons}
                         </div>
+                        <div style="margin-top: 10px;">
+                            <button class="reply-btn" data-comment-id="${comment.id}" style="background: none; color: #BB86FC; border: none; cursor: pointer; font-size: 13px;">Reply</button>
+                            ${replyButtonHtml}
+                        </div>
+                        <div class="reply-form-container" id="reply-form-container-${comment.id}" style="display: none; margin-top: 10px; max-width: 100%; box-sizing: border-box;"></div>
+                        <div class="replies-container" id="replies-container-${comment.id}" style="margin-top: 10px; display: none; max-width: 100%; box-sizing: border-box;"></div>
                     </div>
                 `;
             });
-            
-            commentsContainer.innerHTML = commentsHTML;
-            
-            // Add event listeners to reaction buttons
-            addReactionEventListeners();
+            // After rendering, always re-attach reaction event listeners
+            setTimeout(addReactionEventListeners, 0);
+            return html;
+        }
+        async function loadReplies(commentId, level = 1) {
+            const container = document.getElementById(`replies-container-${commentId}`);
+            if (!container) return;
+            container.style.display = 'block';
+            container.innerHTML = '<span style="color: #888; font-size: 13px;">Loading replies...</span>';
+            try {
+                const response = await fetch(`/api/comments/${commentId}/replies`);
+                const data = await response.json();
+                if (data.replies && data.replies.length > 0) {
+                    container.innerHTML = renderCommentTree(data.replies, level);
+                    setTimeout(addReactionEventListeners, 0); // Ensure reactions work for replies
+                    addReplyButtonListeners();
+                    // Recursively load deeper replies
+                    data.replies.forEach(reply => loadReplies(reply.id, level + 1));
+                } else {
+                    container.innerHTML = '<span style="color: #888; font-size: 13px;">No replies yet.</span>';
+                }
+            } catch (error) {
+                container.innerHTML = '<span style="color: #ff6b6b; font-size: 13px;">Failed to load replies.</span>';
+            }
         }
         
         function createReactionButtons(commentId, reactions, userReactions) {
@@ -805,52 +852,52 @@
                 { type: 'like', emoji: '👍', label: 'Like' },
                 { type: 'dislike', emoji: '👎', label: 'Dislike' }
             ];
-            
             let buttonsHTML = '<div style="display: flex; gap: 8px; flex-wrap: wrap;">';
-            
             reactionTypes.forEach(reaction => {
                 const count = reactions[reaction.type] || 0;
-                const isUserReacted = userReactions.includes(reaction.type);
+                const isUserReacted = userReactions && userReactions.includes(reaction.type);
                 const buttonClass = isUserReacted ? 'reaction-btn active' : 'reaction-btn';
-                
                 buttonsHTML += `
-                    <button class="${buttonClass}" 
-                            data-comment-id="${commentId}" 
+                    <button class="${buttonClass}"
+                            data-comment-id="${commentId}"
                             data-reaction-type="${reaction.type}"
-                            style="
-                                background: ${isUserReacted ? '#6200EE' : 'transparent'};
-                                border: 1px solid #444;
-                                border-radius: 20px;
-                                padding: 4px 8px;
-                                color: #fff;
-                                cursor: pointer;
-                                font-size: 12px;
-                                transition: all 0.2s;
-                                display: flex;
-                                align-items: center;
-                                gap: 4px;
-                            "
-                            onmouseover="this.style.background='#333'"
-                            onmouseout="this.style.background='${isUserReacted ? '#6200EE' : 'transparent'}'">
+                            style="background: ${isUserReacted ? '#6200EE' : 'transparent'}; border: 1px solid #444; border-radius: 20px; padding: 4px 8px; color: #fff; cursor: pointer; font-size: 12px; transition: all 0.2s; display: flex; align-items: center; gap: 4px;">
                         <span style="font-size: 14px;">${reaction.emoji}</span>
                         <span>${count}</span>
                     </button>
                 `;
             });
-            
             buttonsHTML += '</div>';
             return buttonsHTML;
         }
         
-        function addReactionEventListeners() {
-            const reactionButtons = document.querySelectorAll('.reaction-btn');
-            reactionButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const commentId = this.getAttribute('data-comment-id');
-                    const reactionType = this.getAttribute('data-reaction-type');
-                    addReaction(commentId, reactionType);
-                });
+        function updateReactionButtons(commentId, reactions, userReactions) {
+            // Only update the reaction button area, not the whole container
+            const reactionsContainers = document.querySelectorAll(`.reactions-container[data-comment-id="${commentId}"]`);
+            reactionsContainers.forEach(reactionsContainer => {
+                // Only replace the buttons, not the container
+                reactionsContainer.innerHTML = createReactionButtons(commentId, reactions, userReactions);
             });
+        }
+        
+        // Remove old addReactionEventListeners and replace with event delegation
+        function addReactionEventListeners() {
+            const commentsContainer = document.getElementById('comments-container');
+            if (!commentsContainer) return;
+            // Remove any previous event listener to avoid duplicates
+            commentsContainer.removeEventListener('click', reactionDelegationHandler);
+            commentsContainer.addEventListener('click', reactionDelegationHandler);
+        }
+
+        function reactionDelegationHandler(event) {
+            const target = event.target.closest('.reaction-btn');
+            if (target) {
+                const commentId = target.getAttribute('data-comment-id');
+                const reactionType = target.getAttribute('data-reaction-type');
+                if (commentId && reactionType) {
+                    addReaction(commentId, reactionType);
+                }
+            }
         }
         
         function addReaction(commentId, reactionType) {
@@ -867,7 +914,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Update the reaction buttons for this comment
+                    // Update the reaction buttons for this comment or reply only
                     updateReactionButtons(commentId, data.reactions, data.user_reactions);
                 } else {
                     showProgressSavedNotification('Error: ' + data.error);
@@ -877,15 +924,6 @@
                 console.error('Error adding reaction:', error);
                 showProgressSavedNotification('Failed to add reaction. Please try again.');
             });
-        }
-        
-        function updateReactionButtons(commentId, reactions, userReactions) {
-            const reactionsContainer = document.querySelector(`[data-comment-id="${commentId}"]`);
-            if (reactionsContainer) {
-                const newButtons = createReactionButtons(commentId, reactions, userReactions);
-                reactionsContainer.innerHTML = newButtons;
-                addReactionEventListeners();
-            }
         }
         
         // Chapter Reaction Functions
@@ -2113,6 +2151,148 @@
         } else {
             // Default to visible if no preference is saved
             updateMusicPlayerVisibility(true);
+        }
+
+        function addReplyButtonListeners() {
+            const replyButtons = document.querySelectorAll('.reply-btn');
+            replyButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const commentId = this.getAttribute('data-comment-id');
+                    showReplyForm(commentId);
+                });
+            });
+            // Add listeners for View Replies/Hide Replies buttons (for all levels)
+            const viewRepliesButtons = document.querySelectorAll('.view-replies-btn');
+            viewRepliesButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const commentId = this.getAttribute('data-comment-id');
+                    toggleReplies(commentId);
+                });
+            });
+            const hideRepliesButtons = document.querySelectorAll('.hide-replies-btn');
+            hideRepliesButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const commentId = this.getAttribute('data-comment-id');
+                    toggleReplies(commentId);
+                });
+            });
+        }
+
+        function showReplyForm(commentId) {
+            // Hide all other reply forms
+            document.querySelectorAll('.reply-form-container').forEach(el => el.style.display = 'none');
+            const container = document.getElementById(`reply-form-container-${commentId}`);
+            if (!container) return;
+            container.style.display = 'block';
+            container.innerHTML = `
+                <div style="background: rgba(255,255,255,0.02); border-radius: 10px; border: 1px solid #333; padding: 15px;">
+                    <h4 style="color: #BB86FC; font-size: 1rem; margin-bottom: 10px;">Reply to this comment</h4>
+                    <textarea id="reply-text-${commentId}" placeholder="Write your reply here..." maxlength="250" style="width: 100%; min-height: 80px; padding: 12px; border: 1px solid #444; border-radius: 8px; background: #333; color: #fff; margin-bottom: 12px; resize: vertical; font-family: inherit; font-size: 14px; line-height: 1.4;"></textarea>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div style="color: #888; font-size: 0.9rem;">
+                            <span id="reply-char-count-${commentId}">0</span>/250 characters
+                        </div>
+                        <div style="color: #888; font-size: 0.9rem;">
+                            <span id="reply-char-remaining-${commentId}" style="color: #BB86FC;">250</span> remaining
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" id="reply-name-${commentId}" placeholder="Your name (optional)" style="flex: 1; max-width: 200px; padding: 10px; border: 1px solid #444; border-radius: 8px; background: #333; color: #fff; font-family: inherit; font-size: 14px;">
+                        <button onclick="submitReply(${commentId})" style="padding: 10px 20px; background: #6200EE; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 14px; transition: background-color 0.2s;">Post Reply</button>
+                        <button onclick="hideReplyForm(${commentId})" style="padding: 10px 16px; background: #555; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; transition: background-color 0.2s;">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            // Add character counter functionality
+            const textarea = document.getElementById(`reply-text-${commentId}`);
+            const charCount = document.getElementById(`reply-char-count-${commentId}`);
+            const charRemaining = document.getElementById(`reply-char-remaining-${commentId}`);
+            
+            if (textarea && charCount && charRemaining) {
+                const updateCharCounter = () => {
+                    const currentLength = textarea.value.length;
+                    const remaining = 250 - currentLength;
+                    charCount.textContent = currentLength;
+                    charRemaining.textContent = remaining;
+                    
+                    // Change color when approaching limit
+                    if (remaining <= 10) {
+                        charRemaining.style.color = '#ff6b6b';
+                    } else if (remaining <= 50) {
+                        charRemaining.style.color = '#ffa726';
+                    } else {
+                        charRemaining.style.color = '#BB86FC';
+                    }
+                };
+                
+                textarea.addEventListener('input', updateCharCounter);
+                updateCharCounter(); // Initialize counter
+            }
+        }
+
+        function hideReplyForm(commentId) {
+            const container = document.getElementById(`reply-form-container-${commentId}`);
+            if (container) container.style.display = 'none';
+        }
+
+        async function submitReply(parentCommentId) {
+            const textArea = document.getElementById(`reply-text-${parentCommentId}`);
+            const nameInput = document.getElementById(`reply-name-${parentCommentId}`);
+            const text = textArea.value.trim();
+            const name = nameInput.value.trim();
+            if (!text) {
+                alert('Reply cannot be empty.');
+                return;
+            }
+            const novelTitle = document.getElementById('novel-title').textContent;
+            const chapterNumber = document.getElementById('chapter-number').textContent;
+            try {
+                const response = await fetch('/api/comments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        novel: novelTitle,
+                        chapter: chapterNumber,
+                        name: name,
+                        text: text,
+                        parent_comment_id: parentCommentId
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    hideReplyForm(parentCommentId);
+                    loadReplies(parentCommentId);
+                    showProgressSavedNotification('Reply posted successfully!');
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to post reply.'));
+                }
+            } catch (error) {
+                alert('Failed to post reply. Please try again.');
+            }
+        }
+
+        function toggleReplies(commentId) {
+            const container = document.getElementById(`replies-container-${commentId}`);
+            const viewButton = document.querySelector(`[data-comment-id="${commentId}"].view-replies-btn`);
+            const hideButton = document.querySelector(`[data-comment-id="${commentId}"].hide-replies-btn`);
+            const button = viewButton || hideButton;
+            if (!container || !button) return;
+            if (container.style.display === 'none' || container.style.display === '') {
+                // Show replies
+                loadReplies(commentId);
+                const replyCount = button.getAttribute('data-reply-count');
+                button.textContent = 'Hide Replies';
+                button.classList.remove('view-replies-btn');
+                button.classList.add('hide-replies-btn');
+            } else {
+                // Hide replies
+                container.style.display = 'none';
+                const replyCount = button.getAttribute('data-reply-count');
+                button.textContent = `View ${replyCount} repl${replyCount === 1 ? 'y' : 'ies'}`;
+                button.classList.remove('hide-replies-btn');
+                button.classList.add('view-replies-btn');
+            }
         }
     </script>
     

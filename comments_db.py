@@ -58,11 +58,23 @@ def init_comments_db():
             chapter_number VARCHAR(50) NOT NULL,
             user_name VARCHAR(100) NOT NULL,
             comment_text TEXT NOT NULL,
+            parent_comment_id INTEGER DEFAULT NULL,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
             ip_address VARCHAR(45),
-            user_agent TEXT
+            user_agent TEXT,
+            FOREIGN KEY (parent_comment_id) REFERENCES Comments (comment_id) ON DELETE CASCADE
         )
     ''')
+    
+    # Check if parent_comment_id column exists, if not add it
+    c.execute("PRAGMA table_info(Comments)")
+    columns = [column[1] for column in c.fetchall()]
+    if 'parent_comment_id' not in columns:
+        print("Adding parent_comment_id column to existing Comments table...")
+        c.execute('''
+            ALTER TABLE Comments 
+            ADD COLUMN parent_comment_id INTEGER DEFAULT NULL
+        ''')
     
     # Create Reactions table
     c.execute('''
@@ -104,6 +116,11 @@ def init_comments_db():
     c.execute('''
         CREATE INDEX IF NOT EXISTS idx_comments_novel_chapter 
         ON Comments(novel_name, chapter_number)
+    ''')
+    
+    c.execute('''
+        CREATE INDEX IF NOT EXISTS idx_comments_parent 
+        ON Comments(parent_comment_id)
     ''')
     
     c.execute('''
@@ -191,7 +208,7 @@ def record_rate_limit_attempt(ip_address, action_type='comment'):
     finally:
         conn.close()
 
-def add_comment(novel_name, chapter_number, user_name, comment_text, ip_address=None, user_agent=None):
+def add_comment(novel_name, chapter_number, user_name, comment_text, ip_address=None, user_agent=None, parent_comment_id=None):
     """Add a new comment to the database"""
     db_path = get_comments_db_path()
     print(f"Adding comment to database at: {db_path}")
@@ -210,10 +227,22 @@ def add_comment(novel_name, chapter_number, user_name, comment_text, ip_address=
             conn = sqlite3.connect(db_path)
             c = conn.cursor()
         
+        # If this is a reply, verify the parent comment exists and belongs to the same novel/chapter
+        if parent_comment_id:
+            c.execute('''
+                SELECT novel_name, chapter_number FROM Comments 
+                WHERE comment_id = ?
+            ''', (parent_comment_id,))
+            parent_comment = c.fetchone()
+            if not parent_comment:
+                return False, "Parent comment not found"
+            if parent_comment[0] != novel_name or parent_comment[1] != chapter_number:
+                return False, "Parent comment does not belong to the same novel/chapter"
+        
         c.execute('''
-            INSERT INTO Comments (novel_name, chapter_number, user_name, comment_text, ip_address, user_agent)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (novel_name, chapter_number, user_name, comment_text, ip_address, user_agent))
+            INSERT INTO Comments (novel_name, chapter_number, user_name, comment_text, ip_address, user_agent, parent_comment_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (novel_name, chapter_number, user_name, comment_text, ip_address, user_agent, parent_comment_id))
         
         conn.commit()
         print("Comment added successfully")
@@ -231,7 +260,7 @@ def add_comment(novel_name, chapter_number, user_name, comment_text, ip_address=
             pass
 
 def get_comments(novel_name, chapter_number, limit=50):
-    """Get comments for a specific novel and chapter"""
+    """Get top-level comments for a specific novel and chapter"""
     db_path = get_comments_db_path()
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
@@ -240,7 +269,7 @@ def get_comments(novel_name, chapter_number, limit=50):
         c.execute('''
             SELECT comment_id, user_name, comment_text, timestamp, ip_address
             FROM Comments 
-            WHERE novel_name = ? AND chapter_number = ?
+            WHERE novel_name = ? AND chapter_number = ? AND parent_comment_id IS NULL
             ORDER BY timestamp DESC
             LIMIT ?
         ''', (novel_name, chapter_number, limit))
@@ -263,6 +292,39 @@ def get_comments(novel_name, chapter_number, limit=50):
     finally:
         conn.close()
 
+def add_reply(parent_comment_id, user_name, comment_text, ip_address=None, user_agent=None):
+    """Add a reply to an existing comment"""
+    db_path = get_comments_db_path()
+    print(f"Adding reply to comment {parent_comment_id}")
+    
+    try:
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        
+        # Get the parent comment details
+        c.execute('''
+            SELECT novel_name, chapter_number FROM Comments 
+            WHERE comment_id = ?
+        ''', (parent_comment_id,))
+        
+        parent_comment = c.fetchone()
+        if not parent_comment:
+            return False, "Parent comment not found"
+        
+        novel_name, chapter_number = parent_comment
+        
+        # Add the reply using the existing add_comment function
+        return add_comment(novel_name, chapter_number, user_name, comment_text, ip_address, user_agent, parent_comment_id)
+        
+    except Exception as e:
+        print(f"Error adding reply: {e}")
+        return False, f"Database error: {str(e)}"
+    finally:
+        try:
+            conn.close()
+        except:
+            pass
+
 def get_comment_count(novel_name, chapter_number):
     """Get the total number of comments for a chapter"""
     db_path = get_comments_db_path()
@@ -280,6 +342,113 @@ def get_comment_count(novel_name, chapter_number):
     except Exception as e:
         print(f"Error getting comment count: {e}")
         return 0
+    finally:
+        conn.close()
+
+def get_replies(comment_id, limit=20, device_id=None):
+    """Get replies for a specific comment, including reactions and user_reactions"""
+    db_path = get_comments_db_path()
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    
+    try:
+        c.execute('''
+            SELECT comment_id, user_name, comment_text, timestamp, ip_address
+            FROM Comments 
+            WHERE parent_comment_id = ?
+            ORDER BY timestamp ASC
+            LIMIT ?
+        ''', (comment_id, limit))
+        
+        results = c.fetchall()
+        replies = []
+        for row in results:
+            reply_id = row[0]
+            reactions = get_comment_reactions(reply_id)
+            user_reactions = []
+            if device_id:
+                user_reactions = get_user_reactions_for_comment(reply_id, device_id)
+            replies.append({
+                'id': reply_id,
+                'name': row[1],
+                'text': row[2],
+                'timestamp': row[3],
+                'ip_address': row[4],
+                'reactions': reactions,
+                'user_reactions': user_reactions
+            })
+        
+        return replies
+    except Exception as e:
+        print(f"Error getting replies: {e}")
+        return []
+    finally:
+        conn.close()
+
+def get_reply_count(comment_id):
+    """Get the number of replies for a specific comment"""
+    db_path = get_comments_db_path()
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    
+    try:
+        c.execute('''
+            SELECT COUNT(*) FROM Comments 
+            WHERE parent_comment_id = ?
+        ''', (comment_id,))
+        
+        result = c.fetchone()
+        return result[0] if result else 0
+    except Exception as e:
+        print(f"Error getting reply count: {e}")
+        return 0
+    finally:
+        conn.close()
+
+def get_comment_with_replies(comment_id, device_id=None):
+    """Get a specific comment with its replies and reactions"""
+    db_path = get_comments_db_path()
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    
+    try:
+        # Get the main comment
+        c.execute('''
+            SELECT comment_id, user_name, comment_text, timestamp, ip_address
+            FROM Comments 
+            WHERE comment_id = ?
+        ''', (comment_id,))
+        
+        result = c.fetchone()
+        if not result:
+            return None
+        
+        # Get reaction counts
+        reactions = get_comment_reactions(comment_id)
+        
+        # Get user's reactions if device_id provided
+        user_reactions = []
+        if device_id:
+            user_reactions = get_user_reactions_for_comment(comment_id, device_id)
+        
+        # Get replies
+        replies = get_replies(comment_id)
+        
+        comment = {
+            'id': result[0],
+            'name': result[1],
+            'text': result[2],
+            'timestamp': result[3],
+            'ip_address': result[4],
+            'reactions': reactions,
+            'user_reactions': user_reactions,
+            'replies': replies
+        }
+        
+        return comment
+    except Exception as e:
+        print(f"Error getting comment with replies: {e}")
+        return None
     finally:
         conn.close()
 
@@ -437,7 +606,7 @@ def add_chapter_reaction(novel_name, chapter_number, reaction_type, device_id, i
         conn.close()
 
 def get_comments_with_reactions(novel_name, chapter_number, limit=50, device_id=None):
-    """Get comments with reaction counts and user's reactions"""
+    """Get top-level comments with reaction counts, user's reactions, and reply counts"""
     db_path = get_comments_db_path()
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
@@ -446,7 +615,7 @@ def get_comments_with_reactions(novel_name, chapter_number, limit=50, device_id=
         c.execute('''
             SELECT comment_id, user_name, comment_text, timestamp, ip_address
             FROM Comments 
-            WHERE novel_name = ? AND chapter_number = ?
+            WHERE novel_name = ? AND chapter_number = ? AND parent_comment_id IS NULL
             ORDER BY timestamp DESC
             LIMIT ?
         ''', (novel_name, chapter_number, limit))
@@ -464,6 +633,9 @@ def get_comments_with_reactions(novel_name, chapter_number, limit=50, device_id=
             if device_id:
                 user_reactions = get_user_reactions_for_comment(comment_id, device_id)
             
+            # Get reply count
+            reply_count = get_reply_count(comment_id)
+            
             comments.append({
                 'id': comment_id,
                 'name': row[1],
@@ -471,7 +643,8 @@ def get_comments_with_reactions(novel_name, chapter_number, limit=50, device_id=
                 'timestamp': row[3],
                 'ip_address': row[4],
                 'reactions': reactions,
-                'user_reactions': user_reactions
+                'user_reactions': user_reactions,
+                'reply_count': reply_count
             })
         
         return comments
@@ -504,7 +677,7 @@ def get_all_comments_for_moderation(limit=100):
     
     try:
         c.execute('''
-            SELECT comment_id, novel_name, chapter_number, user_name, comment_text, timestamp, ip_address
+            SELECT comment_id, novel_name, chapter_number, user_name, comment_text, timestamp, ip_address, parent_comment_id
             FROM Comments 
             ORDER BY timestamp DESC
             LIMIT ?
@@ -513,15 +686,34 @@ def get_all_comments_for_moderation(limit=100):
         results = c.fetchall()
         comments = []
         for row in results:
-            comments.append({
+            comment_data = {
                 'id': row[0],
                 'novel_name': row[1],
                 'chapter_number': row[2],
                 'name': row[3],
                 'text': row[4],
                 'timestamp': row[5],
-                'ip_address': row[6]
-            })
+                'ip_address': row[6],
+                'is_reply': row[7] is not None,
+                'parent_comment_id': row[7]
+            }
+            
+            # If this is a reply, get parent comment info
+            if row[7]:
+                c.execute('''
+                    SELECT user_name, comment_text 
+                    FROM Comments 
+                    WHERE comment_id = ?
+                ''', (row[7],))
+                parent_result = c.fetchone()
+                if parent_result:
+                    comment_data['parent_comment'] = {
+                        'id': row[7],
+                        'name': parent_result[0],
+                        'text': parent_result[1][:100] + '...' if len(parent_result[1]) > 100 else parent_result[1]
+                    }
+            
+            comments.append(comment_data)
         
         return comments
     except Exception as e:
@@ -531,7 +723,7 @@ def get_all_comments_for_moderation(limit=100):
         conn.close()
 
 def delete_comment(comment_id):
-    """Delete a comment by ID"""
+    """Delete a comment by ID (replies will be deleted automatically due to CASCADE)"""
     db_path = get_comments_db_path()
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
@@ -540,7 +732,7 @@ def delete_comment(comment_id):
         # Delete associated reactions first
         c.execute('DELETE FROM Reactions WHERE comment_id = ?', (comment_id,))
         
-        # Delete the comment
+        # Delete the comment (replies will be deleted automatically due to CASCADE)
         c.execute('DELETE FROM Comments WHERE comment_id = ?', (comment_id,))
         
         conn.commit()
@@ -569,6 +761,48 @@ def edit_comment(comment_id, new_text):
     except Exception as e:
         print(f"Error editing comment: {e}")
         return False
+    finally:
+        conn.close()
+
+def get_all_comments_tree_for_moderation(limit=500):
+    """Get all comments as a nested/threaded tree for moderation purposes"""
+    db_path = get_comments_db_path()
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    try:
+        c.execute('''
+            SELECT comment_id, novel_name, chapter_number, user_name, comment_text, timestamp, ip_address, parent_comment_id
+            FROM Comments 
+            ORDER BY timestamp ASC
+            LIMIT ?
+        ''', (limit,))
+        results = c.fetchall()
+        # Build a dict of all comments by id
+        all_comments = {}
+        for row in results:
+            all_comments[row[0]] = {
+                'id': row[0],
+                'novel_name': row[1],
+                'chapter_number': row[2],
+                'name': row[3],
+                'text': row[4],
+                'timestamp': row[5],
+                'ip_address': row[6],
+                'parent_comment_id': row[7],
+                'replies': []
+            }
+        # Build the tree
+        root_comments = []
+        for comment in all_comments.values():
+            parent_id = comment['parent_comment_id']
+            if parent_id and parent_id in all_comments:
+                all_comments[parent_id]['replies'].append(comment)
+            else:
+                root_comments.append(comment)
+        return root_comments
+    except Exception as e:
+        print(f"Error getting threaded comments for moderation: {e}")
+        return []
     finally:
         conn.close()
 
