@@ -16,6 +16,7 @@ try:
     
     # Database
     import database
+    import comments_db
     
     # Flask and standard libraries
     from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, Response, render_template_string, session
@@ -32,15 +33,18 @@ try:
     from flask_limiter import Limiter
     from flask_limiter.util import get_remote_address
     from threading import Lock
-    from markupsafe import Markup, escape
 
+    # PythonAnywhere detection
+    IS_PYTHONANYWHERE = 'PYTHONANYWHERE_SITE' in os.environ
 
-    
     # Project-specific imports
     from config import Config
 
 except ImportError as e:
     input(f"Module not found: {e}")
+
+# Import escape outside try-except to ensure it's always available
+from markupsafe import Markup, escape
 
 logger = boLogger.Logging()
 MAINTAINANCE = False
@@ -50,7 +54,11 @@ app = Flask(__name__)
 app.config.from_object(Config)
 app.secret_key = Config.SECRET_KEY
 
-
+# PythonAnywhere session configuration
+if IS_PYTHONANYWHERE:
+    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config['SESSION_FILE_DIR'] = '/tmp'
+    print("PythonAnywhere detected - using filesystem sessions in /tmp")
 
 app.config['CACHE_TYPE'] = 'SimpleCache'
 cache = Cache(app)
@@ -71,6 +79,25 @@ limiter = Limiter(
     storage_options={},
     strategy="fixed-window"
 )
+
+# Cleanup old rate limits periodically
+def cleanup_rate_limits():
+    """Clean up old rate limit entries"""
+    try:
+        comments_db.cleanup_old_rate_limits()
+    except Exception as e:
+        logger.error(f"Error cleaning up rate limits: {e}")
+
+# Schedule cleanup every hour
+import threading
+def schedule_cleanup():
+    while True:
+        time.sleep(3600)  # Wait 1 hour
+        cleanup_rate_limits()
+
+# Start cleanup thread
+cleanup_thread = threading.Thread(target=schedule_cleanup, daemon=True)
+cleanup_thread.start()
 
 # --- BEGIN: Most Recent Chapter Cache ---
 # Global cache for latest chapter numbers
@@ -1666,6 +1693,406 @@ def novel_last_updated():
     latest_ts = max(valid_timestamps)
     
     return jsonify({'last_updated': latest_ts.strftime('%Y-%m-%d %H:%M:%S')})
+
+
+@app.route('/api/comments', methods=['GET'])
+def get_comments_api():
+    """Get comments for a specific novel and chapter"""
+    novel_name = request.args.get('novel')
+    chapter_number = request.args.get('chapter')
+    
+    if not novel_name or not chapter_number:
+        return jsonify({'error': 'Missing novel or chapter parameter'}), 400
+    
+    try:
+        # Generate device ID for this request
+        device_id = comments_db.generate_device_id(request.remote_addr, request.headers.get('User-Agent'))
+        comments = comments_db.get_comments_with_reactions(novel_name, chapter_number, device_id=device_id)
+        return jsonify({'comments': comments})
+    except Exception as e:
+        logger.error(f"Error getting comments: {e}")
+        return jsonify({'error': 'Failed to load comments'}), 500
+
+
+@app.route('/api/comments', methods=['POST'])
+def add_comment_api():
+    """Add a new comment with advanced rate limiting"""
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    novel_name = data.get('novel')
+    chapter_number = data.get('chapter')
+    user_name = data.get('name', 'Anonymous').strip()
+    comment_text = data.get('text', '').strip()
+    
+    if not novel_name or not chapter_number or not comment_text:
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    if len(comment_text) > 250:
+        return jsonify({'error': 'Comment too long (max 250 characters)'}), 400
+    
+    if len(user_name) > 100:
+        return jsonify({'error': 'Name too long (max 100 characters)'}), 400
+    
+    # Check rate limiting (3 comments per 5 minutes per IP)
+    is_limited, remaining_attempts, reset_time = comments_db.check_rate_limit(
+        request.remote_addr, 
+        action_type='comment', 
+        max_attempts=3, 
+        window_minutes=5
+    )
+    
+    if is_limited:
+        time_until_reset = (reset_time - datetime.datetime.now()).total_seconds()
+        minutes_until_reset = max(0, int(time_until_reset / 60))
+        return jsonify({
+            'error': f'Rate limited. You can post {remaining_attempts} more comments in the next {minutes_until_reset} minutes.'
+        }), 429
+    
+    # Sanitize inputs
+    user_name = escape(user_name)
+    comment_text = escape(comment_text)
+    
+    try:
+        success, message = comments_db.add_comment(
+            novel_name=novel_name,
+            chapter_number=chapter_number,
+            user_name=user_name,
+            comment_text=comment_text,
+            ip_address=request.remote_addr,
+            user_agent=request.headers.get('User-Agent')
+        )
+        
+        if success:
+            # Record the rate limit attempt
+            comments_db.record_rate_limit_attempt(request.remote_addr, 'comment')
+            return jsonify({'success': True, 'message': message})
+        else:
+            return jsonify({'error': message}), 400
+            
+    except Exception as e:
+        logger.error(f"Error adding comment: {e}")
+        return jsonify({'error': 'Failed to add comment'}), 500
+
+
+@app.route('/api/comments/reaction', methods=['POST'])
+def add_reaction_api():
+    """Add or remove a reaction to a comment"""
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    comment_id = data.get('comment_id')
+    reaction_type = data.get('reaction_type')
+    
+    if not comment_id or not reaction_type:
+        return jsonify({'error': 'Missing comment_id or reaction_type'}), 400
+    
+    # Validate reaction type (only like/dislike for comments)
+    valid_reactions = ['like', 'dislike']
+    if reaction_type not in valid_reactions:
+        return jsonify({'error': 'Invalid reaction type'}), 400
+    
+    try:
+        # Generate device ID for this request
+        device_id = comments_db.generate_device_id(request.remote_addr, request.headers.get('User-Agent'))
+        
+        success, action = comments_db.add_reaction(
+            comment_id=comment_id,
+            reaction_type=reaction_type,
+            device_id=device_id,
+            ip_address=request.remote_addr
+        )
+        
+        if success:
+            # Get updated reaction counts
+            reactions = comments_db.get_comment_reactions(comment_id)
+            user_reactions = comments_db.get_user_reactions_for_comment(comment_id, device_id)
+            
+            return jsonify({
+                'success': True,
+                'action': action,
+                'reactions': reactions,
+                'user_reactions': user_reactions
+            })
+        else:
+            return jsonify({'error': 'Failed to add reaction'}), 500
+            
+    except Exception as e:
+        logger.error(f"Error adding reaction: {e}")
+        return jsonify({'error': 'Failed to add reaction'}), 500
+
+
+@app.route('/api/chapter/reactions', methods=['GET'])
+def get_chapter_reactions_api():
+    """Get reactions for a specific chapter"""
+    novel_name = request.args.get('novel')
+    chapter_number = request.args.get('chapter')
+    
+    if not novel_name or not chapter_number:
+        return jsonify({'error': 'Missing novel or chapter parameter'}), 400
+    
+    try:
+        # Generate device ID for this request
+        device_id = comments_db.generate_device_id(request.remote_addr, request.headers.get('User-Agent'))
+        
+        reactions = comments_db.get_chapter_reactions(novel_name, chapter_number)
+        user_reactions = comments_db.get_user_chapter_reactions(novel_name, chapter_number, device_id)
+        
+        return jsonify({
+            'reactions': reactions,
+            'user_reactions': user_reactions
+        })
+    except Exception as e:
+        logger.error(f"Error getting chapter reactions: {e}")
+        return jsonify({'error': 'Failed to load chapter reactions'}), 500
+
+
+@app.route('/api/chapter/reaction', methods=['POST'])
+def add_chapter_reaction_api():
+    """Add or remove a reaction to a chapter"""
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    novel_name = data.get('novel')
+    chapter_number = data.get('chapter')
+    reaction_type = data.get('reaction_type')
+    
+    if not novel_name or not chapter_number or not reaction_type:
+        return jsonify({'error': 'Missing novel, chapter, or reaction_type'}), 400
+    
+    # Validate reaction type
+    valid_reactions = ['like', 'love', 'haha', 'wow', 'sad', 'angry']
+    if reaction_type not in valid_reactions:
+        return jsonify({'error': 'Invalid reaction type'}), 400
+    
+    try:
+        # Generate device ID for this request
+        device_id = comments_db.generate_device_id(request.remote_addr, request.headers.get('User-Agent'))
+        
+        success, action = comments_db.add_chapter_reaction(
+            novel_name=novel_name,
+            chapter_number=chapter_number,
+            reaction_type=reaction_type,
+            device_id=device_id,
+            ip_address=request.remote_addr
+        )
+        
+        if success:
+            # Get updated reaction counts
+            reactions = comments_db.get_chapter_reactions(novel_name, chapter_number)
+            user_reactions = comments_db.get_user_chapter_reactions(novel_name, chapter_number, device_id)
+            
+            return jsonify({
+                'success': True,
+                'action': action,
+                'reactions': reactions,
+                'user_reactions': user_reactions
+            })
+        else:
+            return jsonify({'error': 'Failed to add chapter reaction'}), 500
+            
+    except Exception as e:
+        logger.error(f"Error adding chapter reaction: {e}")
+        return jsonify({'error': 'Failed to add chapter reaction'}), 500
+
+
+@app.route('/api/comments/count', methods=['GET'])
+def get_comment_count_api():
+    """Get comment count for a specific novel and chapter"""
+    novel_name = request.args.get('novel')
+    chapter_number = request.args.get('chapter')
+    
+    if not novel_name or not chapter_number:
+        return jsonify({'error': 'Missing novel or chapter parameter'}), 400
+    
+    try:
+        count = comments_db.get_comment_count(novel_name, chapter_number)
+        return jsonify({'count': count})
+    except Exception as e:
+        logger.error(f"Error getting comment count: {e}")
+        return jsonify({'error': 'Failed to get comment count'}), 500
+
+
+@app.route('/moderation', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
+def moderation_page():
+    """Moderation page with key verification"""
+    if request.method == 'POST':
+        key = request.form.get('key', '').strip()
+        
+        # Read the moderation key from file with PythonAnywhere compatibility
+        correct_key = None
+        try:
+            # Try multiple possible locations for the moderation key
+            possible_paths = [
+                'moderation.txt',
+                '/tmp/moderation.txt',  # PythonAnywhere temp directory
+                os.path.join(os.path.expanduser('~'), 'moderation.txt'),  # Home directory
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), 'moderation.txt')  # Current directory
+            ]
+            
+            for path in possible_paths:
+                try:
+                    with open(path, 'r') as f:
+                        correct_key = f.read().strip()
+                        print(f"Found moderation key at: {path}")
+                        break
+                except (FileNotFoundError, PermissionError):
+                    continue
+                    
+            if not correct_key:
+                # Fallback to hardcoded key for PythonAnywhere (less secure but functional)
+                if IS_PYTHONANYWHERE:
+                    correct_key = "moderator_key_2024_secure_access_only"
+                    print("Using fallback moderation key for PythonAnywhere")
+                else:
+                    return render_template('moderation_login.html', error="Moderation system not configured")
+                    
+        except Exception as e:
+            logger.error(f"Error reading moderation key: {e}")
+            if IS_PYTHONANYWHERE:
+                correct_key = "moderator_key_2024_secure_access_only"
+                print("Using fallback moderation key due to error")
+            else:
+                return render_template('moderation_login.html', error="Moderation system error")
+        
+        if key == correct_key:
+            # Store the key in session for this session
+            try:
+                session['moderation_authenticated'] = True
+                session['moderation_key'] = key
+                return redirect(url_for('moderation_dashboard'))
+            except Exception as e:
+                logger.error(f"Session error: {e}")
+                return render_template('moderation_login.html', error="Session error - please try again")
+        else:
+            return render_template('moderation_login.html', error="Invalid key")
+    
+    return render_template('moderation_login.html')
+
+@app.route('/moderation/dashboard')
+def moderation_dashboard():
+    """Moderation dashboard - requires authentication"""
+    # Check if user is authenticated
+    if not session.get('moderation_authenticated'):
+        return redirect(url_for('moderation_page'))
+    
+    # Get all comments for moderation
+    try:
+        comments = comments_db.get_all_comments_for_moderation()
+        
+        # Calculate statistics
+        now = datetime.datetime.now()
+        recent_count = 0
+        unique_novels = set()
+        
+        for comment in comments:
+            # Count recent comments (last 24 hours)
+            try:
+                # Handle different timestamp formats
+                timestamp_str = str(comment['timestamp'])
+                if 'T' in timestamp_str:
+                    # ISO format: 2024-01-01T12:00:00
+                    comment_time = datetime.datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+                else:
+                    # SQLite format: 2024-01-01 12:00:00
+                    comment_time = datetime.datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+                
+                if (now - comment_time).total_seconds() < 24 * 3600:
+                    recent_count += 1
+            except Exception as e:
+                print(f"Error parsing timestamp {comment['timestamp']}: {e}")
+                pass
+            
+            # Count unique novels
+            unique_novels.add(comment['novel_name'])
+        
+        return render_template('moderation_dashboard.html', 
+                            comments=comments, 
+                            recent_count=recent_count,
+                            unique_novels=len(unique_novels))
+    except Exception as e:
+        logger.error(f"Error loading moderation dashboard: {e}")
+        return render_template('moderation_dashboard.html', 
+                            comments=[], 
+                            error="Failed to load comments",
+                            recent_count=0,
+                            unique_novels=0)
+
+@app.route('/api/moderation/delete-comment', methods=['POST'])
+def delete_comment_api():
+    """Delete a comment (moderation only)"""
+    # Check if user is authenticated for moderation
+    if not session.get('moderation_authenticated'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    comment_id = data.get('comment_id')
+    if not comment_id:
+        return jsonify({'error': 'Missing comment_id'}), 400
+    
+    try:
+        success = comments_db.delete_comment(comment_id)
+        if success:
+            return jsonify({'success': True, 'message': 'Comment deleted successfully'})
+        else:
+            return jsonify({'error': 'Failed to delete comment'}), 500
+    except Exception as e:
+        logger.error(f"Error deleting comment: {e}")
+        return jsonify({'error': 'Failed to delete comment'}), 500
+
+@app.route('/api/moderation/edit-comment', methods=['POST'])
+def edit_comment_api():
+    """Edit a comment (moderation only)"""
+    # Check if user is authenticated for moderation
+    if not session.get('moderation_authenticated'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    comment_id = data.get('comment_id')
+    new_text = data.get('text', '').strip()
+    
+    if not comment_id or not new_text:
+        return jsonify({'error': 'Missing comment_id or text'}), 400
+    
+    if len(new_text) > 1000:
+        return jsonify({'error': 'Comment too long (max 1000 characters)'}), 400
+    
+    try:
+        success = comments_db.edit_comment(comment_id, new_text)
+        if success:
+            return jsonify({'success': True, 'message': 'Comment updated successfully'})
+        else:
+            return jsonify({'error': 'Failed to update comment'}), 500
+    except Exception as e:
+        logger.error(f"Error editing comment: {e}")
+        return jsonify({'error': 'Failed to update comment'}), 500
+
+@app.route('/api/moderation/comments', methods=['GET'])
+def get_comments_for_moderation_api():
+    """Get all comments for moderation"""
+    # Check if user is authenticated for moderation
+    if not session.get('moderation_authenticated'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        comments = comments_db.get_all_comments_for_moderation()
+        return jsonify({'comments': comments})
+    except Exception as e:
+        logger.error(f"Error getting comments for moderation: {e}")
+        return jsonify({'error': 'Failed to load comments'}), 500
 
 
 if __name__ == "__main__":

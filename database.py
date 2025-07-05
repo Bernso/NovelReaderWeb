@@ -66,6 +66,3 @@ def get_all_novel_views():
 
 # Initialize the database when the module is imported
 init_db()
-
-# The mobile header does not work Fix that
-# The header animation on appearance is very ugly and buggy, fix that

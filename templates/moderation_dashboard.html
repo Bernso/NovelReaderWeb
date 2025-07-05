@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moderation Dashboard - Novel Reader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dashboard-header h1 {
+            color: #BB86FC;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dashboard-header p {
+            color: #aaa;
+            font-size: 1.1rem;
+            margin: 0;
+            opacity: 0.8;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            color: #BB86FC;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #aaa;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .comments-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .section-title {
+            color: #BB86FC;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #BB86FC 0%, #6200EE 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(187, 134, 252, 0.3);
+        }
+        
+        .comment-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .comment-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(187, 134, 252, 0.3);
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .comment-info {
+            flex: 1;
+        }
+        
+        .comment-author {
+            color: #BB86FC;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        
+        .comment-thread {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .comment-thread a {
+            color: #BB86FC;
+            text-decoration: none;
+        }
+        
+        .comment-thread a:hover {
+            text-decoration: underline;
+        }
+        
+        .comment-timestamp {
+            color: #666;
+            font-size: 0.8rem;
+        }
+        
+        .comment-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-btn {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .edit-btn:hover {
+            background: #ffb300;
+            transform: translateY(-2px);
+        }
+        
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .delete-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+        
+        .comment-text {
+            color: #fff;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            word-wrap: break-word;
+        }
+        
+        .comment-ip {
+            color: #666;
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+        
+        .edit-form {
+            display: none;
+            margin-top: 15px;
+        }
+        
+        .edit-form.active {
+            display: block;
+        }
+        
+        .edit-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1rem;
+            resize: vertical;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        
+        .edit-textarea:focus {
+            outline: none;
+            border-color: #BB86FC;
+        }
+        
+        .edit-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .save-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .save-btn:hover {
+            background: #218838;
+        }
+        
+        .cancel-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .cancel-btn:hover {
+            background: #5a6268;
+        }
+        
+        .no-comments {
+            text-align: center;
+            color: #888;
+            font-size: 1.1rem;
+            padding: 40px;
+        }
+        
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(220, 53, 69, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(220, 53, 69, 1);
+            transform: translateY(-2px);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(40, 167, 69, 0.9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: 500;
+            z-index: 1001;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .notification.show {
+            opacity: 1;
+        }
+        
+        .notification.error {
+            background: rgba(220, 53, 69, 0.9);
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 10px;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 2rem;
+            }
+            
+            .comment-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .comment-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .logout-btn {
+                position: static;
+                margin-bottom: 20px;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'header.html' %}
+    <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+    
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>🛡️ Moderation Dashboard</h1>
+            <p>Manage and moderate comments across all novels and chapters</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="total-comments">{{ comments|length }}</div>
+                <div class="stat-label">Total Comments</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="recent-comments">{{ recent_count }}</div>
+                <div class="stat-label">Last 24 Hours</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="unique-novels">{{ unique_novels }}</div>
+                <div class="stat-label">Active Novels</div>
+            </div>
+        </div>
+        
+        <div class="comments-section">
+            <div class="section-header">
+                <h2 class="section-title">Recent Comments</h2>
+                <button class="refresh-btn" onclick="refreshComments()">🔄 Refresh</button>
+            </div>
+            
+            {% if error %}
+            <div style="color: #ff6b6b; text-align: center; padding: 20px; background: rgba(255, 107, 107, 0.1); border-radius: 10px; margin-bottom: 20px;">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <div id="comments-container">
+                {% if comments %}
+                    {% for comment in comments %}
+                    <div class="comment-card" data-comment-id="{{ comment.id }}">
+                        <div class="comment-header">
+                            <div class="comment-info">
+                                <div class="comment-author">{{ comment.name or 'Anonymous' }}</div>
+                                <div class="comment-thread">
+                                    📚 <a href="/read?n={{ comment.novel_name }}-chapters&c={{ comment.chapter_number }}" target="_blank">
+                                        {{ comment.novel_name }} - Chapter {{ comment.chapter_number }}
+                                    </a>
+                                </div>
+                                <div class="comment-timestamp">{{ comment.timestamp }}</div>
+                            </div>
+                            <div class="comment-actions">
+                                <button class="action-btn edit-btn" onclick="editComment({{ comment.id }})">✏️ Edit</button>
+                                <button class="action-btn delete-btn" onclick="deleteComment({{ comment.id }})">🗑️ Delete</button>
+                            </div>
+                        </div>
+                        <div class="comment-text" id="comment-text-{{ comment.id }}">{{ comment.text }}</div>
+                        <div class="comment-ip">IP: {{ comment.ip_address }}</div>
+                        
+                        <div class="edit-form" id="edit-form-{{ comment.id }}">
+                            <textarea class="edit-textarea" id="edit-textarea-{{ comment.id }}" maxlength="1000">{{ comment.text }}</textarea>
+                            <div class="edit-actions">
+                                <button class="save-btn" onclick="saveComment({{ comment.id }})">💾 Save</button>
+                                <button class="cancel-btn" onclick="cancelEdit({{ comment.id }})">❌ Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-comments">
+                        <h3>No comments found</h3>
+                        <p>There are no comments to moderate at this time.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+    
+    <script>
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${isError ? 'error' : ''}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        function refreshComments() {
+            fetch('/api/moderation/comments')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showNotification(data.error, true);
+                    } else {
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    showNotification('Failed to refresh comments', true);
+                });
+        }
+        
+        function editComment(commentId) {
+            const editForm = document.getElementById(`edit-form-${commentId}`);
+            const commentText = document.getElementById(`comment-text-${commentId}`);
+            
+            editForm.classList.add('active');
+            commentText.style.display = 'none';
+        }
+        
+        function cancelEdit(commentId) {
+            const editForm = document.getElementById(`edit-form-${commentId}`);
+            const commentText = document.getElementById(`comment-text-${commentId}`);
+            const textarea = document.getElementById(`edit-textarea-${commentId}`);
+            
+            // Reset textarea to original content
+            const originalText = commentText.textContent;
+            textarea.value = originalText;
+            
+            editForm.classList.remove('active');
+            commentText.style.display = 'block';
+        }
+        
+        function saveComment(commentId) {
+            const textarea = document.getElementById(`edit-textarea-${commentId}`);
+            const newText = textarea.value.trim();
+            
+            if (!newText) {
+                showNotification('Comment cannot be empty', true);
+                return;
+            }
+            
+            fetch('/api/moderation/edit-comment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    comment_id: commentId,
+                    text: newText
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message);
+                    const commentText = document.getElementById(`comment-text-${commentId}`);
+                    commentText.textContent = newText;
+                    cancelEdit(commentId);
+                } else {
+                    showNotification(data.error, true);
+                }
+            })
+            .catch(error => {
+                showNotification('Failed to update comment', true);
+            });
+        }
+        
+        function deleteComment(commentId) {
+            if (!confirm('Are you sure you want to delete this comment? This action cannot be undone.')) {
+                return;
+            }
+            
+            fetch('/api/moderation/delete-comment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    comment_id: commentId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message);
+                    const commentCard = document.querySelector(`[data-comment-id="${commentId}"]`);
+                    commentCard.remove();
+                    
+                    // Update stats
+                    const totalComments = document.getElementById('total-comments');
+                    totalComments.textContent = parseInt(totalComments.textContent) - 1;
+                } else {
+                    showNotification(data.error, true);
+                }
+            })
+            .catch(error => {
+                showNotification('Failed to delete comment', true);
+            });
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout from the moderation panel?')) {
+                window.location.href = '/moderation';
+            }
+        }
+        
+        // Auto-refresh every 30 seconds
+        setInterval(refreshComments, 30000);
+    </script>
+</body>
+</html> 

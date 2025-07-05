@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moderation Access - Novel Reader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .moderation-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .moderation-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        .moderation-header {
+            margin-bottom: 30px;
+        }
+        
+        .moderation-header h1 {
+            color: #BB86FC;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .moderation-header p {
+            color: #aaa;
+            font-size: 1.1rem;
+            margin: 0;
+            opacity: 0.8;
+        }
+        
+        .moderation-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .form-group {
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #fff;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #BB86FC;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(187, 134, 252, 0.1);
+        }
+        
+        .form-group input::placeholder {
+            color: #888;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #BB86FC 0%, #6200EE 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(187, 134, 252, 0.3);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        
+        .error-message {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .security-notice {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 10px;
+            color: #ffc107;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .security-notice strong {
+            color: #ffd54f;
+        }
+        
+        .back-link {
+            margin-top: 20px;
+        }
+        
+        .back-link a {
+            color: #BB86FC;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .back-link a:hover {
+            color: #fff;
+        }
+        
+        @media (max-width: 600px) {
+            .moderation-card {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .moderation-header h1 {
+                font-size: 2rem;
+            }
+            
+            .moderation-header p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'header.html' %}
+    <div class="moderation-container">
+        <div class="moderation-card">
+            <div class="moderation-header">
+                <h1>🔒 Moderation Access</h1>
+                <p>Enter your moderation key to access the comment management system</p>
+            </div>
+            
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <form method="POST" class="moderation-form">
+                <div class="form-group">
+                    <label for="key">Moderation Key</label>
+                    <input type="password" id="key" name="key" placeholder="Enter your moderation key" required>
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    Access Moderation Panel
+                </button>
+            </form>
+            
+            <div class="security-notice">
+                <strong>Security Notice:</strong><br>
+                This page is restricted to authorized moderators only. 
+                All access attempts are logged and monitored for security purposes.
+            </div>
+            
+            <div class="back-link">
+                <a href="/">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
