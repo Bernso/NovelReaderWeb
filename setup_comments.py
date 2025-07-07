@@ -42,7 +42,8 @@ def setup_database():
                 comment_text TEXT NOT NULL,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 ip_address VARCHAR(45),
-                user_agent TEXT
+                user_agent TEXT,
+                is_owner BOOLEAN DEFAULT 0
             )
         ''')
         

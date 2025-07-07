@@ -429,7 +429,7 @@
 
         
          <!-- COMMENT SECTION -->
-        <section id="comment-section" class='community' style='margin: 20px 0;'>
+        <section id="comment-section" class='community' style='margin: 20px 0; padding: 0 20px;'>
                 <h2 style="color: #BB86FC; font-size: 2rem; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px; text-align: left;">Community Discussion</h2>
                 <p style="color: #aaa; font-size: 1.1rem; margin-bottom: 28px; text-align: left;">Share your thoughts, ask questions, or join the conversation about this chapter below.</p>
                 <!-- Chapter Reaction Section -->
@@ -785,8 +785,6 @@
                 const userReactions = comment.user_reactions || [];
                 const replyCount = comment.reply_count || (comment.replies ? comment.replies.length : 0);
                 const reactionButtons = createReactionButtons(comment.id, reactions, userReactions);
-                
-                // Alternate background color by level
                 let bgColor, borderColor;
                 if (level % 2 === 0) {
                     bgColor = '#1a1a1a';
@@ -796,22 +794,19 @@
                     borderColor = '#555';
                 }
                 const leftMargin = level * 14;
-                
-                // Show View Replies button only if there are replies
+                // OWNER badge HTML (applies to both comments and replies)
+                const ownerBadge = comment.is_owner ? `<span class="owner-badge" title="Owner" style="background: #6200EE; color: #fff; border-radius: 4px; padding: 2px 8px; font-size: 11px; margin-left: 8px; font-weight: bold; letter-spacing: 0.5px; vertical-align: middle;">OWNER</span>` : '';
                 const replyButtonHtml = replyCount > 0 ? 
                     `<span style="color: #666; margin: 0 8px;">•</span><button class="view-replies-btn" data-comment-id="${comment.id}" data-reply-count="${replyCount}" style="background: none; color: #BB86FC; border: none; cursor: pointer; font-size: 13px;">View ${replyCount} repl${replyCount === 1 ? 'y' : 'ies'}</button>` : '';
-                
                 html += `
                     <div class="comment-block" style="border: 1px solid ${borderColor}; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: ${bgColor}; margin-left: ${leftMargin}px; max-width: 100%; word-wrap: break-word; overflow-wrap: break-word; box-sizing: border-box; position: relative;">
                         ${level > 0 ? '<div style="position: absolute; left: -15px; top: 20px; width: 10px; height: 1px; background: #555;"></div>' : ''}
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <strong style="color: #BB86FC;">${comment.name || 'Anonymous'}</strong>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center;">
+                            <strong style="color: #BB86FC;">${comment.name || 'Anonymous'}${ownerBadge}</strong>
                             <span style="color: #888; font-size: 12px;">${date}</span>
                         </div>
                         <p class="comment-text" style="color: #fff; line-height: 1.6; margin: 0 0 15px 0; word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; max-width: 100%; text-align: left;">${comment.text}</p>
-                        <div class="reactions-container" data-comment-id="${comment.id}">
-                            ${reactionButtons}
-                        </div>
+                        <div class="reactions-container" data-comment-id="${comment.id}">${reactionButtons}</div>
                         <div style="margin-top: 10px;">
                             <button class="reply-btn" data-comment-id="${comment.id}" style="background: none; color: #BB86FC; border: none; cursor: pointer; font-size: 13px;">Reply</button>
                             ${replyButtonHtml}
@@ -821,7 +816,6 @@
                     </div>
                 `;
             });
-            // After rendering, always re-attach reaction event listeners
             setTimeout(addReactionEventListeners, 0);
             return html;
         }
@@ -1068,7 +1062,8 @@
                     novel: novelTitle,
                     chapter: chapterNumber,
                     name: name,
-                    text: text
+                    text: text,
+                    owner_code: getOwnerCode()
                 })
             })
             .then(response => response.json())
@@ -2256,7 +2251,8 @@
                         chapter: chapterNumber,
                         name: name,
                         text: text,
-                        parent_comment_id: parentCommentId
+                        parent_comment_id: parentCommentId,
+                        owner_code: getOwnerCode()
                     })
                 });
                 const data = await response.json();
@@ -2293,6 +2289,127 @@
                 button.classList.remove('hide-replies-btn');
                 button.classList.add('view-replies-btn');
             }
+        }
+
+        // --- OWNER CODE UI ---
+        const OWNER_CODE_KEY = 'owner_code';
+        function showOwnerCodePrompt() {
+            const code = prompt('Enter owner code:');
+            if (code !== null) {
+                localStorage.setItem(OWNER_CODE_KEY, code);
+                alert('Owner code set!');
+            }
+        }
+        function getOwnerCode() {
+            return localStorage.getItem(OWNER_CODE_KEY) || '';
+        }
+        
+
+        // --- OWNER LOGIN SYSTEM ---
+        let isOwner = false;
+        function updateOwnerUI() {
+            const btn = document.getElementById('owner-login-btn');
+            if (btn) {
+                btn.textContent = isOwner ? 'Logout' : 'Login';
+            }
+        }
+        async function checkOwnerStatus() {
+            const res = await fetch('/api/owner/status');
+            const data = await res.json();
+            isOwner = !!data.is_owner;
+            updateOwnerUI();
+        }
+        async function ownerLoginLogout() {
+            if (isOwner) {
+                await fetch('/api/owner/logout', { method: 'POST' });
+                isOwner = false;
+                updateOwnerUI();
+                alert('Logged out as owner.');
+            } else {
+                const code = prompt('Enter owner code:');
+                if (!code) return;
+                const res = await fetch('/api/owner/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    isOwner = true;
+                    updateOwnerUI();
+                    alert('You are now verified as the owner for 1 day.');
+                } else {
+                    alert('Invalid code.');
+                }
+            }
+        }
+        window.addEventListener('DOMContentLoaded', function() {
+            const commentSection = document.getElementById('comment-section');
+            if (commentSection) {
+                let btn = document.getElementById('owner-login-btn');
+                if (!btn) {
+                    btn = document.createElement('button');
+                    btn.id = 'owner-login-btn';
+                    btn.textContent = 'I am the owner';
+                    btn.style = 'margin-bottom: 10px; margin-top: 10px; background: #6200EE; color: #fff; border: none; border-radius: 5px; padding: 6px 16px; cursor: pointer; font-weight: bold; opacity: 0; pointer-events: none; position: relative;';
+                    btn.onclick = ownerLoginLogout;
+                    btn.title = 'Owner login (hidden)';
+                    commentSection.insertBefore(btn, commentSection.firstChild);
+                } else {
+                    btn.textContent = 'I am the owner';
+                    btn.style.opacity = '0';
+                    btn.style.pointerEvents = 'none';
+                }
+                checkOwnerStatus();
+            }
+        });
+        // Secret keyboard shortcut: Ctrl+Shift+O to reveal the button
+        window.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && (e.key === 'O' || e.key === 'o')) {
+                e.preventDefault();
+                const btn = document.getElementById('owner-login-btn');
+                if (btn) {
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    btn.title = 'Owner login (secret shortcut revealed)';
+                }
+            }
+        });
+        // --- PATCH addComment and submitReply: no owner code sent ---
+        function addComment(novelTitle, chapterNumber, name, text) {
+            const submitButton = document.getElementById('submit-comment');
+            const originalText = submitButton.textContent;
+            submitButton.disabled = true;
+            submitButton.textContent = 'Posting...';
+            fetch('/api/comments', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    novel: novelTitle,
+                    chapter: chapterNumber,
+                    name: name,
+                    text: text
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showProgressSavedNotification('Error: ' + data.error);
+                } else {
+                    loadComments(novelTitle, chapterNumber);
+                    showProgressSavedNotification('Comment posted successfully!');
+                }
+            })
+            .catch(error => {
+                console.error('Error posting comment:', error);
+                showProgressSavedNotification('Failed to post comment. Please try again.');
+            })
+            .finally(() => {
+                submitButton.disabled = false;
+                submitButton.textContent = originalText;
+            });
         }
     </script>
     

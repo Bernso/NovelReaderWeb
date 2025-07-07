@@ -19,7 +19,7 @@ try:
     import comments_db
     
     # Flask and standard libraries
-    from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, Response, render_template_string, session
+    from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, Response, render_template_string, session, make_response
     from flask_caching import Cache
     import os
     import re  
@@ -33,6 +33,7 @@ try:
     from flask_limiter import Limiter
     from flask_limiter.util import get_remote_address
     from threading import Lock
+    import secrets
 
     # PythonAnywhere detection
     IS_PYTHONANYWHERE = 'PYTHONANYWHERE_SITE' in os.environ
@@ -1713,81 +1714,6 @@ def get_comments_api():
         logger.error(f"Error getting comments: {e}")
         return jsonify({'error': 'Failed to load comments'}), 500
 
-
-@app.route('/api/comments', methods=['POST'])
-def add_comment_api():
-    """Add a new comment or reply with advanced rate limiting"""
-    data = request.get_json()
-    
-    if not data:
-        return jsonify({'error': 'No data provided'}), 400
-    
-    novel_name = data.get('novel')
-    chapter_number = data.get('chapter')
-    user_name = data.get('name', 'Anonymous').strip()
-    comment_text = data.get('text', '').strip()
-    parent_comment_id = data.get('parent_comment_id')
-    
-    if not novel_name or not chapter_number or not comment_text:
-        return jsonify({'error': 'Missing required fields'}), 400
-    
-    if len(comment_text) > 250:
-        return jsonify({'error': 'Comment too long (max 250 characters)'}), 400
-    
-    if len(user_name) > 100:
-        return jsonify({'error': 'Name too long (max 100 characters)'}), 400
-    
-    # Check rate limiting (3 comments per 5 minutes per IP)
-    is_limited, remaining_attempts, reset_time = comments_db.check_rate_limit(
-        request.remote_addr, 
-        action_type='comment', 
-        max_attempts=3, 
-        window_minutes=5
-    )
-    
-    if is_limited:
-        time_until_reset = (reset_time - datetime.datetime.now()).total_seconds()
-        minutes_until_reset = max(0, int(time_until_reset / 60))
-        return jsonify({
-            'error': f'Rate limited. You can post {remaining_attempts} more comments in the next {minutes_until_reset} minutes.'
-        }), 429
-    
-    # Sanitize inputs
-    user_name = escape(user_name)
-    comment_text = escape(comment_text)
-    
-    try:
-        if parent_comment_id:
-            # Add reply
-            success, message = comments_db.add_reply(
-                parent_comment_id=parent_comment_id,
-                user_name=user_name,
-                comment_text=comment_text,
-                ip_address=request.remote_addr,
-                user_agent=request.headers.get('User-Agent')
-            )
-        else:
-            # Add top-level comment
-            success, message = comments_db.add_comment(
-                novel_name=novel_name,
-                chapter_number=chapter_number,
-                user_name=user_name,
-                comment_text=comment_text,
-                ip_address=request.remote_addr,
-                user_agent=request.headers.get('User-Agent')
-            )
-        
-        if success:
-            # Record the rate limit attempt
-            comments_db.record_rate_limit_attempt(request.remote_addr, 'comment')
-            return jsonify({'success': True, 'message': message})
-        else:
-            return jsonify({'error': message}), 400
-            
-    except Exception as e:
-        logger.error(f"Error adding comment: {e}")
-        return jsonify({'error': 'Failed to add comment'}), 500
-
 # --- Replies API ---
 @app.route('/api/comments/<int:comment_id>/replies', methods=['GET'])
 def get_replies_api(comment_id):
@@ -2125,6 +2051,109 @@ def get_comments_for_moderation_api():
     except Exception as e:
         logger.error(f"Error getting comments for moderation: {e}")
         return jsonify({'error': 'Failed to load comments'}), 500
+
+
+OWNER_CODE_FILE = 'owner.txt'
+OWNER_COOKIE_NAME = 'owner_verified'
+OWNER_COOKIE_MAX_AGE = 86400  # 1 day in seconds
+OWNER_TOKENS = set()  # In-memory set of valid owner tokens
+
+def get_owner_code():
+    try:
+        with open(os.path.join(app.root_path, OWNER_CODE_FILE), 'r', encoding='utf-8') as f:
+            return f.read().strip()
+    except Exception:
+        return ''
+
+@app.route('/api/owner/login', methods=['POST'])
+def owner_login():
+    data = request.get_json()
+    code = data.get('code', '')
+    owner_code = get_owner_code()
+    if code and code == owner_code:
+        token = secrets.token_urlsafe(32)
+        OWNER_TOKENS.add(token)
+        resp = make_response(jsonify({'success': True}))
+        resp.set_cookie(OWNER_COOKIE_NAME, token, max_age=OWNER_COOKIE_MAX_AGE, httponly=True, samesite='Lax')
+        return resp
+    return jsonify({'success': False, 'error': 'Invalid code'}), 401
+
+@app.route('/api/owner/logout', methods=['POST'])
+def owner_logout():
+    token = request.cookies.get(OWNER_COOKIE_NAME)
+    if token in OWNER_TOKENS:
+        OWNER_TOKENS.remove(token)
+    resp = make_response(jsonify({'success': True}))
+    resp.set_cookie(OWNER_COOKIE_NAME, '', expires=0)
+    return resp
+
+@app.route('/api/owner/status', methods=['GET'])
+def owner_status():
+    token = request.cookies.get(OWNER_COOKIE_NAME)
+    is_owner = token in OWNER_TOKENS
+    return jsonify({'is_owner': is_owner})
+
+@app.route('/api/comments', methods=['POST'])
+def add_comment_api():
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    novel_name = data.get('novel')
+    chapter_number = data.get('chapter')
+    user_name = data.get('name', 'Anonymous').strip()
+    comment_text = data.get('text', '').strip()
+    parent_comment_id = data.get('parent_comment_id')
+    if not novel_name or not chapter_number or not comment_text:
+        return jsonify({'error': 'Missing required fields'}), 400
+    if len(comment_text) > 250:
+        return jsonify({'error': 'Comment too long (max 250 characters)'}), 400
+    if len(user_name) > 100:
+        return jsonify({'error': 'Name too long (max 100 characters)'}), 400
+    is_limited, remaining_attempts, reset_time = comments_db.check_rate_limit(
+        request.remote_addr, 
+        action_type='comment', 
+        max_attempts=3, 
+        window_minutes=5
+    )
+    if is_limited:
+        time_until_reset = (reset_time - datetime.datetime.now()).total_seconds()
+        minutes_until_reset = max(0, int(time_until_reset / 60))
+        return jsonify({
+            'error': f'Rate limited. You can post {remaining_attempts} more comments in the next {minutes_until_reset} minutes.'
+        }), 429
+    user_name = escape(user_name)
+    comment_text = escape(comment_text)
+    # Check owner cookie securely
+    token = request.cookies.get(OWNER_COOKIE_NAME)
+    is_owner = token in OWNER_TOKENS
+    try:
+        if parent_comment_id:
+            success, message = comments_db.add_reply(
+                parent_comment_id=parent_comment_id,
+                user_name=user_name,
+                comment_text=comment_text,
+                ip_address=request.remote_addr,
+                user_agent=request.headers.get('User-Agent'),
+                is_owner=is_owner
+            )
+        else:
+            success, message = comments_db.add_comment(
+                novel_name=novel_name,
+                chapter_number=chapter_number,
+                user_name=user_name,
+                comment_text=comment_text,
+                ip_address=request.remote_addr,
+                user_agent=request.headers.get('User-Agent'),
+                is_owner=is_owner
+            )
+        if success:
+            comments_db.record_rate_limit_attempt(request.remote_addr, 'comment')
+            return jsonify({'success': True, 'message': message})
+        else:
+            return jsonify({'error': message}), 400
+    except Exception as e:
+        logger.error(f"Error adding comment: {e}")
+        return jsonify({'error': 'Failed to add comment'}), 500
 
 
 if __name__ == "__main__":
