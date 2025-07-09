@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="See live website visit statistics and analytics for the Novel Reader site.">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='MAINICON-20240501-rounded.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Visit Stats</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: var(--actual-background);
+            min-height: 100vh;
+            /* Removed pattern background */
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s cubic-bezier(0.4,0,0.2,1) 0.2s forwards;
+        }
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .stats-card {
+            background: rgba(35, 35, 43, 0.75);
+            border-radius: 22px;
+            box-shadow: 0 8px 40px 0 var(--primary-color)11, 0 1.5px 8px 0 #00000033;
+            padding: 2.5rem 2rem 2rem 2rem;
+            max-width: 700px;
+            margin: 2.5rem auto 2rem auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            backdrop-filter: blur(8px) saturate(1.2);
+            border: 1.5px solid rgba(187,134,252,0.13);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .stat-tile {
+            background: rgba(41, 41, 55, 0.82);
+            border-radius: 16px;
+            padding: 1.2rem 0.5rem 1rem 0.5rem;
+            text-align: center;
+            box-shadow: 0 2px 12px var(--primary-color)11, 0 1.5px 8px 0 #00000022;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: box-shadow 0.3s, transform 0.2s, border 0.3s;
+            position: relative;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
+            border: 1.5px solid rgba(187,134,252,0.10);
+        }
+        .stat-tile:hover {
+            box-shadow: 0 4px 32px 0 var(--primary-color)44, 0 1.5px 8px 0 #00000033;
+            transform: translateY(-4px) scale(1.045);
+            border: 1.5px solid var(--primary-color);
+            /* Remove animation that could cause flicker */
+        }
+        .stat-tile:hover .stat-number,
+        .stat-tile:hover .stat-label,
+        .stat-tile:hover .stat-icon {
+            color: var(--primary-color) !important;
+            filter: drop-shadow(0 2px 8px var(--primary-color)22);
+            opacity: 1 !important;
+        }
+        .stat-icon {
+            font-size: 2.1em;
+            margin-bottom: 0.2em;
+            color: var(--primary-color);
+            filter: drop-shadow(0 2px 8px var(--primary-color)22);
+        }
+        .stat-number {
+            font-size: 2.1em;
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-bottom: 0.1em;
+            letter-spacing: 0.01em;
+            opacity: 1;
+        }
+        .stat-label {
+            font-size: 1em;
+            color: var(--text-muted);
+            letter-spacing: 0.01em;
+            opacity: 1;
+        }
+        .charts-section {
+            background: rgba(35, 35, 43, 0.78);
+            border-radius: 22px;
+            box-shadow: 0 8px 40px 0 var(--primary-color)11, 0 1.5px 8px 0 #00000033;
+            padding: 2rem 1rem 2rem 1rem;
+            max-width: 900px;
+            margin: 2rem auto 2.5rem auto;
+            backdrop-filter: blur(8px) saturate(1.2);
+            border: 1.5px solid rgba(187,134,252,0.13);
+        }
+        .chart-card {
+            background: rgba(41, 41, 55, 0.90);
+            border-radius: 18px;
+            box-shadow: 0 2px 16px #00000044, 0 1.5px 8px 0 var(--primary-color)11;
+            padding: 1.5rem 1rem 1.2rem 1rem;
+            margin-bottom: 2.5rem;
+            max-width: 98vw;
+            transition: box-shadow 0.2s, transform 0.2s;
+            border: 1.5px solid rgba(187,134,252,0.10);
+        }
+        .chart-card:hover {
+            box-shadow: 0 6px 32px 0 var(--primary-color)33, 0 1.5px 8px 0 #00000033;
+            transform: scale(1.012);
+            border: 1.5px solid var(--primary-color);
+        }
+        .charts-section h3 {
+            color: var(--primary-color);
+            margin-top: 2.2rem;
+            margin-bottom: 0.7rem;
+            font-size: 1.15em;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+        }
+        .charts canvas {
+            background: var(--actual-background);
+            border-radius: 14px;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 2px 8px #00000033;
+            padding: 0.5rem;
+            transition: box-shadow 0.2s;
+        }
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-bottom: 1.2rem;
+            gap: 0.5rem;
+        }
+        .theme-toggle label {
+            color: var(--primary-color);
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .theme-toggle input[type="checkbox"] {
+            accent-color: var(--primary-color);
+            width: 1.2em;
+            height: 1.2em;
+        }
+        @media (max-width: 800px) {
+            .stats-card, .charts-section {
+                max-width: 98vw;
+                padding: 1.2rem 0.2rem 1.2rem 0.2rem;
+            }
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.7rem;
+            }
+            .stat-tile {
+                padding: 0.8rem 0.2rem 0.7rem 0.2rem;
+            }
+            .chart-card {
+                padding: 0.7rem 0.1rem 0.7rem 0.1rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="no-select">
+    {% include 'header.html' %}
+    <main style="margin-top: 70px; max-width: 100vw;">
+        <section class="hero fade-in" style="border-radius: 20px;">
+            <h2>Website Visit Statistics</h2>
+            <p>See live analytics and traffic for this site, including hourly, daily, weekly, monthly, and yearly stats.</p>
+        </section>
+        <div class="stats-card fade-in">
+            <div class="stats-grid">
+                <div class="stat-tile"><span class="stat-icon"><i class="fa-solid fa-clock"></i></span><span class="stat-number" id="visits-hour">-</span><span class="stat-label">This Hour</span></div>
+                <div class="stat-tile"><span class="stat-icon"><i class="fa-solid fa-calendar-day"></i></span><span class="stat-number" id="visits-day">-</span><span class="stat-label">Today</span></div>
+                <div class="stat-tile"><span class="stat-icon"><i class="fa-solid fa-calendar-week"></i></span><span class="stat-number" id="visits-week">-</span><span class="stat-label">This Week</span></div>
+                <div class="stat-tile"><span class="stat-icon"><i class="fa-solid fa-calendar-alt"></i></span><span class="stat-number" id="visits-month">-</span><span class="stat-label">This Month</span></div>
+                <div class="stat-tile"><span class="stat-icon"><i class="fa-solid fa-calendar"></i></span><span class="stat-number" id="visits-year">-</span><span class="stat-label">This Year</span></div>
+                <div class="stat-tile"><span class="stat-icon"><i class="fa-solid fa-globe"></i></span><span class="stat-number" id="visits-total">-</span><span class="stat-label">All Time</span></div>
+            </div>
+        </div>
+        <section class="hero fade-in" style="border-radius: 20px;">
+            <h2>Traffic Graphs</h2>
+            <p>Visualize visits over time. All times are in UTC.</p>
+        </section>
+        <div class="charts-section fade-in">
+            <div class="theme-toggle">
+                <label for="chartTheme">Dark Charts</label>
+                <input type="checkbox" id="chartTheme" checked>
+            </div>
+            <div class="chart-card"><h3>Visits per Hour (Last 24h)</h3><canvas id="hourlyChart" height="120"></canvas></div>
+            <div class="chart-card"><h3>Visits per Day (Last 30d)</h3><canvas id="dailyChart" height="120"></canvas></div>
+            <div class="chart-card"><h3>Visits per Week (Last 12w)</h3><canvas id="weeklyChart" height="120"></canvas></div>
+            <div class="chart-card"><h3>Visits per Month (Last 12mo)</h3><canvas id="monthlyChart" height="120"></canvas></div>
+            <div class="chart-card"><h3>Visits per Year (Last 5y)</h3><canvas id="yearlyChart" height="120"></canvas></div>
+        </div>
+        <section class="community fade-in">
+            <h2>Join Our Community</h2>
+            <p>Connect with other readers on our <a href="https://www.discord.gg/k5HBFXqtCB" target="_blank" style="text-decoration: none;">Discord Server</a></p>
+            <p>Created by <a href="https://www.github.com/Bernso" target="_blank" style="text-decoration: none;">Bernso</a></p>
+        </section>
+    </main>
+    <button onclick="topFunction()" id="backToTopBtn" title="Go to top"></button>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+    // Animated counters
+    function numberFormat(num) {
+        // Convert to string, remove commas, and check if it's a valid number
+        let str = String(num).replace(/,/g, '').trim();
+        if (!/^\d+$/.test(str)) return num;
+        return str.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    function animateCounter(id, end) {
+        const el = document.getElementById(id);
+        let start = 0;
+        const duration = 900;
+        const step = Math.ceil(end / (duration / 16));
+        function update() {
+            start += step;
+            if (start >= end) {
+                el.textContent = numberFormat(end);
+            } else {
+                el.textContent = numberFormat(start);
+                requestAnimationFrame(update);
+            }
+        }
+        update();
+    }
+    // Helper for gradient fill
+    function getGradient(ctx, chartArea, color1, color2) {
+        const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+        gradient.addColorStop(0, color1);
+        gradient.addColorStop(1, color2);
+        return gradient;
+    }
+    // Chart theme
+    let darkTheme = true;
+    document.getElementById('chartTheme').addEventListener('change', function() {
+        darkTheme = this.checked;
+        window.renderAllCharts && window.renderAllCharts();
+    });
+    async function fetchStats() {
+        const res = await fetch('/api/visit-stats');
+        const data = await res.json();
+        animateCounter('visits-hour', data.visits_hour);
+        animateCounter('visits-day', data.visits_day);
+        animateCounter('visits-week', data.visits_week);
+        animateCounter('visits-month', data.visits_month);
+        animateCounter('visits-year', data.visits_year);
+        animateCounter('visits-total', data.visits_total);
+
+        // Chart config helper
+        function makeChart(canvasId, labels, values, label, type, grad1, grad2) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            if (window[canvasId + '_chart']) window[canvasId + '_chart'].destroy();
+            window[canvasId + '_chart'] = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: values,
+                        borderColor: darkTheme ? '#BB86FC' : '#6C47B6',
+                        backgroundColor: (context) => {
+                            const chart = context.chart;
+                            const {ctx, chartArea} = chart;
+                            if (!chartArea) return darkTheme ? 'rgba(187,134,252,0.10)' : 'rgba(108,71,182,0.10)';
+                            return getGradient(ctx, chartArea, grad1, grad2);
+                        },
+                        fill: type !== 'bar',
+                        tension: 0.35,
+                        pointRadius: 6,
+                        pointHoverRadius: 12,
+                        pointBackgroundColor: darkTheme ? '#BB86FC' : '#6C47B6',
+                        pointBorderColor: darkTheme ? '#9965e3' : '#BB86FC',
+                        borderWidth: 3,
+                        borderRadius: type === 'bar' ? 10 : 0,
+                        hoverBackgroundColor: darkTheme ? '#9965e3' : '#BB86FC',
+                        hoverBorderColor: darkTheme ? '#9965e3' : '#BB86FC',
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.7,
+                        shadowOffsetX: 0,
+                        shadowOffsetY: 2,
+                        shadowBlur: 8,
+                        shadowColor: darkTheme ? '#BB86FC33' : '#6C47B633',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    animation: {
+                        duration: 1200,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: darkTheme ? '#232323' : '#fff',
+                            titleColor: darkTheme ? '#BB86FC' : '#6C47B6',
+                            bodyColor: darkTheme ? '#fff' : '#232323',
+                            borderColor: darkTheme ? '#BB86FC' : '#6C47B6',
+                            borderWidth: 1,
+                            padding: 14,
+                            caretSize: 8,
+                            cornerRadius: 10,
+                        }
+                    },
+                    layout: {
+                        padding: 10
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true,
+                        animationDuration: 400
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: darkTheme ? '#33334a' : '#e0e0e0',
+                                borderColor: darkTheme ? '#BB86FC' : '#6C47B6',
+                                borderWidth: 1,
+                                drawBorder: true,
+                                tickColor: darkTheme ? '#BB86FC' : '#6C47B6',
+                            },
+                            ticks: { color: darkTheme ? '#cccccc' : '#232323', font: { size: 13 } }
+                        },
+                        y: {
+                            grid: {
+                                color: darkTheme ? '#33334a' : '#e0e0e0',
+                                borderColor: darkTheme ? '#BB86FC' : '#6C47B6',
+                                borderWidth: 1,
+                                drawBorder: true,
+                                tickColor: darkTheme ? '#BB86FC' : '#6C47B6',
+                            },
+                            beginAtZero: true,
+                            ticks: { color: darkTheme ? '#cccccc' : '#232323', font: { size: 13 } }
+                        }
+                    }
+                }
+            });
+        }
+        // Render all charts (for theme toggle)
+        window.renderAllCharts = function() {
+            makeChart('hourlyChart', data.visits_per_hour.map(x => x[0].slice(11)), data.visits_per_hour.map(x => x[1]), 'Visits per Hour', 'line', darkTheme ? '#BB86FC44' : '#6C47B644', darkTheme ? '#18181f' : '#fff');
+            makeChart('dailyChart', data.visits_per_day.map(x => x[0]), data.visits_per_day.map(x => x[1]), 'Visits per Day', 'bar', darkTheme ? '#BB86FC' : '#6C47B6', darkTheme ? '#18181f' : '#fff');
+            makeChart('weeklyChart', data.visits_per_week.map(x => x[0]), data.visits_per_week.map(x => x[1]), 'Visits per Week', 'bar', darkTheme ? '#BB86FC' : '#6C47B6', darkTheme ? '#18181f' : '#fff');
+            makeChart('monthlyChart', data.visits_per_month.map(x => x[0]), data.visits_per_month.map(x => x[1]), 'Visits per Month', 'bar', darkTheme ? '#BB86FC' : '#6C47B6', darkTheme ? '#18181f' : '#fff');
+            makeChart('yearlyChart', data.visits_per_year.map(x => x[0]), data.visits_per_year.map(x => x[1]), 'Visits per Year', 'bar', darkTheme ? '#BB86FC' : '#6C47B6', darkTheme ? '#18181f' : '#fff');
+        }
+        window.renderAllCharts();
+    }
+    fetchStats();
+    </script>
+</body>
+</html> 

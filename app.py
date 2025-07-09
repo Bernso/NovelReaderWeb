@@ -259,6 +259,13 @@ def maintainance_override():
                 
         """), 503
 
+@app.before_request
+def log_site_visit():    
+    try:
+        database.increment_visit_counters()
+    except Exception as e:
+        pass
+
 
 
 # Everything documented here is done by tabnine AI (not me)
@@ -498,9 +505,8 @@ def run_scriptlightNovelPubDotVip():
               If an exception occurs, it returns a JSON response with an error message.
     """
     try:
-        print("Received request to /lightNovelPubDotVip")  # Debugging statement
+        logger.info("Received request to /lightNovelPubDotVip")
         novel_link = request.json.get('novelLink')
-        print(f"Novel link received: {novel_link}")  # Debugging statement
         import webscrapers.lightNovelPubDotVip.getPics
         import webscrapers.lightNovelPubDotVip.genChaptersV2
         scraper = webscrapers.lightNovelPubDotVip.getPics.NovelImageScraper()
@@ -512,7 +518,7 @@ def run_scriptlightNovelPubDotVip():
 
         return jsonify({"result": "Done"})
     except Exception as e:
-        print(f"Error occurred: {str(e)}")  # Debugging statement
+        logger.error(f"Error occurred in /lightNovelPubDotVip: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 
@@ -533,14 +539,13 @@ def run_scriptreaderNovel():
               If an exception occurs, it returns a JSON response with an error message.
     """
     try:
-        print("Received request to /readerNovel")  # Debugging statement
+        logger.info("Received request to /readerNovel")
         novel_link = request.json.get('novelLink')
-        print(f"Novel link received: {novel_link}")  # Debugging statement
         result = webscrapers.readerNovel.genChapters.yes(base_url=novel_link)
         webscrapers.readerNovel.getPics.main(url=novel_link) 
         return jsonify({"result": result})
     except Exception as e:
-        print(f"Error occurred: {str(e)}")  # Debugging statement
+        logger.error(f"Error occurred in /readerNovel: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 
@@ -562,14 +567,13 @@ def run_scriptreadWebNovel():
               If an error occurs, it returns a JSON response with the error message and a status code of 500.
     """
     try:
-        print("Received request to /readerNovel")  # Debugging statement
+        logger.info("Received request to /readWebNovel")
         novel_link = request.json.get('novelLink')
-        print(f"Novel link received: {novel_link}")  # Debugging statement
         result = webscrapers.readWebNovel.genChapters.yes(base_url=novel_link)
         webscrapers.readWebNovel.getPics.main(url=novel_link) 
         return jsonify({"result": result})
     except Exception as e:
-        print(f"Error occurred: {str(e)}")  # Debugging statement
+        logger.error(f"Error occurred in /readWebNovel: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
     
@@ -592,15 +596,29 @@ def run_scriptwebNovelDotCom():
               If an exception occurs, it returns a JSON response containing the error message with a 500 status code.
     """
     try:
-        print("Received request to /webNovelDotCom")  # Debugging statement
+        logger.info("Received request to /webNovelDotCom")
         novel_link = request.json.get('novelLink')
-        print(f"Novel link received: {novel_link}")  # Debugging statement
         result = webscrapers.webNovelDotCom.genChapters.yes(base_url=novel_link)
         webscrapers.webNovelDotCom.getPics.main(url=novel_link) 
         return jsonify({"result": result})
     except Exception as e:
-        print(f"Error occurred: {str(e)}")  # Debugging statement
+        logger.error(f"Error occurred in /webNovelDotCom: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+
+def _parse_chapter_filename(filename):
+    """Helper to parse chapter filename into a float or int chapter number."""
+    parts = filename.split('-')
+    if len(parts) == 3:
+        try:
+            return float(f"{parts[1]}.{parts[2].split('.')[0]}")
+        except Exception:
+            return None
+    else:
+        try:
+            return int(parts[1].split('.')[0])
+        except Exception:
+            return None
 
 
 def fetch_chapters_for_novel(novel_name):
@@ -609,10 +627,10 @@ def fetch_chapters_for_novel(novel_name):
     if not novel_name.endswith('-chapters'):
         novel_name = novel_name + '-chapters'
     
-    print(f"Fetching chapters for novel: {novel_name}")
+    logger.info(f"Fetching chapters for novel: {novel_name}")
     
     path = normalize_path(os.path.join(app.root_path, 'templates', 'novels', novel_name))
-    print(f"Looking in path: {path}")
+    logger.info(f"Looking in path: {path}")
     
     if not os.path.exists(path):
         raise FileNotFoundError(f"Novel not found")
@@ -621,17 +639,13 @@ def fetch_chapters_for_novel(novel_name):
     if not chapters:
         raise ValueError(f"No chapters found for novel: {novel_name}")
         
-    print(f"Found {len(chapters)} chapters")
+    logger.info(f"Found {len(chapters)} chapters")
     
     chapterContent = {}
     for chapter in chapters:
-        # Split the chapter filename and handle both integer and decimal chapter numbers
-        parts = chapter.split('-')
-        if len(parts) == 3:  # For decimal chapters like chapter-3-2.txt
-            chapter_number = float(f"{parts[1]}.{parts[2].split('.')[0]}")
-        else:  # For integer chapters like chapter-3.txt
-            chapter_number = int(parts[1].split('.')[0])
-        
+        chapter_number = _parse_chapter_filename(chapter)
+        if chapter_number is None:
+            continue
         chapter_path = normalize_path(os.path.join(path, chapter))
         try:
             with open(chapter_path, 'r', encoding='utf-8') as f:
@@ -641,7 +655,6 @@ def fetch_chapters_for_novel(novel_name):
         except Exception as e:
             logger.error(f"Error reading chapter {chapter}: {e}")
             continue
-            
     return chapterContent
 
 def fetch_chapters_around_chapter_for_novel(novel_name, chapter_number):
@@ -667,33 +680,21 @@ def create_chapters_json(novel_name):
     try:
         # Normalize the novel name by properly decoding URL encoding and handling special characters
         novel_name = urllib.parse.unquote(novel_name)
-        # Handle special Unicode apostrophes and quotes consistently
         novel_name = novel_name.replace('\u2019', "'").replace('\u2018', "'").replace('%27', "'")
-        
-        # Create the novel directory path with normalized path
         novel_path = normalize_path(os.path.join(app.root_path, 'templates', 'novels', novel_name))
-        
-        # Create the directory if it doesn't exist
         os.makedirs(novel_path, exist_ok=True)
-        
-        # Check if there are any chapters to process
         try:
             chapters = [f for f in os.listdir(novel_path) if f.startswith('chapter-') and f.endswith('.txt')]
         except FileNotFoundError:
             logger.error(f"Directory not found: {novel_path}")
             return {}
-        
         chapter_content = {}
-
         for chapter in chapters:
+            chapter_number = _parse_chapter_filename(chapter)
+            if chapter_number is None:
+                continue
+            chapter_file_path = normalize_path(os.path.join(novel_path, chapter))
             try:
-                parts = chapter.split('-')
-                if len(parts) == 3:
-                    chapter_number = float(f"{parts[1]}.{parts[2].split('.')[0]}")
-                else:
-                    chapter_number = int(parts[1].split('.')[0])
-                
-                chapter_file_path = normalize_path(os.path.join(novel_path, chapter))
                 with open(chapter_file_path, 'r', encoding='utf-8') as f:
                     content = f.read()
                     content = content.replace('<br>', "\n")
@@ -701,21 +702,14 @@ def create_chapters_json(novel_name):
             except Exception as e:
                 logger.error(f"Error processing chapter {chapter}: {e}")
                 continue
-
-        # Only proceed if we have chapters to save
         if not chapter_content:
             logger.warning(f"No chapters found or processed for {novel_name}")
             return {}
-            
-        # Create the JSON file
         json_path = normalize_path(os.path.join(novel_path, 'chapters.json'))
         try:
             with open(json_path, 'w', encoding='utf-8') as json_file:
                 json.dump(chapter_content, json_file, ensure_ascii=False, indent=4)
-            
             logger.info(f"Chapters JSON file created for {novel_name}")
-            
-            # Delete chapter text files after creating JSON
             for chapter in chapters:
                 chapter_path = normalize_path(os.path.join(novel_path, chapter))
                 try:
@@ -725,9 +719,7 @@ def create_chapters_json(novel_name):
         except OSError as e:
             logger.error(f"Error creating chapters.json for {novel_name}: {e}")
             return {}
-        
         return chapter_content
-    
     except Exception as e:
         logger.error(f"Failed to create chapters JSON for {novel_name}: {e}")
         return {}
@@ -997,7 +989,7 @@ def transform_title(novel_title):
     # Add -chapters suffix
     transformed_title += '-chapters'
     
-    print(f"Transformed title: {transformed_title}")
+    logger.info(f"Transformed title: {transformed_title}")
     return transformed_title
 
 
@@ -1056,26 +1048,23 @@ def update_novel(novel_title):
               and the result will be None.
     """
     try:
-        print(f"Received request to update novel: {novel_title}")  # Debugging statement
+        logger.info(f"Received request to update novel: {novel_title}")
         novel_title2 = request.json.get('novelTitle2')
-        print(f"Received novelTitle2: {novel_title2}")  # Debugging statement
+        logger.info(f"Received novelTitle2: {novel_title2}")
 
         if novel_title2 is None:
             raise ValueError("novelTitle2 is missing or None.")
         
-        print("Calling webscrapers.updateNovel.yes function...")  # Debugging statement
+        logger.info("Calling webscrapers.updateNovel.yes function...")
         result = webscrapers.updateNovel.yes(novel_title2)
 
         # After update, make sure metadata.json exists
         novel_path = os.path.join(app.root_path, 'templates', 'novels', novel_title)
-        metadata_path = os.path.join(novel_path, 'metadata.json')
-        if not os.path.exists(metadata_path):
-            # Create metadata from categories if possible
-            get_novel_metadata(novel_title)
+        _ensure_metadata_exists(novel_path, novel_title)
 
         return jsonify({"status": "success", "message": f"{novel_title} updated successfully.", "result": result})
     except Exception as e:
-        print(f"Exception occurred: {str(e)}")  # Debugging statement
+        logger.error(f"Exception occurred in update_novel: {str(e)}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
@@ -1903,7 +1892,7 @@ def moderation_page():
                 try:
                     with open(path, 'r') as f:
                         correct_key = f.read().strip()
-                        print(f"Found moderation key at: {path}")
+                        logger.info(f"Found moderation key at: {path}")
                         break
                 except (FileNotFoundError, PermissionError):
                     continue
@@ -1912,7 +1901,7 @@ def moderation_page():
                 # Fallback to hardcoded key for PythonAnywhere (less secure but functional)
                 if IS_PYTHONANYWHERE:
                     correct_key = "moderator_key_2024_secure_access_only"
-                    print("Using fallback moderation key for PythonAnywhere")
+                    logger.info("Using fallback moderation key for PythonAnywhere")
                 else:
                     return render_template('moderation_login.html', error="Moderation system not configured")
                     
@@ -1920,7 +1909,7 @@ def moderation_page():
             logger.error(f"Error reading moderation key: {e}")
             if IS_PYTHONANYWHERE:
                 correct_key = "moderator_key_2024_secure_access_only"
-                print("Using fallback moderation key due to error")
+                logger.info("Using fallback moderation key due to error")
             else:
                 return render_template('moderation_login.html', error="Moderation system error")
         
@@ -2155,6 +2144,42 @@ def add_comment_api():
         logger.error(f"Error adding comment: {e}")
         return jsonify({'error': 'Failed to add comment'}), 500
 
+@app.route('/api/visit-stats')
+def visit_stats_api():
+    """Return visit stats for hour, day, week, month, year, total, and time series for graphs."""
+    try:
+        stats = database.get_stats()
+        visits_per_hour = database.get_time_series('hour', 24)
+        visits_per_day = database.get_time_series('day', 30)
+        visits_per_week = database.get_time_series('week', 12)
+        visits_per_month = database.get_time_series('month', 12)
+        visits_per_year = database.get_time_series('year', 5)
+        return jsonify({
+            'visits_hour': stats['hour'],
+            'visits_day': stats['day'],
+            'visits_week': stats['week'],
+            'visits_month': stats['month'],
+            'visits_year': stats['year'],
+            'visits_total': stats['total'],
+            'visits_per_hour': visits_per_hour,
+            'visits_per_day': visits_per_day,
+            'visits_per_week': visits_per_week,
+            'visits_per_month': visits_per_month,
+            'visits_per_year': visits_per_year
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/visit-stats')
+def visit_stats_page():
+    """Show the visit stats and graphs page."""
+    return render_template('visit_stats.html')
+
+def _ensure_metadata_exists(novel_path, novel_title):
+    """Helper to ensure metadata.json exists for a novel."""
+    metadata_path = os.path.join(novel_path, 'metadata.json')
+    if not os.path.exists(metadata_path):
+        get_novel_metadata(novel_title)
 
 if __name__ == "__main__":
     try:
