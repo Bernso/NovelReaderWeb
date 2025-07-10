@@ -400,7 +400,7 @@
     {% include 'header.html' %}
     <button class="logout-btn" onclick="logout()">🚪 Logout</button>
     
-    <div class="dashboard-container">
+    <div class="dashboard-container starter">
         <div class="dashboard-header">
             <h1>🛡️ Moderation Dashboard</h1>
             <p>Manage and moderate comments across all novels and chapters</p>
@@ -408,7 +408,7 @@
         
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-number" id="total-comments">{{ comments|length }}</div>
+                <div class="stat-number" id="total-comments">{{ total_comments }}</div>
                 <div class="stat-label">Total Comments</div>
             </div>
             <div class="stat-card">

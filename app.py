@@ -1940,8 +1940,10 @@ def moderation_dashboard():
         now = datetime.datetime.now()
         recent_count = 0
         unique_novels = set()
+        total_comments = 0
         def count_stats(comment):
-            nonlocal recent_count
+            nonlocal recent_count, total_comments
+            total_comments += 1
             # Count recent comments (last 24 hours)
             try:
                 timestamp_str = str(comment['timestamp'])
@@ -1962,15 +1964,15 @@ def moderation_dashboard():
                               threaded_comments=threaded_comments, 
                               recent_count=recent_count,
                               unique_novels=len(unique_novels),
-                              comments=[])
+                              total_comments=total_comments)
     except Exception as e:
         logger.error(f"Error loading moderation dashboard: {e}")
         return render_template('moderation_dashboard.html', 
                               threaded_comments=[], 
-                              comments=[], 
                               error="Failed to load comments",
                               recent_count=0,
-                              unique_novels=0)
+                              unique_novels=0,
+                              total_comments=0)
 
 @app.route('/api/moderation/delete-comment', methods=['POST'])
 def delete_comment_api():

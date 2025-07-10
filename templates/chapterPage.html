@@ -56,9 +56,11 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='mini-player.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='comments.css') }}">
     <script src="{{ url_for('static', filename='mini-player.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
     <style>
+        /* Comment-related CSS has been moved to static/comments.css */
         .features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -188,6 +190,279 @@
         .gradient-angle label {
             display: block;
             margin-bottom: 5px;
+        }
+
+        /* Read More/Show Less Button Styles */
+        .read-more-btn,
+        .show-less-btn {
+            text-align: left !important;
+            width: fit-content !important;
+            margin-left: 0 !important;
+            margin-right: auto !important;
+            transition: color 0.2s, background 0.2s, transform 0.15s;
+        }
+        .comment-text-container .read-more-btn,
+        .comment-text-container .show-less-btn {
+            margin-left: 0 !important;
+            margin-right: auto !important;
+        }
+
+        .read-more-btn:hover,
+        .show-less-btn:hover {
+            color: #9965d4 !important;
+            text-decoration: none !important;
+        }
+
+        .read-more-btn:active,
+        .show-less-btn:active {
+            color: #7c4dff !important;
+        }
+
+        /* Comment text transition for smooth expand/collapse */
+        .comment-text {
+            transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s;
+            overflow: hidden;
+            max-height: 4.8em; /* 3 lines at 1.6em line-height */
+            opacity: 1;
+        }
+        .comment-text.expanded {
+            max-height: 1000px; /* Large enough to show all text */
+        }
+
+        /* Mobile-responsive comment system improvements */
+        @media (max-width: 768px) {
+            /* Comment section container */
+            #comment-section {
+                padding: 0 15px !important;
+                margin: 15px 0 !important;
+            }
+
+            /* Comment blocks */
+            .comment-block {
+                padding: 12px !important;
+                margin-bottom: 12px !important;
+                margin-left: 0 !important;
+                border-radius: 6px !important;
+            }
+
+            /* Comment header - stack vertically on mobile */
+            .comment-block > div:first-child {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 8px !important;
+                margin-bottom: 12px !important;
+            }
+
+            /* Author name and date */
+            .comment-block strong {
+                font-size: 14px !important;
+            }
+
+            .comment-block span[style*="color: #888"] {
+                font-size: 11px !important;
+            }
+
+            /* Comment text container */
+            .comment-text-container {
+                margin-bottom: 15px;
+                text-align: left !important;
+            }
+
+            /* Comment text */
+            .comment-text {
+                font-size: 14px !important;
+                line-height: 1.5 !important;
+                margin-bottom: 8px !important;
+            }
+
+            /* Read more/show less buttons */
+            .read-more-btn,
+            .show-less-btn {
+                font-size: 12px !important;
+                margin-top: 6px !important;
+                padding: 6px 0 !important;
+                width: 100% !important;
+                text-align: left !important;
+            }
+
+            /* Reactions container */
+            .reactions-container {
+                margin-bottom: 10px !important;
+            }
+
+            .reactions-container button {
+                font-size: 11px !important;
+                padding: 3px 6px !important;
+                margin-right: 6px !important;
+            }
+
+            /* Action buttons (Reply, View replies) */
+            .comment-block > div:nth-last-child(3) {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 10px !important;
+                margin-top: 10px !important;
+                align-items: center !important;
+            }
+
+            .reply-btn,
+            .view-replies-btn,
+            .hide-replies-btn {
+                font-size: 12px !important;
+                padding: 6px 0 !important;
+                text-align: left !important;
+                width: fit-content !important;
+            }
+
+            /* Chapter reaction section */
+            #chapter-reaction-section {
+                padding: 15px !important;
+                margin-bottom: 20px !important;
+            }
+
+            #chapter-reaction-section h4 {
+                font-size: 14px !important;
+                margin-bottom: 12px !important;
+            }
+
+            #chapter-reactions-container {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 8px !important;
+                justify-content: center !important;
+            }
+
+            .chapter-reaction-btn {
+                font-size: 12px !important;
+                padding: 6px 12px !important;
+                min-width: 60px !important;
+            }
+
+            /* Comment form */
+            #comment-form {
+                padding: 15px !important;
+                margin-top: 15px !important;
+            }
+
+            #comment-form h3 {
+                font-size: 16px !important;
+                margin-bottom: 8px !important;
+            }
+
+            #comment-text {
+                min-height: 80px !important;
+                font-size: 14px !important;
+                padding: 8px !important;
+                margin-bottom: 8px !important;
+            }
+
+            #comment-name {
+                width: 100% !important;
+                max-width: none !important;
+                margin-bottom: 8px !important;
+                padding: 8px !important;
+            }
+
+            #submit-comment {
+                width: 100% !important;
+                padding: 10px !important;
+                font-size: 14px !important;
+            }
+
+            /* Character counter */
+            #comment-form > div:nth-child(3) {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 4px !important;
+                margin-bottom: 12px !important;
+            }
+
+            /* Reply forms */
+            .reply-form-container > div {
+                padding: 12px !important;
+            }
+
+            .reply-form-container h4 {
+                font-size: 14px !important;
+                margin-bottom: 8px !important;
+            }
+
+            .reply-form-container textarea {
+                min-height: 60px !important;
+                font-size: 14px !important;
+                padding: 8px !important;
+            }
+
+            .reply-form-container input {
+                width: 100% !important;
+                max-width: none !important;
+                margin-bottom: 8px !important;
+                padding: 8px !important;
+            }
+
+            .reply-form-container button {
+                width: 100% !important;
+                margin-bottom: 6px !important;
+                padding: 8px !important;
+                font-size: 13px !important;
+            }
+
+            /* Owner badge */
+            .owner-badge {
+                font-size: 10px !important;
+                padding: 1px 6px !important;
+                margin-left: 6px !important;
+            }
+
+            /* Section headers */
+            #comment-section h2 {
+                font-size: 1.5rem !important;
+                margin-bottom: 6px !important;
+            }
+
+            #comment-section p {
+                font-size: 1rem !important;
+                margin-bottom: 20px !important;
+            }
+        }
+
+        /* Extra small devices */
+        @media (max-width: 480px) {
+            #comment-section {
+                padding: 0 10px !important;
+            }
+
+            .comment-block {
+                padding: 10px !important;
+                margin-bottom: 10px !important;
+            }
+
+            .comment-text {
+                font-size: 13px !important;
+            }
+
+            .read-more-btn,
+            .show-less-btn {
+                font-size: 11px !important;
+            }
+
+            .reply-btn,
+            .view-replies-btn,
+            .hide-replies-btn {
+                font-size: 11px !important;
+            }
+
+            #comment-form {
+                padding: 12px !important;
+            }
+
+            #comment-text {
+                font-size: 13px !important;
+            }
+
+            #submit-comment {
+                font-size: 13px !important;
+            }
         }
         
         .hdText {
@@ -442,8 +717,8 @@
                 <div id="comments-container" style="margin-bottom: 32px;"></div>
                 <div id="comment-form" style="margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 10px; border: 1px solid #333;">
                     <h3 style="color: #BB86FC; font-size: 1.2rem; margin-bottom: 10px;">Add a Comment</h3>
-                    <textarea id="comment-text" placeholder="Write your comment here..." maxlength="250" style="width: 100%; min-height: 100px; padding: 10px; border: 1px solid #444; border-radius: 5px; background: #333; color: #fff; margin-bottom: 10px; resize: vertical;"></textarea>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <textarea id="comment-text" placeholder="Write your comment here..." maxlength="250" style="width: 100%; min-height: 100px; padding: 10px; border: 1px solid #444; border-radius: 5px; background: #333; color: #fff; margin-bottom: 10px; resize: vertical; font-family: inherit; font-size: 14px; line-height: 1.4;"></textarea>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 8px;">
                         <div style="color: #888; font-size: 0.9rem;">
                             <span id="char-count">0</span>/250 characters
                         </div>
@@ -451,8 +726,10 @@
                             <span id="char-remaining" style="color: #BB86FC;">250</span> remaining
                         </div>
                     </div>
-                    <input type="text" id="comment-name" placeholder="Your name (optional)" style="width: 200px; padding: 8px; border: 1px solid #444; border-radius: 5px; background: #333; color: #fff; margin-right: 10px;">
-                    <button id="submit-comment" style="padding: 8px 16px; background: #6200EE; color: white; border: none; border-radius: 5px; cursor: pointer;">Post Comment</button>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <input type="text" id="comment-name" placeholder="Your name (optional)" style="flex: 1; min-width: 200px; padding: 8px; border: 1px solid #444; border-radius: 5px; background: #333; color: #fff; font-family: inherit; font-size: 14px;">
+                        <button id="submit-comment" style="padding: 8px 16px; background: #6200EE; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 500; font-size: 14px; transition: background-color 0.2s; white-space: nowrap;">Post Comment</button>
+                    </div>
                 </div>
         </section>
 
@@ -776,6 +1053,7 @@
             commentsContainer.innerHTML = renderCommentTree(comments, 0);
             addReactionEventListeners();
             addReplyButtonListeners();
+            // Note: initializeReadMoreButtons is already called in renderCommentTree
         }
         function renderCommentTree(comments, level) {
             let html = '';
@@ -798,6 +1076,12 @@
                 const ownerBadge = comment.is_owner ? `<span class="owner-badge" title="Owner" style="background: #6200EE; color: #fff; border-radius: 4px; padding: 2px 8px; font-size: 11px; margin-left: 8px; font-weight: bold; letter-spacing: 0.5px; vertical-align: middle;">OWNER</span>` : '';
                 const replyButtonHtml = replyCount > 0 ? 
                     `<span style="color: #666; margin: 0 8px;">•</span><button class="view-replies-btn" data-comment-id="${comment.id}" data-reply-count="${replyCount}" style="background: none; color: #BB86FC; border: none; cursor: pointer; font-size: 13px;">View ${replyCount} repl${replyCount === 1 ? 'y' : 'ies'}</button>` : '';
+                
+                // Create comment text with read more functionality
+                const commentTextId = `comment-text-${comment.id}`;
+                const readMoreId = `read-more-${comment.id}`;
+                const showLessId = `show-less-${comment.id}`;
+                
                 html += `
                     <div class="comment-block" style="border: 1px solid ${borderColor}; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: ${bgColor}; margin-left: ${leftMargin}px; max-width: 100%; word-wrap: break-word; overflow-wrap: break-word; box-sizing: border-box; position: relative;">
                         ${level > 0 ? '<div style="position: absolute; left: -15px; top: 20px; width: 10px; height: 1px; background: #555;"></div>' : ''}
@@ -805,7 +1089,11 @@
                             <strong style="color: #BB86FC;">${comment.name || 'Anonymous'}${ownerBadge}</strong>
                             <span style="color: #888; font-size: 12px;">${date}</span>
                         </div>
-                        <p class="comment-text" style="color: #fff; line-height: 1.6; margin: 0 0 15px 0; word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; max-width: 100%; text-align: left;">${comment.text}</p>
+                        <div class="comment-text-container" style="margin-bottom: 15px; text-align: left !important;">
+                            <p class="comment-text" id="${commentTextId}" style="color: #fff; line-height: 1.6; margin: 0; word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; max-width: 100%; text-align: left;">${comment.text}</p>
+                            <button id="${readMoreId}" class="read-more-btn" data-comment-id="${comment.id}" style="display: none; background: none; color: #BB86FC; border: none; cursor: pointer; font-size: 13px; font-weight: 500; margin-top: 0; padding: 0 0; transition: color 0.2s;">Read more</button>
+                            <button id="${showLessId}" class="show-less-btn" data-comment-id="${comment.id}" style="display: none; background: none; color: #BB86FC; border: none; cursor: pointer; font-size: 13px; font-weight: 500; margin-top: 0; padding: 0 0; transition: color 0.2s;">Show less</button>
+                        </div>
                         <div class="reactions-container" data-comment-id="${comment.id}">${reactionButtons}</div>
                         <div style="margin-top: 10px;">
                             <button class="reply-btn" data-comment-id="${comment.id}" style="background: none; color: #BB86FC; border: none; cursor: pointer; font-size: 13px;">Reply</button>
@@ -816,7 +1104,10 @@
                     </div>
                 `;
             });
-            setTimeout(addReactionEventListeners, 0);
+            setTimeout(() => {
+                addReactionEventListeners();
+                initializeReadMoreButtons();
+            }, 0);
             return html;
         }
         async function loadReplies(commentId, level = 1) {
@@ -829,8 +1120,11 @@
                 const data = await response.json();
                 if (data.replies && data.replies.length > 0) {
                     container.innerHTML = renderCommentTree(data.replies, level);
-                    setTimeout(addReactionEventListeners, 0); // Ensure reactions work for replies
-                    addReplyButtonListeners();
+                    setTimeout(() => {
+                        addReactionEventListeners(); // Ensure reactions work for replies
+                        addReplyButtonListeners();
+                        initializeReadMoreButtons(); // Initialize read more buttons for replies
+                    }, 0);
                     // Recursively load deeper replies
                     data.replies.forEach(reply => loadReplies(reply.id, level + 1));
                 } else {
@@ -2173,6 +2467,48 @@
             });
         }
 
+        // Read More/Show Less functionality
+        function initializeReadMoreButtons() {
+            // Check each comment to see if it needs a read more button
+            const commentTexts = document.querySelectorAll('.comment-text');
+            commentTexts.forEach(commentText => {
+                const commentId = commentText.id.replace('comment-text-', '');
+                const readMoreBtn = document.getElementById(`read-more-${commentId}`);
+                const showLessBtn = document.getElementById(`show-less-${commentId}`);
+                
+                if (!readMoreBtn || !showLessBtn) return;
+                
+                // Check if the text is actually truncated (more than 3 lines)
+                const lineHeight = parseFloat(window.getComputedStyle(commentText).lineHeight);
+                const maxHeight = lineHeight * 3;
+                const actualHeight = commentText.scrollHeight;
+                
+                // Add a small buffer (2px) to account for rounding differences
+                if (actualHeight > maxHeight + 2) {
+                    // Show the read more button
+                    readMoreBtn.style.display = 'inline-block';
+                    commentText.style.maxHeight = maxHeight + 'px';
+                    commentText.classList.remove('expanded');
+                    
+                    // Add event listener for read more
+                    readMoreBtn.addEventListener('click', function() {
+                        commentText.classList.add('expanded');
+                        commentText.style.maxHeight = actualHeight + 30 + 'px'; // Add buffer for padding
+                        readMoreBtn.style.display = 'none';
+                        showLessBtn.style.display = 'inline-block';
+                    });
+                    
+                    // Add event listener for show less
+                    showLessBtn.addEventListener('click', function() {
+                        commentText.classList.remove('expanded');
+                        commentText.style.maxHeight = maxHeight + 'px';
+                        showLessBtn.style.display = 'none';
+                        readMoreBtn.style.display = 'inline-block';
+                    });
+                }
+            });
+        }
+
         function showReplyForm(commentId) {
             // Hide all other reply forms
             document.querySelectorAll('.reply-form-container').forEach(el => el.style.display = 'none');
@@ -2183,7 +2519,7 @@
                 <div style="background: rgba(255,255,255,0.02); border-radius: 10px; border: 1px solid #333; padding: 15px;">
                     <h4 style="color: #BB86FC; font-size: 1rem; margin-bottom: 10px;">Reply to this comment</h4>
                     <textarea id="reply-text-${commentId}" placeholder="Write your reply here..." maxlength="250" style="width: 100%; min-height: 80px; padding: 12px; border: 1px solid #444; border-radius: 8px; background: #333; color: #fff; margin-bottom: 12px; resize: vertical; font-family: inherit; font-size: 14px; line-height: 1.4;"></textarea>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 8px;">
                         <div style="color: #888; font-size: 0.9rem;">
                             <span id="reply-char-count-${commentId}">0</span>/250 characters
                         </div>
@@ -2191,10 +2527,10 @@
                             <span id="reply-char-remaining-${commentId}" style="color: #BB86FC;">250</span> remaining
                         </div>
                     </div>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <input type="text" id="reply-name-${commentId}" placeholder="Your name (optional)" style="flex: 1; max-width: 200px; padding: 10px; border: 1px solid #444; border-radius: 8px; background: #333; color: #fff; font-family: inherit; font-size: 14px;">
-                        <button onclick="submitReply(${commentId})" style="padding: 10px 20px; background: #6200EE; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 14px; transition: background-color 0.2s;">Post Reply</button>
-                        <button onclick="hideReplyForm(${commentId})" style="padding: 10px 16px; background: #555; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; transition: background-color 0.2s;">Cancel</button>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <input type="text" id="reply-name-${commentId}" placeholder="Your name (optional)" style="flex: 1; min-width: 150px; padding: 10px; border: 1px solid #444; border-radius: 8px; background: #333; color: #fff; font-family: inherit; font-size: 14px;">
+                        <button onclick="submitReply(${commentId})" style="padding: 10px 20px; background: #6200EE; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 14px; transition: background-color 0.2s; white-space: nowrap;">Post Reply</button>
+                        <button onclick="hideReplyForm(${commentId})" style="padding: 10px 16px; background: #555; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; transition: background-color 0.2s; white-space: nowrap;">Cancel</button>
                     </div>
                 </div>
             `;
